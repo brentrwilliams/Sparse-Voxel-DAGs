@@ -165,6 +165,21 @@ void Voxels::voxelizeTriangle(const Triangle& triangle)
 }
 
 /**
+ * Returns the number of voxels that are set
+ *
+ * Tested: 9-12-2013 
+ */
+unsigned int Voxels::countSetVoxels()
+{
+   unsigned int i, count = 0;
+   
+   for (i = 0; i < dataSize; i++)
+      count += countSetBits(data[i]);
+   
+   return count;
+}
+
+/**
  * Print the binary of an unsigned 64-bit int in sets of 8 bits
  *
  * Tested: 9-3-2013 

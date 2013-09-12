@@ -42,6 +42,7 @@ class Voxels
       void set(unsigned int x, unsigned int y, unsigned int z);
       void build(const std::vector<Triangle> triangles);
       void voxelizeTriangle(const Triangle& triangle);
+      unsigned int countSetVoxels();
       
    //Will be
    //public:

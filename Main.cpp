@@ -21,4 +21,6 @@ int main()
       printBinary(voxels[i]);
       std::cout << "\n";
    }
+   
+   std::cout << "Num set bits: " << voxels.countSetVoxels() << "\n";
 }
