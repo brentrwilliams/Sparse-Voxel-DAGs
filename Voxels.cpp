@@ -194,3 +194,20 @@ void printBinary(const uint64_t dataVals)
    }
 }
 
+/**
+ * Returns the number of set bits in an unsigned 64-bit int
+ *
+ * Written based on the algorithm published by Peter Wagner in CACM 3 (1960)
+ *
+ * Tested: 9-12-2013 
+ */
+unsigned int countSetBits(uint64_t data)
+{
+   unsigned int count; 
+   
+   for (count = 0; data; count++) 
+      data &= data - 1;
+   
+   return count;
+}
+

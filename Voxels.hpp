@@ -54,6 +54,7 @@ class Voxels
 };
 
 void printBinary(const uint64_t data);
+unsigned int countSetBits(uint64_t data);
 
 #endif
 
