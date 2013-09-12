@@ -169,20 +169,19 @@ void Voxels::voxelizeTriangle(const Triangle& triangle)
  *
  * Tested: 9-3-2013 
  */
-void printBinary(const uint64_t dataVals)
+void printBinary(uint64_t data)
 {
-   uint64_t vals = dataVals;
    unsigned int i;
    char bits[64];
    
    for (i = 0; i < 64; i++)
    {
-      if (vals & 1)
+      if (data & 1)
          bits[i] = '1';
       else
          bits[i] = '0';
       
-      vals >>= 1;
+      data >>= 1;
    }
    
    for (i = 0; i < 64; i++)
