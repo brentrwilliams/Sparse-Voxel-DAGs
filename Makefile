@@ -6,8 +6,8 @@ NVCC_OPTS=-O3 -arch=sm_20 -Xcompiler -Wall -Xcompiler -Wextra -m64
 
 GCC_OPTS= -Wall -Wextra -m64 -g
 
-Main: Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o Node.o Voxels.o Makefile
-	g++ -o main Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o Node.o Voxels.o $(GCC_OPTS)
+Main: Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o Node.o Voxels.o ActiveList.o Makefile
+	g++ -o main Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o Node.o Voxels.o ActiveList.o $(GCC_OPTS)
 
 Vec2.o: Vec2.cpp Vec2.hpp
 	g++ -c Vec2.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
@@ -38,6 +38,9 @@ Node.o: Node.cpp Node.hpp
 
 Voxels.o: Voxels.cpp Voxels.hpp 
 	g++ -c Voxels.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+
+ActiveList.o: ActiveList.cpp ActiveList.hpp 
+	g++ -c ActiveList.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
 
 Main.o: Main.cpp Intersect.hpp
 	g++ -c Main.cpp $(GCC_OPTS)
