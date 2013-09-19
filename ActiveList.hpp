@@ -12,21 +12,12 @@
 
 #include "Voxels.hpp"
 
-class ActiveList
+class ActiveList : public Voxels
 {
    public:
       unsigned int currentLevel;
-      unsigned int levels;
-      uint64_t *data;
-      unsigned int dataSize;
-      unsigned int dimension; // Number of voxels for one side of the cube
       
-      ActiveList(const Voxels& voxels);
-      ~ActiveList();
-      unsigned int calculateDataSize(unsigned int levels);
-      uint64_t& operator[](unsigned int i);
-      void set(unsigned int x, unsigned int y, unsigned int z);
-      unsigned int countSetVoxels();
+      ActiveList(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles);
       unsigned int nextLevel();
 };
 
