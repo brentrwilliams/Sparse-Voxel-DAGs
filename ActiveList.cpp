@@ -21,6 +21,7 @@ ActiveList::ActiveList(const unsigned int levelsVal,
  * Updates the active list to be the next level returning the number of levels 
  * remaining in the active list.
  *
+ * Logically makes sense but untested
  */
 unsigned int ActiveList::nextLevel()
 {
@@ -49,18 +50,19 @@ unsigned int ActiveList::nextLevel()
          
          if (dataToMask & mask8Bits)   // If 1 or more of the 8 bits is set (ie 
          {                             // the parent node is filled)
-            data[newI] |= (1L << shiftI); //set the bit at shiftI
+            newData[newI] |= (1L << shiftI); //set the bit at shiftI
          }
          
          dataToMask >>= 8; 
       }
    }
    
-   // Free the old data and swap put in the new data
+   // Free the old data and swap in the new data
    delete [] data;
    data = newData;
 
    currentLevel--;
    return currentLevel;
 }
+
 
