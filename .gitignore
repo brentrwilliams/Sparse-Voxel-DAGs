@@ -1,1 +1,3 @@
 test.out
+*.o
+main
