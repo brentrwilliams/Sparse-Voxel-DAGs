@@ -101,6 +101,21 @@ void Voxels::set(unsigned int x, unsigned int y, unsigned int z)
 }
 
 /**
+ * Sets the voxel at the given x, y and z values as filled 
+ *
+ * Tested: 
+ */
+bool Voxels::isSet(unsigned int x, unsigned int y, unsigned int z)
+{
+   unsigned int voxelNumber = x + dimension*y + dimension*dimension*z;
+   unsigned int dataIndex = voxelNumber / 64;
+   unsigned int bitIndex =  voxelNumber % 64;
+   uint64_t toAnd = (1L << bitIndex);
+   
+   return (data[dataIndex] & toAnd) > 0;
+}
+
+/**
  * Returns the number of voxels 
  *
  * Tested: 9-3-2013 
@@ -180,31 +195,49 @@ unsigned int Voxels::countSetVoxels()
 }
 
 /**
- * Print the binary of an unsigned 64-bit int in sets of 8 bits
+ * Returns the string representation of the binary of an unsigned 64-bit int 
  *
- * Tested: 9-3-2013 
+ * Tested: 12-21-2013 
  */
-void printBinary(uint64_t data)
+void binaryToString(uint64_t data, char* str)
 {
    unsigned int i;
-   char bits[64];
    
    for (i = 0; i < 64; i++)
    {
       if (data & 1)
-         bits[i] = '1';
+         str[i] = '1';
       else
-         bits[i] = '0';
+         str[i] = '0';
       
       data >>= 1;
    }
+}
+
+/**
+ * Print the binary representation of the voxels
+ *
+ * Tested: 12-21-2013 
+ */
+void Voxels::printBinary()
+{
+   unsigned int i, j, k;
    
-   for (i = 0; i < 64; i++)
-   {
-      std::cout << bits[i]; 
-      
-      if ((i+1) % 8 == 0)
+   for (k = 0; k < dimension; k++)
+   {  
+      std::cout << "z = " << k << "\n";
+      for (j = 0; j < dimension; j++)
+      {
+         for (i = 0; i < dimension; i++)
+         {
+            if (isSet(i,j,k))
+               std::cout << "1 ";
+            else
+               std::cout << "0 ";
+         }
          std::cout << "\n";
+      }
+      std::cout << "\n";
    }
 }
 

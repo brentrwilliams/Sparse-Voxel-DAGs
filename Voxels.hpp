@@ -40,9 +40,11 @@ class Voxels
       
       unsigned int calculateDataSize(unsigned int levels);
       void set(unsigned int x, unsigned int y, unsigned int z);
+      bool isSet(unsigned int x, unsigned int y, unsigned int z);
       void build(const std::vector<Triangle> triangles);
       void voxelizeTriangle(const Triangle& triangle);
       unsigned int countSetVoxels();
+      void printBinary();
       
    //Will be
    //public:
@@ -54,7 +56,7 @@ class Voxels
       
 };
 
-void printBinary(const uint64_t data);
+void binaryToString(uint64_t data, char* str);
 unsigned int countSetBits(uint64_t data);
 
 #endif
