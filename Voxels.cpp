@@ -28,7 +28,6 @@ Voxels::Voxels(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, 
       std::cerr << err;
       throw std::out_of_range(err);
    }
-   std::cerr << "data: " << data << std::endl; 
    
    boundingBox.square();
    voxelWidth = (boundingBox.maxs.x - boundingBox.mins.x) / dimension;
@@ -92,24 +91,38 @@ uint64_t& Voxels::operator[](unsigned int i)
  */
 void Voxels::set(unsigned int x, unsigned int y, unsigned int z)
 {
+   //If each individual voxel had an index, the voxeNumber is that index
    unsigned int voxelNumber = x + dimension*y + dimension*dimension*z;
+   
+   //dataIndex is the index into the uint64 array of the current voxel
    unsigned int dataIndex = voxelNumber / 64;
+   
+   //bitIndex is the current voxel (represented by a bit) to set
    unsigned int bitIndex =  voxelNumber % 64;
+   
+   //The mask used to set the voxel
    uint64_t toOr = (1L << bitIndex);
    
    data[dataIndex] |= toOr; // sets the bitIndex bit 
 }
 
 /**
- * Sets the voxel at the given x, y and z values as filled 
+ * Checks is the voxel at the given x, y and z values as set 
  *
- * Tested: 
+ * Tested: 12-22-2013
  */
 bool Voxels::isSet(unsigned int x, unsigned int y, unsigned int z)
 {
+   //If each individual voxel had an index, the voxeNumber is that index
    unsigned int voxelNumber = x + dimension*y + dimension*dimension*z;
+   
+   //dataIndex is the index into the uint64 array of the current voxel
    unsigned int dataIndex = voxelNumber / 64;
+   
+   //bitIndex is the current voxel (represented by a bit) to set
    unsigned int bitIndex =  voxelNumber % 64;
+   
+   //The mask used check if the voxel is set
    uint64_t toAnd = (1L << bitIndex);
    
    return (data[dataIndex] & toAnd) > 0;
