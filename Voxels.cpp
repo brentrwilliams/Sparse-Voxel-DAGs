@@ -92,7 +92,8 @@ uint64_t& Voxels::operator[](unsigned int i)
 void Voxels::set(unsigned int x, unsigned int y, unsigned int z)
 {
    //If each individual voxel had an index, the voxeNumber is that index
-   unsigned int voxelNumber = x + dimension*y + dimension*dimension*z;
+   unsigned int voxelNumber = mortonCode(x,y,z,levels);
+   //unsigned int voxelNumber = x + dimension*y + dimension*dimension*z;
    
    //dataIndex is the index into the uint64 array of the current voxel
    unsigned int dataIndex = voxelNumber / 64;
@@ -114,7 +115,8 @@ void Voxels::set(unsigned int x, unsigned int y, unsigned int z)
 bool Voxels::isSet(unsigned int x, unsigned int y, unsigned int z)
 {
    //If each individual voxel had an index, the voxeNumber is that index
-   unsigned int voxelNumber = x + dimension*y + dimension*dimension*z;
+   unsigned int voxelNumber = mortonCode(x,y,z,levels);
+   //unsigned int voxelNumber = x + dimension*y + dimension*dimension*z;
    
    //dataIndex is the index into the uint64 array of the current voxel
    unsigned int dataIndex = voxelNumber / 64;

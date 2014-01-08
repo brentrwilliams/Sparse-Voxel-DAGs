@@ -68,6 +68,7 @@ void printBinary(uint32_t value, unsigned int level)
    std::cout << "\n";
 } 
 
+/*
 int main()
 {
    uint32_t value;
@@ -100,4 +101,4 @@ int main()
    }
    
    return 0;
-}
+}*/

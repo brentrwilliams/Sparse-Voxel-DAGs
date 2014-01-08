@@ -8,8 +8,14 @@ GCC_OPTS= -Wall -Wextra -m64 -g
 
 all: Main cleanOs
 
-Main: Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o Node.o Voxels.o Makefile
-	g++ -o main Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o Node.o Voxels.o $(GCC_OPTS)
+Main: Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o Node.o Voxels.o MortonCode.o SVONode.o Makefile
+	g++ -o main Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o Node.o Voxels.o MortonCode.o $(GCC_OPTS)
+
+SVONode.o: SVONode.cpp SVONode.hpp
+	g++ -c SVONode.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+
+MortonCode.o: MortonCode.cpp MortonCode.hpp
+	g++ -c MortonCode.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
 
 Vec2.o: Vec2.cpp Vec2.hpp
 	g++ -c Vec2.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
