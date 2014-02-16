@@ -13,5 +13,7 @@
 #include "Triangle.hpp"
 #include "Intersect.hpp"
 #include "Voxels.hpp"
+#include "SparseVoxelOctree.hpp"
+#include "SVONode.hpp"
 
 #endif

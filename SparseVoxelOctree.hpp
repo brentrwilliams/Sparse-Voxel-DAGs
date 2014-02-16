@@ -21,7 +21,7 @@
 class SparseVoxelOctree
 {
    private:
-   
+      //Fix later
    public:
       SparseVoxelOctree(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles);
       ~SparseVoxelOctree();
@@ -30,6 +30,10 @@ class SparseVoxelOctree
       void voxelizeTriangle(const Triangle& triangle, uint64_t* activeNodes, uint64_t* nodes);
       void setChildMask(bool childMaskBools[8], uint64_t* childMask);
       void buildLevel(int currentLevel, SVONode* childNodes, SVONode** newParentNodes);
+      bool isSet(unsigned int x, unsigned int y, unsigned int z);
+      bool isMaskSet(SVONode* node, unsigned int i);
+      bool isLeafSet(uint64_t* node, unsigned int i);
+      void printBinary();
       
       BoundingBox boundingBox;
       unsigned int levels;

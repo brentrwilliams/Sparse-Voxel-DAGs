@@ -68,8 +68,8 @@ void printBinary(uint32_t value, unsigned int level)
    std::cout << "\n";
 } 
 
-/*
-int main()
+
+/*int main()
 {
    uint32_t value;
    unsigned int x,y,z;
@@ -95,7 +95,7 @@ int main()
    for (i = 0; i < dim*dim*dim; i++)
    {
       mortonCodeToXYZ(1,&x,&y,&z,level);
-      std::cout << i << " (" << x << ", " << y << ", " << z << "): \n\t";
+      std::cout << i << ": \n\t";
       printBinary(i, level);
       std::cout << "\n";
    }
