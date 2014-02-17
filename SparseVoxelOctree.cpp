@@ -83,28 +83,23 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles)
    }
    root = newParentNodes;
 }*/
-/*
+
 void SparseVoxelOctree::build(const std::vector<Triangle> triangles)
 {
    root = new SVONode;
    bool childMaskBools[8] = {true, false, false, false, false, false, false, false};
    setChildMask(childMaskBools, &(root->childMask));
+   
    uint64_t* leafNode = new uint64_t;
    *leafNode = 18446744073709551615L;
    root->childPointers[0] = leafNode;
    
-   int i;
-   std::cout << "\nMask bits: ";
-   for (i = 0; i < 8; i++)
-   {
-      if (isMaskSet(root, i))
-         std::cout << 1;
-      else
-         std::cout << 0;
-   }
-   std::cout << "\n\n";
-}*/
+   
+   
+}
 
+/*
+//Working build function for 3 levels
 void SparseVoxelOctree::build(const std::vector<Triangle> triangles)
 {
    Voxels* leafVoxels = new Voxels(levels, boundingBox, triangles);
@@ -130,7 +125,52 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles)
    setChildMask(childMask, &(root->childMask));
    
    
+}*/
+
+/*
+void SparseVoxelOctree::build(const std::vector<Triangle> triangles)
+{
+   Voxels* leafVoxels = new Voxels(levels, boundingBox, triangles);
+   uint64_t* leafVoxelData = leafVoxels->data;
+   unsigned int numLeafs = leafVoxels->dataSize;
+   
+   std::cout << "Number of leaf nodes: " << numLeafs << "\n";
+   
+   bool childMask[8];
+   
+   int numPrevLevelNodes = numLeafs;
+   int numCurrLevelNodes = numPrevLevelNodes / 8;
+   SVONode* currLevelNodes = new SVONode[numCurrLevelNodes];
+   SVONode* prevLevelNodes;
+   
+   for (int i = 0; i < numPrevLevelNodes; i++)
+   {
+      childMask[i%8] = leafVoxelData[i] > 0;
+      if (childMask[i%8])
+      {
+         currLevelNodes[i/8].childPointers[i%8] = (void *)  &(leafVoxelData[i]);
+      }
+      
+      if ((i+1) % 8 == 0)
+      {
+         setChildMask(childMask, &(currLevelNodes[i/8].childMask));
+      }
+   }
+   
+   prevLevelNodes = currLevelNodes;
+   root = new SVONode;
+   for (int i = 0; i < 8; i++)
+   {
+      childMask[i] = isMaskNotEmpty(&prevLevelNodes[i]);
+      if (childMask[i])
+      {
+         root->childPointers[i] = (void *)  &(prevLevelNodes[i]);
+      }
+   }
+   setChildMask(childMask, &(root->childMask));
+   
 }
+*/
 
 void SparseVoxelOctree::buildLevel(int currentLevel, SVONode* childNodes, SVONode** newParentNodes)
 {
@@ -178,6 +218,17 @@ void SparseVoxelOctree::setChildMask(bool childMaskBools[8], uint64_t* childMask
 }
 
 /**
+ * Returns a boolean indicating whether the node's childmask is non empty.
+ *
+ * Tested: 2-16-2014 
+ */
+bool SparseVoxelOctree::isMaskNotEmpty(SVONode* node)
+{
+   uint64_t toAnd = SET_8_BITS;
+   return (node->childMask & toAnd) > 0; 
+}
+
+/**
  * Returns a boolean indicating whether the node's childmask at the ith bit is 
  * set.
  *
@@ -202,6 +253,7 @@ bool SparseVoxelOctree::isLeafSet(uint64_t* node, unsigned int i)
    return (leaf & toAnd) > 0; 
 }
 
+/*
 bool SparseVoxelOctree::isSet(unsigned int x, unsigned int y, unsigned int z)
 {
    void* currentNode = root;
@@ -210,14 +262,15 @@ bool SparseVoxelOctree::isSet(unsigned int x, unsigned int y, unsigned int z)
    unsigned int octreeIndex = mortonCode(x,y,z,currentLevel);
    unsigned int childIndex;
    unsigned int leafIndex;
+   int nodesPerChildNode = pow(8, currentLevel-1);
    
-   childIndex = octreeIndex / pow(8, currentLevel-1);
+   childIndex = octreeIndex / nodesPerChildNode;
    if (!isMaskSet((SVONode*)currentNode, childIndex)) 
    {
       return false;
    }
    
-   /*while (currentLevel > 3)
+   while (currentLevel > 3)
    {
       childIndex = octreeIndex / pow(8, currentLevel-1);
       if (!isMaskSet((SVONode*)currentNode, childIndex)) 
@@ -227,13 +280,103 @@ bool SparseVoxelOctree::isSet(unsigned int x, unsigned int y, unsigned int z)
       
       currentNode = (void*) ((SVONode*) currentNode)->childPointers[childIndex];
       currentLevel--;
-   }*/
+   }
    
    uint64_t* leafPtr = (uint64_t*) ((SVONode*) currentNode)->childPointers[childIndex];
    leafIndex = octreeIndex - (childIndex * pow(8, currentLevel)); /// ***???***
    return isLeafSet(leafPtr, leafIndex);
-}
+}*/
+/*
+//Works for 4 levels
+bool SparseVoxelOctree::isSet(unsigned int x, unsigned int y, unsigned int z)
+{
+   void* currentNode = root;
+   int currentLevel = levels;
+   
+   unsigned int mortonIndex = mortonCode(x,y,z,currentLevel);
+   int rootChildIndex = mortonIndex / 512;
+   int level1Index = (mortonIndex % 512) / 64;
+   int leafIndex = mortonIndex % 64;
+   
+   if (!isMaskSet((SVONode*)currentNode, rootChildIndex)) 
+   {
+      return false;
+   }
+   currentNode = (void*) ((SVONode*)currentNode)->childPointers[rootChildIndex];
+   
+   if (!isMaskSet((SVONode*)currentNode, level1Index)) 
+   {
+      return false;
+   }
+   currentNode = (void*) ((SVONode*)currentNode)->childPointers[level1Index];
+   
+   return isLeafSet((uint64_t*)currentNode, leafIndex);
+}*/
 
+/*
+//Works for 5 levels
+bool SparseVoxelOctree::isSet(unsigned int x, unsigned int y, unsigned int z)
+{
+   void* currentNode = root;
+   int currentLevel = levels;
+   
+   unsigned int mortonIndex = mortonCode(x,y,z,currentLevel);
+   int rootChildIndex = mortonIndex / 4096;
+   int level1Index = (mortonIndex % 4096) / 512;
+   int level2Index = (mortonIndex % 512) / 64;
+   int leafIndex = mortonIndex % 64;
+   
+   if (!isMaskSet((SVONode*)currentNode, rootChildIndex)) 
+   {
+      return false;
+   }
+   currentNode = (void*) ((SVONode*)currentNode)->childPointers[rootChildIndex];
+   
+   if (!isMaskSet((SVONode*)currentNode, level1Index)) 
+   {
+      return false;
+   }
+   currentNode = (void*) ((SVONode*)currentNode)->childPointers[level1Index];
+   
+   if (!isMaskSet((SVONode*)currentNode, level2Index)) 
+   {
+      return false;
+   }
+   currentNode = (void*) ((SVONode*)currentNode)->childPointers[level2Index];
+   
+   return isLeafSet((uint64_t*)currentNode, leafIndex);
+}*/
+
+/**
+ * Returns a boolean indicating whether the voxel at the given coordinate is 
+ * set.
+ *
+ * Tested: 2-16-2014 
+ */
+bool SparseVoxelOctree::isSet(unsigned int x, unsigned int y, unsigned int z)
+{
+   void* currentNode = root;
+   int currentLevel = levels;
+   unsigned int mortonIndex = mortonCode(x,y,z,currentLevel);
+   
+   int divBy = pow(8, currentLevel-1);
+   int modBy = divBy;
+   int index = mortonIndex / divBy;
+   
+   while (divBy >= 64)
+   {
+      if (!isMaskSet((SVONode*)currentNode, index)) 
+      {
+         return false;
+      }
+      currentNode = (void*) ((SVONode*)currentNode)->childPointers[index];
+      modBy = divBy;
+      divBy /= 8;
+      index = (mortonIndex % modBy) / divBy;
+   }
+   index = mortonIndex % modBy;
+   return isLeafSet((uint64_t*)currentNode, index);
+}
 
 void SparseVoxelOctree::printBinary()
 {

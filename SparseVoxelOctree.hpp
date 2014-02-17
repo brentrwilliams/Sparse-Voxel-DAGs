@@ -18,6 +18,8 @@
 #include <vector>
 #include <stdint.h>
 
+#define SET_8_BITS 255
+
 class SparseVoxelOctree
 {
    private:
@@ -31,6 +33,7 @@ class SparseVoxelOctree
       void setChildMask(bool childMaskBools[8], uint64_t* childMask);
       void buildLevel(int currentLevel, SVONode* childNodes, SVONode** newParentNodes);
       bool isSet(unsigned int x, unsigned int y, unsigned int z);
+      bool isMaskNotEmpty(SVONode* node);
       bool isMaskSet(SVONode* node, unsigned int i);
       bool isLeafSet(uint64_t* node, unsigned int i);
       void printBinary();
