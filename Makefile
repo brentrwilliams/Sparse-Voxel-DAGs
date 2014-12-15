@@ -4,7 +4,7 @@ CUDA_INCLUDEPATH=/usr/local/cuda-5.0/include
 
 NVCC_OPTS=-O3 -arch=sm_20 -Xcompiler -Wall -Xcompiler -Wextra -m64
 
-GCC_OPTS= -Wall -Wextra -m64 -g
+GCC_OPTS= -Wall -Wextra -m64 -g -O3 -pg
 
 all: Main cleanOs
 

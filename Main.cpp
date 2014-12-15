@@ -21,14 +21,25 @@ int main()
 }
 */
 
-int main()
+int main(int argc, char const *argv[])
 {
-   std::string fileName("SphereDetailed.obj");
-   OBJFile sphereFile(fileName);
-   unsigned int numLevels = 5;
+   if (argc < 3)
+   {
+      perror("Missing arguments.\n Exitting\n");
+      exit(1);
+   }
    
-   SparseVoxelOctree svo(numLevels, sphereFile.getBoundingBox(), sphereFile.getTriangles());
-   svo.printBinary();
+   std::string fileName(argv[1]);
+   OBJFile objFile(fileName);
+   unsigned int numLevels = atoi(argv[2]);
    
+   Voxels voxels(numLevels, objFile.getBoundingBox(), objFile.getTriangles());
+   
+   if (argc == 3)
+   {
+      voxels.printBinary();
+   }
+   
+    
    return 0;
 }

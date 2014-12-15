@@ -147,7 +147,10 @@ void Voxels::build(const std::vector<Triangle> triangles)
 {
    unsigned int i;
    for (i = 0; i < triangles.size(); i++)
+   {
       voxelizeTriangle(triangles[i]);
+      fprintf(stderr, "%.2f\n", (((float)i)/triangles.size()) * 100.0f);
+   }
 }
 
 /**

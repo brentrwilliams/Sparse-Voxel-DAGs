@@ -12,6 +12,7 @@
 #ifndef VOXELS_HPP
 #define VOXELS_HPP
 
+#include <stdio.h>
 #include <stdint.h>
 #include <math.h>
 #include <iostream>
