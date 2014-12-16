@@ -37,8 +37,10 @@ int main(int argc, char const *argv[])
    
    if (argc == 3)
    {
-      voxels.printBinary();
+      voxels.writeImages();
    }
+
+   std::cout << "Number of triangles: " << objFile.getNumTriangles() << std::endl;
    
     
    return 0;

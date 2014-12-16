@@ -25,6 +25,7 @@
 #include "Triangle.hpp"
 #include "Intersect.hpp"
 #include "MortonCode.hpp"
+#include "Image.hpp"
 
 
 class Voxels
@@ -47,6 +48,7 @@ class Voxels
       void voxelizeTriangle(const Triangle& triangle);
       unsigned int countSetVoxels();
       void printBinary();
+      void writeImages();
       
    //Will be
    //public:

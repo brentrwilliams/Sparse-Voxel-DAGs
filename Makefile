@@ -4,12 +4,14 @@ CUDA_INCLUDEPATH=/usr/local/cuda-5.0/include
 
 NVCC_OPTS=-O3 -arch=sm_20 -Xcompiler -Wall -Xcompiler -Wextra -m64
 
-GCC_OPTS= -Wall -Wextra -m64 -g -O3 -pg
+GCC_OPTS= -Wall -Wextra -m64 -g -pg
 
 all: Main cleanOs
 
-Main: Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o Node.o Voxels.o MortonCode.o SVONode.o Makefile
-	g++ -o main Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o Node.o Voxels.o MortonCode.o $(GCC_OPTS)
+test: Main
+
+Main: Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o Node.o Voxels.o MortonCode.o SVONode.o Image.o Makefile
+	g++ -o main Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o Node.o Voxels.o MortonCode.o Image.o $(GCC_OPTS)
 
 SVONode.o: SVONode.cpp SVONode.hpp
 	g++ -c SVONode.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
@@ -46,6 +48,9 @@ Node.o: Node.cpp Node.hpp
 
 Voxels.o: Voxels.cpp Voxels.hpp 
 	g++ -c Voxels.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+
+Image.o: Image.cpp Image.hpp 
+	g++ -c Image.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
 
 Main.o: Main.cpp Intersect.hpp
 	g++ -c Main.cpp $(GCC_OPTS)

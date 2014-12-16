@@ -276,3 +276,33 @@ unsigned int countSetBits(uint64_t data)
    return count;
 }
 
+/**
+ * Writes the voxel data to tga files where the file name is the z axis voxel number.
+ *
+ *
+ * Tested: 12-15-2014
+ */
+void Voxels::writeImages()
+{
+   unsigned int i, j, k;
+   
+   for (k = 0; k < dimension; k++)
+   {  
+      cout << "Witing image " << k << endl;
+      Image image(dimension,dimension);
+      for (j = 0; j < dimension; j++)
+      {
+         for (i = 0; i < dimension; i++)
+         {
+            if (isSet(i,j,k))
+            {
+               image.setColor(i,j, 1.0f,1.0f,1.0f);
+            }
+         }
+      }
+      char fileName[30];
+      sprintf(fileName, "./images/%04d.tga",k);
+      image.writeTGA((fileName));
+   }
+}
+

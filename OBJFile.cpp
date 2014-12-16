@@ -94,3 +94,12 @@ const std::vector<Triangle>& OBJFile::getTriangles()
 {
    return triangles;
 }
+
+/**
+ * Returns the number of triangles it has.
+ *
+ */
+unsigned int OBJFile::getNumTriangles()
+{
+   return triangles.size();
+}

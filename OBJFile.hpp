@@ -38,6 +38,7 @@ class OBJFile
       OBJFile(std::string fileNameVal);
       const BoundingBox& getBoundingBox();
       const std::vector<Triangle>& getTriangles();
+      unsigned int getNumTriangles();
 };
 
 #endif
