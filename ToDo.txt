@@ -1,0 +1,6 @@
+To Do:
+- Check that the bounding box calculation is correct
+   - The bunny looks like it could fill up a larger portion of the box in any dimension
+- Check to see why the child mask is a uint64_t and not a uint8_t
+- Make function to write/read from disk SVO
+- 

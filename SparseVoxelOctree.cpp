@@ -201,6 +201,13 @@ bool SparseVoxelOctree::isSet(unsigned int x, unsigned int y, unsigned int z)
    return isLeafSet((uint64_t*)currentNode, index);
 }
 
+
+/**
+ * Returns a boolean indicating whether the voxel at the given coordinate is 
+ * set.
+ *
+ * Tested: 2-16-2014 
+ */
 void SparseVoxelOctree::printBinary()
 {
    unsigned int i, j, k;
@@ -223,6 +230,35 @@ void SparseVoxelOctree::printBinary()
    }
 }
 
+
+/**
+ * Writes the voxel data to tga files where the file name is the z axis voxel number.
+ *
+ * Tested: 12-15-2014
+ */
+void SparseVoxelOctree::writeImages()
+{
+   unsigned int i, j, k;
+   
+   for (k = 0; k < dimension; k++)
+   {  
+      cout << "Witing image " << k << endl;
+      Image image(dimension,dimension);
+      for (j = 0; j < dimension; j++)
+      {
+         for (i = 0; i < dimension; i++)
+         {
+            if (isSet(i,j,k))
+            {
+               image.setColor(i,j, 1.0f,1.0f,1.0f);
+            }
+         }
+      }
+      char fileName[30];
+      sprintf(fileName, "./images/%04d.tga",k);
+      image.writeTGA((fileName));
+   }
+}
 
 
 

@@ -14,6 +14,7 @@
 #include "BoundingBox.hpp"
 #include "SparseVoxelOctree.hpp"
 #include "SVONode.hpp"
+#include "Image.hpp"
 
 #include <vector>
 #include <stdint.h>
@@ -36,6 +37,7 @@ class SparseVoxelOctree
       bool isMaskSet(SVONode* node, unsigned int i);
       bool isLeafSet(uint64_t* node, unsigned int i);
       void printBinary();
+      void writeImages();
       
       BoundingBox boundingBox;
       unsigned int levels;

@@ -18,7 +18,7 @@ BoundingBox::BoundingBox(const Vec3& minsVal, const Vec3& maxsVal)
 {
 }
 
-void BoundingBox::print()
+void BoundingBox::print() const
 {
    printf("mins: <%f, %f, %f>, maxs: <%f, %f, %f>\n", mins.x, mins.y, mins.z, maxs.x, maxs.y, maxs.z);  
 }
