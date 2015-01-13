@@ -75,6 +75,8 @@ void OBJFile::parse()
        vertices[faces[i].v3])); 
    }
 
+
+   updateBoundingBox();
 }
 
 /**
@@ -102,4 +104,75 @@ const std::vector<Triangle>& OBJFile::getTriangles()
 unsigned int OBJFile::getNumTriangles()
 {
    return triangles.size();
+}
+
+void OBJFile::centerMesh()
+{
+   // Center the mesh around (0, 0, 0)
+   Vec3 translate = boundingBox.getCenter();
+
+   for (unsigned long i = 0; i < triangles.size(); i++)
+   {
+      Triangle& triangle = triangles.at(i);
+      triangle.v0 -= translate;
+      triangle.v1 -= translate;
+      triangle.v2 -= translate;
+   }
+
+   boundingBox.mins -= translate;
+   boundingBox.maxs -= translate;
+   updateBoundingBox();
+}
+
+void OBJFile::updateBoundingBox()
+{
+   boundingBox.mins = triangles[0].v0;
+   boundingBox.maxs = triangles[0].v1;
+   for (unsigned long i = 0; i < triangles.size(); i++)
+   {
+      Vec3 v = triangles[i].v0;
+      if (v.x < boundingBox.mins.x)
+         boundingBox.mins.x = v.x;
+      if (v.y < boundingBox.mins.y)
+         boundingBox.mins.y = v.y;
+      if (v.z < boundingBox.mins.z)
+         boundingBox.mins.z = v.z;
+            
+      if (v.x > boundingBox.maxs.x)
+         boundingBox.maxs.x = v.x;
+      if (v.y > boundingBox.maxs.y)
+         boundingBox.maxs.y = v.y;
+      if (v.z > boundingBox.maxs.z)
+         boundingBox.maxs.z = v.z;
+
+      v = triangles[i].v1;
+      if (v.x < boundingBox.mins.x)
+         boundingBox.mins.x = v.x;
+      if (v.y < boundingBox.mins.y)
+         boundingBox.mins.y = v.y;
+      if (v.z < boundingBox.mins.z)
+         boundingBox.mins.z = v.z;
+            
+      if (v.x > boundingBox.maxs.x)
+         boundingBox.maxs.x = v.x;
+      if (v.y > boundingBox.maxs.y)
+         boundingBox.maxs.y = v.y;
+      if (v.z > boundingBox.maxs.z)
+         boundingBox.maxs.z = v.z;
+
+      v = triangles[i].v2;
+      if (v.x < boundingBox.mins.x)
+         boundingBox.mins.x = v.x;
+      if (v.y < boundingBox.mins.y)
+         boundingBox.mins.y = v.y;
+      if (v.z < boundingBox.mins.z)
+         boundingBox.mins.z = v.z;
+            
+      if (v.x > boundingBox.maxs.x)
+         boundingBox.maxs.x = v.x;
+      if (v.y > boundingBox.maxs.y)
+         boundingBox.maxs.y = v.y;
+      if (v.z > boundingBox.maxs.z)
+         boundingBox.maxs.z = v.z;
+   }
 }

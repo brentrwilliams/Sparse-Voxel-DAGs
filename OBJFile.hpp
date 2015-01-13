@@ -39,6 +39,8 @@ class OBJFile
       const BoundingBox& getBoundingBox();
       const std::vector<Triangle>& getTriangles();
       unsigned int getNumTriangles();
+      void centerMesh();
+      void updateBoundingBox();
 };
 
 #endif

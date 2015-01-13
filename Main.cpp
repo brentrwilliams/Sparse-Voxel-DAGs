@@ -17,17 +17,14 @@ int main(int argc, char const *argv[])
    std::string fileName(argv[1]);
    OBJFile objFile(fileName);
    unsigned int numLevels = atoi(argv[2]);
-   
+   objFile.centerMesh();
+
    SparseVoxelOctree svo(numLevels, objFile.getBoundingBox(), objFile.getTriangles());
-   objFile.getBoundingBox().print();
    
    if (argc == 3)
    {
       svo.writeImages();
    }
-
-   std::cout << "Number of triangles: " << objFile.getNumTriangles() << std::endl;
-   
     
    return 0;
 }

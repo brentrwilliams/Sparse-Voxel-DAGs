@@ -25,25 +25,32 @@ void BoundingBox::print() const
 
 void BoundingBox::square()
 {
-   float xLen = mins.x - maxs.x;
-   float yLen = mins.y - maxs.y;
-   float zLen = mins.z - maxs.z;
+   float xLen = maxs.x - mins.x;
+   float yLen = maxs.y - mins.y;
+   float zLen = maxs.z - mins.z;
    float largest = xLen;
    
    if (yLen > largest)
       largest = yLen;
    if (zLen > largest)
       largest = zLen;
-   
-   float xDif = 0.5 * (largest - xLen);
-   mins.x -= xDif;
-   maxs.x += xDif;
-   
-   float yDif = 0.5 * (largest - yLen);
-   mins.y -= yDif;
-   maxs.y += yDif;
-   
-   float zDif = 0.5 * (largest - zLen);
-   mins.z -= zDif;
-   maxs.z += zDif;
+
+   float halfLength = xLen * 0.5f;
+
+   float centerX = (mins.x + maxs.x) * 0.5f;
+   mins.x = centerX - halfLength;
+   maxs.x = centerX + halfLength;
+
+   float centerY = (mins.y + maxs.y) * 0.5f;
+   mins.y = centerY - halfLength;
+   maxs.y = centerY + halfLength;
+
+   float centerZ = (mins.z + maxs.z) * 0.5f;
+   mins.z = centerZ - halfLength;
+   maxs.z = centerZ + halfLength;
+}
+
+Vec3 BoundingBox::getCenter() const
+{
+   return (maxs + mins) * 0.5;
 }

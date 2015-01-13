@@ -30,6 +30,9 @@ Voxels::Voxels(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, 
    }
    
    boundingBox.square();
+   std::cout << "Voxels constructor boundingBox: " << endl;
+   boundingBox.print();
+   std::cout << endl;
    voxelWidth = (boundingBox.maxs.x - boundingBox.mins.x) / dimension;
    
    std::cout << "Number of 64bit ints allocated: " << dataSize << "\n";

@@ -19,6 +19,7 @@ class BoundingBox
       BoundingBox(const Vec3& minsVal, const Vec3& maxsVal);
       void print() const;
       void square();
+      Vec3 getCenter() const;
 };
 
 #endif
