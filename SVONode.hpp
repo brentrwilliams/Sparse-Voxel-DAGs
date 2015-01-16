@@ -13,8 +13,9 @@
 class SVONode
 {
    public:
-      uint64_t childMask;
+      //SVONode();
       void* childPointers[8];
+
 };
 
 #endif

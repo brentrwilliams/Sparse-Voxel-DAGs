@@ -31,10 +31,9 @@ class SparseVoxelOctree
       void build(const std::vector<Triangle> triangles);
       void setVoxel(unsigned int x, unsigned int y, unsigned int z, uint64_t* activeNodes, uint64_t* nodes);
       void voxelizeTriangle(const Triangle& triangle, uint64_t* activeNodes, uint64_t* nodes);
-      void setChildMask(bool childMaskBools[8], uint64_t* childMask);
       bool isSet(unsigned int x, unsigned int y, unsigned int z);
-      bool isMaskNotEmpty(SVONode* node);
-      bool isMaskSet(SVONode* node, unsigned int i);
+      bool isNodeNotEmpty(SVONode *node);
+      bool isChildSet(SVONode *node, unsigned int i);
       bool isLeafSet(uint64_t* node, unsigned int i);
       void printBinary();
       void writeImages();

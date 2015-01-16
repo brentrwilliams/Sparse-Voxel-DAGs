@@ -56,28 +56,22 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles)
       exit(EXIT_FAILURE);
    }
    
-   bool childMask[8];
-   
    int numPrevLevelNodes = numLeafs; //512
    int numCurrLevelNodes = numPrevLevelNodes / 8; //64
    SVONode* prevLevelNodes;
    SVONode* currLevelNodes = new SVONode[numCurrLevelNodes];
    std::cout << "numCurrLevelNodes: " << numCurrLevelNodes << "\n";
    
+   // Set the level above the leaf nodes
    for (int i = 0; i < numPrevLevelNodes; i++)
    {
-      childMask[i%8] = leafVoxelData[i] > 0;
-      if (childMask[i%8])
+      if (leafVoxelData[i] > 0)
       {
          currLevelNodes[i/8].childPointers[i%8] = (void *)  &(leafVoxelData[i]);
       }
-      
-      if ((i+1) % 8 == 0)
-      {
-         setChildMask(childMask, &(currLevelNodes[i/8].childMask));
-      }
    }
    
+   // Set the rest of the non leaf nodes
    while(numCurrLevelNodes >= 64)
    {
       numPrevLevelNodes = numCurrLevelNodes; //64
@@ -86,79 +80,50 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles)
       currLevelNodes = new SVONode[numCurrLevelNodes];
       std::cout << "numCurrLevelNodes: " << numCurrLevelNodes << "\n";
       
+      // For each of the previous level's nodes we set the child pointers
       for (int i = 0; i < numPrevLevelNodes; i++)
       {
-         childMask[i%8] = isMaskNotEmpty(&prevLevelNodes[i]);
-         if (childMask[i%8])
+         if (isNodeNotEmpty(&prevLevelNodes[i]))
          {
             currLevelNodes[i/8].childPointers[i%8] = (void *)  &(prevLevelNodes[i]);
-         }
-         
-         if ((i+1) % 8 == 0)
-         {
-            setChildMask(childMask, &(currLevelNodes[i/8].childMask));
          }
       }
    }
    
+   // Set the root node
    prevLevelNodes = currLevelNodes;
    root = new SVONode;
    for (int i = 0; i < 8; i++)
    {
-      childMask[i] = isMaskNotEmpty(&prevLevelNodes[i]);
-      if (childMask[i])
+      if (isNodeNotEmpty(&prevLevelNodes[i]))
       {
          root->childPointers[i] = (void *)  &(prevLevelNodes[i]);
       }
    }
-   setChildMask(childMask, &(root->childMask));
 }
 
+
 /**
- * Sets the given child mask according to the array of 8 bools.
+ * Returns a boolean indicating whether all the node's children are not empty.
  *
- * Tested: 1-27-2014 
+ * Tested: 1-16-2015
  */
-void SparseVoxelOctree::setChildMask(bool childMaskBools[8], uint64_t* childMask)
+bool SparseVoxelOctree::isNodeNotEmpty(SVONode *node)
 {
-   unsigned int i;
-   *childMask = 0;
-   for (i = 0; i < 8; i++)
+   for (int i = 0; i < 8; i++)
    {
-      if (childMaskBools[i])
+      if (node->childPointers[i] != NULL)
       {
-         *childMask |= (1L << i);
+         return true;
       }
-      
    }
-}
 
-/**
- * Returns a boolean indicating whether the node's childmask is non empty.
- *
- * Tested: 2-16-2014 
- */
-bool SparseVoxelOctree::isMaskNotEmpty(SVONode* node)
-{
-   uint64_t toAnd = SET_8_BITS;
-   return (node->childMask & toAnd) > 0; 
-}
-
-/**
- * Returns a boolean indicating whether the node's childmask at the ith bit is 
- * set.
- *
- * Tested: 1-27-2014 
- */
-bool SparseVoxelOctree::isMaskSet(SVONode* node, unsigned int i)
-{
-   uint64_t toAnd = (1L << i);
-   return (node->childMask & toAnd) > 0; 
+   return false;
 }
 
 
 /**
- * Returns a boolean indicating whether the node's lead at the ith bit is set.
+ * Returns a boolean indicating whether the node's leaf at the ith bit is set.
  *
  * Tested: 1-27-2014 
  */
@@ -167,6 +132,16 @@ bool SparseVoxelOctree::isLeafSet(uint64_t* node, unsigned int i)
    uint64_t leaf = (uint64_t) *node;
    uint64_t toAnd = (1L << i);
    return (leaf & toAnd) > 0; 
+}
+
+/**
+ * Returns a boolean indicating whether the node's child is set.
+ *
+ * Tested: 1-16-2015 
+ */
+bool SparseVoxelOctree::isChildSet(SVONode *node, unsigned int i)
+{
+   return node->childPointers[i] != NULL;
 }
 
 
@@ -188,7 +163,7 @@ bool SparseVoxelOctree::isSet(unsigned int x, unsigned int y, unsigned int z)
    
    while (divBy >= 64)
    {
-      if (!isMaskSet((SVONode*)currentNode, index)) 
+      if (!isChildSet((SVONode*)currentNode, index)) 
       {
          return false;
       }

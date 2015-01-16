@@ -10,8 +10,8 @@ all: Main cleanOs
 
 test: Main
 
-Main: Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o Node.o Voxels.o MortonCode.o SVONode.o Image.o Makefile
-	g++ -o main Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o Node.o Voxels.o MortonCode.o Image.o $(GCC_OPTS)
+Main: Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o DAG.o Node.o Voxels.o MortonCode.o SVONode.o Image.o Makefile
+	g++ -o main Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o DAG.o Node.o Voxels.o MortonCode.o Image.o $(GCC_OPTS)
 
 SVONode.o: SVONode.cpp SVONode.hpp
 	g++ -c SVONode.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
@@ -40,8 +40,11 @@ Intersect.o: Intersect.cpp Intersect.hpp Vec3.hpp Triangle.hpp Vec2.hpp
 BoundingBox.o: BoundingBox.cpp BoundingBox.hpp Vec3.hpp
 	g++ -c BoundingBox.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
 
-SparseVoxelOctree.o: SparseVoxelOctree.cpp Intersect.hpp Vec3.hpp Triangle.hpp Vec2.hpp Voxels.hpp
+SparseVoxelOctree.o: SparseVoxelOctree.cpp Intersect.hpp Vec3.hpp Triangle.hpp Vec2.hpp Voxels.hpp SVONode.hpp
 	g++ -c SparseVoxelOctree.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+
+DAG.o: DAG.cpp SparseVoxelOctree.hpp Intersect.hpp Vec3.hpp Triangle.hpp Vec2.hpp Voxels.hpp
+	g++ -c DAG.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
 
 Node.o: Node.cpp Node.hpp
 	g++ -c Node.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
