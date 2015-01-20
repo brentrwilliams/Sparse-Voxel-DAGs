@@ -11,12 +11,12 @@
  */
 SparseVoxelOctree::SparseVoxelOctree(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles)
  : boundingBox(boundingBoxVal),
-   levels(levelsVal),
+   numLevels(levelsVal),
    size(pow(8, levelsVal)), 
    dimension(pow(2,levelsVal)),
    voxelWidth(0)
 {
-   if (levels <= 2)
+   if (numLevels <= 2)
    {
       std::string err("\nNumber of levels too small\n");
       std::cerr << err;
@@ -25,6 +25,7 @@ SparseVoxelOctree::SparseVoxelOctree(const unsigned int levelsVal, const Boundin
    
    boundingBox.square();
    voxelWidth = (boundingBox.maxs.x - boundingBox.mins.x) / dimension;
+   levels = new void*[numLevels-1]; // has the -1 because the last two levels are uint64's 
    build(triangles);
 }
 
@@ -43,14 +44,19 @@ SparseVoxelOctree::~SparseVoxelOctree()
  */
 void SparseVoxelOctree::build(const std::vector<Triangle> triangles)
 {
-   Voxels* leafVoxels = new Voxels(levels, boundingBox, triangles);
+   Voxels* leafVoxels = new Voxels(numLevels, boundingBox, triangles);
    uint64_t* leafVoxelData = leafVoxels->data;
    unsigned int numLeafs = leafVoxels->dataSize;
    
-   std::cout << "levels: " << levels << "\n";
+   std::cout << "levels: " << numLevels << "\n";
    std::cout << "Number of leaf nodes: " << numLeafs << "\n";
+
+   // Save the pointer to the leaf nodes
+   unsigned int currentLevel = numLevels-2;
+   levels[currentLevel] = (void*)leafVoxelData; 
+   currentLevel--;
    
-   if (levels <= 3)
+   if (numLevels <= 3)
    {
       std::cerr << "CANNOT build SVO with levels <= 3.\nExitting...\n";
       exit(EXIT_FAILURE);
@@ -60,8 +66,7 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles)
    int numCurrLevelNodes = numPrevLevelNodes / 8; //64
    SVONode* prevLevelNodes;
    SVONode* currLevelNodes; 
-   currLevelNodes = new SVONode[numCurrLevelNodes]();
-   std::cout << "numCurrLevelNodes: " << numCurrLevelNodes << "\n";
+   currLevelNodes = new SVONode[numCurrLevelNodes](); 
    
    // Set the level above the leaf nodes
    for (int i = 0; i < numPrevLevelNodes; i++)
@@ -71,6 +76,10 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles)
          currLevelNodes[i/8].childPointers[i%8] = (void *)  &(leafVoxelData[i]);
       }
    }
+
+   // Save the pointer to level above the leafs
+   levels[currentLevel] = currLevelNodes;
+   currentLevel--;
    
    // Set the rest of the non leaf nodes
    while(numCurrLevelNodes >= 64)
@@ -79,7 +88,6 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles)
       numCurrLevelNodes /= 8; // 8
       prevLevelNodes = currLevelNodes;
       currLevelNodes = new SVONode[numCurrLevelNodes];
-      std::cout << "numCurrLevelNodes: " << numCurrLevelNodes << "\n";
       
       // For each of the previous level's nodes we set the child pointers
       for (int i = 0; i < numPrevLevelNodes; i++)
@@ -89,6 +97,10 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles)
             currLevelNodes[i/8].childPointers[i%8] = (void *)  &(prevLevelNodes[i]);
          }
       }
+
+      // Save the pointer for each level's nodes in the level's array
+      levels[currentLevel] = currLevelNodes;
+      currentLevel--;
    }
    
    // Set the root node
@@ -101,6 +113,9 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles)
          root->childPointers[i] = (void *)  &(prevLevelNodes[i]);
       }
    }
+
+   // Save the pointer for root node in the levels array
+   levels[currentLevel] = root;
 }
 
 
@@ -155,7 +170,7 @@ bool SparseVoxelOctree::isChildSet(SVONode *node, unsigned int i)
 bool SparseVoxelOctree::isSet(unsigned int x, unsigned int y, unsigned int z)
 {
    void* currentNode = root;
-   int currentLevel = levels;
+   int currentLevel = numLevels;
    unsigned int mortonIndex = mortonCode(x,y,z,currentLevel);
    
    int divBy = pow(8, currentLevel-1);

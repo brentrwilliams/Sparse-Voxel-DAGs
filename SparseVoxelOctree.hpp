@@ -39,10 +39,11 @@ class SparseVoxelOctree
       void writeImages();
       
       BoundingBox boundingBox;
-      unsigned int levels;
+      unsigned int numLevels;
       unsigned long size; // Total number of voxels if the SVO was full
       unsigned int dimension; // Number of voxels for one side of the cube
       float voxelWidth; // The length of one voxel in world space
+      void** levels; // Array of SVONode*'s that correspond to the levels of the SVO with 0 as root
       SVONode* root;
 };
 
