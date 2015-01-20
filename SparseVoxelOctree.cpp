@@ -59,7 +59,8 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles)
    int numPrevLevelNodes = numLeafs; //512
    int numCurrLevelNodes = numPrevLevelNodes / 8; //64
    SVONode* prevLevelNodes;
-   SVONode* currLevelNodes = new SVONode[numCurrLevelNodes];
+   SVONode* currLevelNodes; 
+   currLevelNodes = new SVONode[numCurrLevelNodes]();
    std::cout << "numCurrLevelNodes: " << numCurrLevelNodes << "\n";
    
    // Set the level above the leaf nodes

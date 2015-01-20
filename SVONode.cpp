@@ -6,10 +6,14 @@
 
 #include "SVONode.hpp"
 
-// SVONode::SVONode()
-// {
-//    for (int i = 0; i < 8; i++)
-//    {
-//       childPointers[i] = NULL;
-//    }
-// }
+SVONode::SVONode()
+{
+   for (int i = 0; i < 8; i++)
+   {
+      childPointers[i] = NULL;
+   }
+}
+
+SVONode::~SVONode()
+{
+}

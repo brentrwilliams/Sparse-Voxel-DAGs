@@ -13,8 +13,10 @@
 class SVONode
 {
    public:
-      //SVONode();
       void* childPointers[8];
+
+      SVONode();
+      ~SVONode();
 
 };
 

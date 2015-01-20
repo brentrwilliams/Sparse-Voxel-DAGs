@@ -1,5 +1,4 @@
 To Do:
-- Check to see why the child mask is a uint64_t and not a uint8_t
 - Implement DAG
    - Build top N-10 levels from top down as an SVO
    - For each leaf of those N-10 top levels:
