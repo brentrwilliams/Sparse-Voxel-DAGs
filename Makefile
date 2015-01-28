@@ -6,7 +6,7 @@ NVCC_OPTS=-O3 -arch=sm_20 -Xcompiler -Wall -Xcompiler -Wextra -m64
 
 GCC_OPTS= -Wall -Wextra -m64 -g -pg
 
-all: Main cleanOs
+all: Main
 
 test: Main
 

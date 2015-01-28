@@ -15,6 +15,7 @@
 #include "SparseVoxelOctree.hpp"
 #include "SVONode.hpp"
 #include "Image.hpp"
+#include <algorithm>
 
 #include <vector>
 #include <stdint.h>
@@ -29,7 +30,7 @@ class DAG
       void build(const std::vector<Triangle> triangles);
 
       BoundingBox boundingBox;
-      unsigned int levels;
+      unsigned int numLevels;
       unsigned long size; // Total number of voxels if the SVO was full
       unsigned int dimension; // Number of voxels for one side of the cube
       float voxelWidth; // The length of one voxel in world space

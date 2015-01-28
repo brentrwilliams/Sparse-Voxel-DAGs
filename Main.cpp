@@ -19,12 +19,14 @@ int main(int argc, char const *argv[])
    unsigned int numLevels = atoi(argv[2]);
    objFile.centerMesh();
 
-   SparseVoxelOctree svo(numLevels, objFile.getBoundingBox(), objFile.getTriangles());
+   //SparseVoxelOctree svo(numLevels, objFile.getBoundingBox(), objFile.getTriangles());
    
-   if (argc == 3)
-   {
-      svo.writeImages();
-   }
+   // if (argc == 3)
+   // {
+   //    svo.writeImages();
+   // }
+
+   DAG dag(numLevels, objFile.getBoundingBox(), objFile.getTriangles());
     
    return 0;
 }

@@ -15,5 +15,6 @@
 #include "Voxels.hpp"
 #include "SparseVoxelOctree.hpp"
 #include "SVONode.hpp"
+#include "DAG.hpp"
 
 #endif
