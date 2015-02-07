@@ -17,3 +17,35 @@ SVONode::SVONode()
 SVONode::~SVONode()
 {
 }
+
+// Returns true if the current object is less than the other object
+// Used for sorting
+bool SVONode::operator< ( const SVONode & other ) const 
+{ 
+   for (int i = 0; i < 8; i++)
+   {
+      if (childPointers[i] < other.childPointers[i])
+      {
+         return true;
+      }
+      else if (childPointers[i] > other.childPointers[i])
+      {
+         return false;
+      }
+   }
+   return false;
+}
+
+// Returns true if the current object is not equal to the other object
+// Used in reduction
+bool SVONode::operator!= ( const SVONode & other ) const 
+{ 
+   for (int i = 0; i < 8; i++)
+   {
+      if (childPointers[i] != other.childPointers[i])
+      {
+         return true;
+      }
+   }
+   return false;
+}
