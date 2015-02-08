@@ -49,3 +49,17 @@ bool SVONode::operator!= ( const SVONode & other ) const
    }
    return false;
 }
+
+// Returns true if the current object is not equal to the other object
+// Used in reduction
+bool SVONode::operator== ( const SVONode & other ) const 
+{ 
+   for (int i = 0; i < 8; i++)
+   {
+      if (childPointers[i] != other.childPointers[i])
+      {
+         return false;
+      }
+   }
+   return true;
+}

@@ -164,36 +164,49 @@ void DAG::build(const std::vector<Triangle> triangles)
          }
       }
       cout << "\t\tnumUniqueChildren: " << numUniqueChildren << endl;
+
+      SVONode* uniqueChildren = new SVONode[numUniqueChildren];
+      unsigned int uniqueChildIndex = 0;
+      for (unsigned int i = 0; i < numChildren-1; ++i)
+      {
+         if (copyChildNodes[i] != copyChildNodes[i+1])
+         {
+            memcpy(&uniqueChildren[uniqueChildIndex], &copyChildNodes[i], sizeof(SVONode));
+            uniqueChildIndex++;
+         }
+      }
+      delete [] copyChildNodes;
+
       cout << "\tFinished reducing child nodes." << endl << endl;
 
       // Reducing child nodes
       cout << "\tAdjusting parent node's pointer's to unique children..." << endl;
-      cout << "\tFinished djusting parent node's pointer's to unique children." << endl << endl;
-      delete [] copyChildNodes;
 
+      for (unsigned int i = 0; i < numParents; i++)
+      {
+         for (unsigned int j = 0; j < 8; j++)
+         {
+            if (parentLevel[i].childPointers[j] != NULL)
+            {
+               // Get a pointer to the address of the child value so you can replace it with the 
+               // new unique child pointer
+               SVONode childValue = *((SVONode*) parentLevel[i].childPointers[j]);
 
+               // Search for the corresponding child value in the uniqueChildren and replace the 
+               // childpointer with a pointer to the unique leaf
+               for (unsigned int k = 0; k < numUniqueChildren; k++)
+               {
+                  if (uniqueChildren[k] == childValue)
+                  {
+                     parentLevel[i].childPointers[j] = &(uniqueChildren[k]);
+                  }
+               }
 
-      // for (unsigned int i = 0; i < numParents; i++)
-      // {
-      //    for (unsigned int j = 0; j < 8; j++)
-      //    {
-      //       if (parentLevel[i].childPointers[j] != NULL)
-      //       {
-      //          SVONode** childValue = *((uint64_t*) parentLevel[i].childPointers[j]);
+            }
+         }
+      }
 
-      //          // Search for the corresponding child value in the uniqueLeafs and replace the 
-      //          // childpointer with a pointer to the unique leaf
-      //          for (unsigned int k = 0; k < numUniqueLeafs; k++)
-      //          {
-      //             if (uniqueLeafs[k] == childValue)
-      //             {
-      //                parentLevel[i].childPointers[j] = &(uniqueLeafs[k]);
-      //             }
-      //          }
-
-      //       }
-      //    }
-      // }
+      cout << "\tFinished adjusting parent node's pointer's to unique children." << endl << endl;
 
       std::cout << "Finished parentLevelNum: " << parentLevelNum << endl << endl << endl;
       parentLevelNum--;

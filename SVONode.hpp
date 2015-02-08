@@ -19,6 +19,7 @@ class SVONode
       ~SVONode();
       bool operator< ( const SVONode & val ) const;
       bool operator!= ( const SVONode & other ) const;
+      bool operator== ( const SVONode & other ) const;
 
 };
 
