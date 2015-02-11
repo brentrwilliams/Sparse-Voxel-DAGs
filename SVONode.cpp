@@ -72,3 +72,12 @@ void SVONode::print()
       std::cerr << "\t" << childPointers[i] << std::endl;
    }
 }
+
+void SVONode::printOneLine()
+{
+   for (int i = 0; i < 8; ++i)
+   {
+      std::cout << childPointers[i] << " ";
+   }
+   std::cout << std::endl;
+}

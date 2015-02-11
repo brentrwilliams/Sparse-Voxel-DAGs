@@ -60,12 +60,6 @@ void DAG::build(const std::vector<Triangle> triangles)
 
    int parentLevelNum = numLevels-3;
    SVONode* parentLevel = (SVONode*) svo.levels[parentLevelNum];
-   // cerr << "Parent Level of LeafNodes = " << parentLevelNum << endl;
-   // cerr << "levels[leafParentLevel] in DAG = " << (void*)parentLevel << endl;
-   // SVONode temp = parentLevel[30];
-   // temp.print();
-   // cerr << "*(parentLevel[30].childPointers[0]) = " << *((uint64_t*)parentLevel[30].childPointers[0]) << endl;
-
    unsigned int numParents = numLeafs / 8;
 
    std::cerr << "Starting leaf level (parentLevelNum: " << parentLevelNum << ")" << endl;
@@ -77,12 +71,12 @@ void DAG::build(const std::vector<Triangle> triangles)
    std::sort(copyLeafVoxels, copyLeafVoxels + numLeafs);
    cerr << "\tFinished sorting leaf nodes." << endl << endl;
    
-   cout << "\nLeafs:" << endl;
-   for (unsigned int i = 0; i < numLeafs; ++i)
-   {
-      std::cout << copyLeafVoxels[i] << "\n";
-   }
-   std::cout << endl << endl;
+   // cout << "\nLeafs:" << endl;
+   // for (unsigned int i = 0; i < numLeafs; ++i)
+   // {
+   //    std::cout << copyLeafVoxels[i] << "\n";
+   // }
+   // std::cout << endl << endl;
 
    // Calculate the number of unique leafs
    cerr << "\tReducing leaf nodes..." << endl;
@@ -114,7 +108,7 @@ void DAG::build(const std::vector<Triangle> triangles)
    cout << "\nuniqueLeafs: " << endl;
    for (unsigned int i = 0; i < numUniqueLeafs; ++i)
    {
-      std::cout << uniqueLeafs[i] << "\n";
+      std::cout << uniqueLeafs[i] << " => " << &(uniqueLeafs[i]) << "\n";
    }
    std::cout << endl << endl; 
 
@@ -174,6 +168,13 @@ void DAG::build(const std::vector<Triangle> triangles)
       SVONode* copyChildNodes = new SVONode[numChildren];
       memcpy(copyChildNodes, childLevel, sizeofChildren);
       std::sort(copyChildNodes, copyChildNodes + numChildren);
+
+      for (unsigned int i = 0; i < numChildren; i++)
+      {
+         copyChildNodes[i].printOneLine();
+      }
+      cout << endl;
+
       cerr << "\tFinished sorting child nodes." << endl << endl;
 
       //Reducing child nodes
@@ -190,15 +191,12 @@ void DAG::build(const std::vector<Triangle> triangles)
 
       SVONode* uniqueChildren = new SVONode[numUniqueChildren];
       unsigned int uniqueChildIndex = 0;
-      updateCount = 0;
       for (unsigned int i = 0; i < numChildren-1; ++i)
       {
          if (copyChildNodes[i] != copyChildNodes[i+1])
          {
             memcpy(&uniqueChildren[uniqueChildIndex], &copyChildNodes[i], sizeof(SVONode));
             uniqueChildIndex++;
-            updateCount++;
-            cerr << "\t\tUpdate: " << updateCount << endl;
          }
       }
       delete [] copyChildNodes;
@@ -207,7 +205,7 @@ void DAG::build(const std::vector<Triangle> triangles)
 
       // Reducing child nodes
       cerr << "\tAdjusting parent node's pointer's to unique children..." << endl;
-
+      updateCount = 0;
       for (unsigned int i = 0; i < numParents; i++)
       {
          for (unsigned int j = 0; j < 8; j++)
@@ -225,6 +223,8 @@ void DAG::build(const std::vector<Triangle> triangles)
                   if (uniqueChildren[k] == childValue)
                   {
                      parentLevel[i].childPointers[j] = &(uniqueChildren[k]);
+                     updateCount++;
+                     cerr << "\t\tUpdate: " << updateCount << " &=> " << &(uniqueChildren[k]) << endl;
                   }
                }
 

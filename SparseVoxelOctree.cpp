@@ -76,24 +76,9 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles)
       {
          currLevelNodes[i/8].childPointers[i%8] = (void *)  &(leafVoxelData[i]);
       }
-      if (i/8 == 256)
-      {
-         currLevelNodes[i/8].print();
-      }
    }
 
-   // cerr << "&(leafVoxelData[8*256]) = " << &(leafVoxelData[8*256]) << endl;
-   // uint64_t* pointerToVoxel = &(leafVoxelData[8*256]);
-   // cerr << "*(pointerToVoxel) = " << *(pointerToVoxel) << endl; 
-
-   // Save the pointer to level above the leafs
    levels[currentLevel] = (void*)currLevelNodes;
-   // cerr << "levels[parentOfLeafs] = " << levels[currentLevel] << endl;
-
-   // SVONode firstNode = currLevelNodes[30];
-   // firstNode.print();
-   // uint64_t* pointerToFirstLeaf = (uint64_t*) firstNode.childPointers[0];
-   // cerr << "*(pointerToFirstLeaf) = " << *(pointerToFirstLeaf) << endl;
    currentLevel--;
    
    // Set the rest of the non leaf nodes

@@ -21,6 +21,7 @@ class SVONode
       bool operator!= ( const SVONode & other ) const;
       bool operator== ( const SVONode & other ) const;
       void print();
+      void printOneLine();
 
 };
 

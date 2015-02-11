@@ -126,6 +126,7 @@ void OBJFile::centerMesh()
 
 void OBJFile::updateBoundingBox()
 {
+   std::cerr << "triangles.size() = " << triangles.size() << std::endl;
    boundingBox.mins = triangles[0].v0;
    boundingBox.maxs = triangles[0].v1;
    for (unsigned long i = 0; i < triangles.size(); i++)
