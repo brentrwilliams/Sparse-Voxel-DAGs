@@ -1,4 +1,12 @@
 To Do:
+- Validate the SVO consolidation
+   - Validate the level above the parents of the leafs
+   - validate the rest
+
+- Fix Github readme.md to point to new blog for progress
+- Make function to write/read SVO to/from disk for faster iteration
+
+DAG Implementation
 - Implement DAG
    - Build top N-10 levels from top down as an SVO
    - For each leaf of those N-10 top levels:
@@ -7,5 +15,7 @@ To Do:
          - Make sure the DAG copies everything into new memory so we can release all the SVO's memory
       - Connect DAG to leaf of top N-10 levels
    - Do one more pass to convert whole tree into DAG
-- Fix Github readme.md to point to new blog for progress
-- Make function to write/read SVO to/from disk for faster iteration
+
+Notes:
+- I have Validated that the number of updates for the leafs is what is to be expected
+- I have validated that the parents of the leafs have been updated correctly

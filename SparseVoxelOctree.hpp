@@ -37,6 +37,7 @@ class SparseVoxelOctree
       bool isLeafSet(uint64_t* node, unsigned int i);
       void printBinary();
       void writeImages();
+      unsigned int countAtLevel(unsigned int level);
       
       BoundingBox boundingBox;
       unsigned int numLevels;

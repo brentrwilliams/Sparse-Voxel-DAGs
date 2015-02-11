@@ -63,3 +63,12 @@ bool SVONode::operator== ( const SVONode & other ) const
    }
    return true;
 }
+
+void SVONode::print()
+{
+   std::cerr << "SVONode: " << std::endl;
+   for (int i = 0; i < 8; ++i)
+   {
+      std::cerr << "\t" << childPointers[i] << std::endl;
+   }
+}
