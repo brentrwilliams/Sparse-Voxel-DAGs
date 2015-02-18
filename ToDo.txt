@@ -1,6 +1,6 @@
 To Do:
-- Convert consolidated SVO to DAG
 - Update the image output function to traverse the DAG
+- Work on raytracer
 
 - Fix Github readme.md to point to new blog for progress
 - Make function to write/read SVO to/from disk for faster iteration
