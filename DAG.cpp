@@ -20,6 +20,7 @@ DAG::DAG(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const 
       throw std::out_of_range(err);
    }
    
+   levels = new void*[numLevels-1]; // has the -1 because the last two levels are uint64's 
    boundingBox.square();
    voxelWidth = (boundingBox.maxs.x - boundingBox.mins.x) / dimension;
    build(triangles);
@@ -38,6 +39,9 @@ void DAG::build(const std::vector<Triangle> triangles)
 {
    SparseVoxelOctree svo(numLevels, boundingBox, triangles);
    root = svo.root;
+   void** newLevels = new void*[numLevels-1]; // has the -1 because the last two levels are uint64's 
+   unsigned int* newLevelSizes = new unsigned int[numLevels-1]();
+   unsigned int newLevelIndex = numLevels-2;
 
    cerr << "Levels: " << endl;
    for (int i = 0; i < 2; ++i)
@@ -94,6 +98,11 @@ void DAG::build(const std::vector<Triangle> triangles)
    uint64_t* uniqueLeafs = new uint64_t[numUniqueLeafs];
    unsigned int uniqueLeafIndex = 1;
    uniqueLeafs[0] = copyLeafVoxels[0];
+   newLevels[newLevelIndex] = uniqueLeafs;
+   newLevelSizes[newLevelIndex] = numUniqueLeafs;
+   cout << "newLevels at leafs (newLevelIndex = " << newLevelIndex << ")" << endl;
+   newLevelIndex--;
+
    for (unsigned int i = 0; i < numLeafs-1; ++i)
    {
       if (copyLeafVoxels[i] != copyLeafVoxels[i+1])
@@ -127,7 +136,7 @@ void DAG::build(const std::vector<Triangle> triangles)
          if (parentLevel[i].childPointers[j] != NULL)
          {
             uint64_t childValue = *((uint64_t*)parentLevel[i].childPointers[j]);
-
+            bool foundUpdate = false;
             // Search for the corresponding child value in the uniqueLeafs and replace the 
             // childpointer with a pointer to the unique leaf
             for (unsigned int k = 0; k < numUniqueLeafs && childValue != 0; k++)
@@ -137,7 +146,13 @@ void DAG::build(const std::vector<Triangle> triangles)
                   parentLevel[i].childPointers[j] = &(uniqueLeafs[k]);
                   updateCount++;
                   cerr << "\t\tUpdate: " << updateCount << "\t=> "  << childValue << " &=> " << &(uniqueLeafs[k]) << endl;
+                  foundUpdate = true;
                }
+            }
+
+            if (!foundUpdate)
+            {
+               cout << "!!!!!!!!! Did not find update for " << childValue << endl;
             }
          }
       }
@@ -169,8 +184,10 @@ void DAG::build(const std::vector<Triangle> triangles)
       memcpy(copyChildNodes, childLevel, sizeofChildren);
       std::sort(copyChildNodes, copyChildNodes + numChildren);
 
+      cout << "copyChildNodes (at parentLevel " << parentLevelNum << "): " << endl;
       for (unsigned int i = 0; i < numChildren; i++)
       {
+         cout << &copyChildNodes[i] << ": ";
          copyChildNodes[i].printOneLine();
       }
       cout << endl;
@@ -191,11 +208,17 @@ void DAG::build(const std::vector<Triangle> triangles)
 
       SVONode* uniqueChildren = new SVONode[numUniqueChildren];
       unsigned int uniqueChildIndex = 0;
+      memcpy(&uniqueChildren[uniqueChildIndex], &copyChildNodes[0], sizeof(SVONode));
+      uniqueChildIndex++;
+      newLevels[newLevelIndex] = uniqueChildren;
+      newLevelSizes[newLevelIndex] = numUniqueChildren;
+      cout << "newLevels at newLevelIndex = " << newLevelIndex << endl;
+      newLevelIndex--;
       for (unsigned int i = 0; i < numChildren-1; ++i)
       {
          if (copyChildNodes[i] != copyChildNodes[i+1])
          {
-            memcpy(&uniqueChildren[uniqueChildIndex], &copyChildNodes[i], sizeof(SVONode));
+            memcpy(&uniqueChildren[uniqueChildIndex], &copyChildNodes[i+1], sizeof(SVONode));
             uniqueChildIndex++;
          }
       }
@@ -206,6 +229,7 @@ void DAG::build(const std::vector<Triangle> triangles)
       // Reducing child nodes
       cerr << "\tAdjusting parent node's pointer's to unique children..." << endl;
       updateCount = 0;
+      bool foundUpdate = false;
       for (unsigned int i = 0; i < numParents; i++)
       {
          for (unsigned int j = 0; j < 8; j++)
@@ -225,9 +249,14 @@ void DAG::build(const std::vector<Triangle> triangles)
                      parentLevel[i].childPointers[j] = &(uniqueChildren[k]);
                      updateCount++;
                      cerr << "\t\tUpdate: " << updateCount << " &=> " << &(uniqueChildren[k]) << endl;
+                     foundUpdate = true;
                   }
                }
-
+               if (!foundUpdate)
+               {
+                  cout << "!!!!!!!!! Did not find update for ";
+                  childValue.printOneLine();
+               }
             }
          }
       }
@@ -236,6 +265,119 @@ void DAG::build(const std::vector<Triangle> triangles)
 
       std::cerr << "Finished parentLevelNum: " << parentLevelNum << endl << endl << endl;
       parentLevelNum--;
+   }
+
+   // Update the newLevels to include the root
+   SVONode* newRoot = new SVONode;
+   memcpy(newRoot, svo.levels[0], sizeof(SVONode));
+   newLevels[0] = newRoot;
+   newLevelSizes[0] = 1;
+
+   cerr << "After updated SVO root:" << endl; 
+   for (int i = 0; i < 8; ++i)
+   {
+      cerr << "\t" << newRoot->childPointers[i] << endl;
+   }
+   cerr << endl;
+
+   cout << "Num unique nodes at level:" << endl;
+   for (unsigned int i = 0; i < numLevels-1; ++i)
+   {
+      cout << "\t" << i << ": " << newLevelSizes[i] << endl;
+   }
+
+   // Go through each level and count the number of nonvoid pointers
+   for (unsigned int levelIndex = 0; levelIndex < numLevels-2; levelIndex++)
+   {
+      unsigned int pointerCount = 0;
+      for (unsigned int i = 0; i < newLevelSizes[levelIndex]; i++)
+      {
+         for (int j = 0; j < 8; j++)
+         {
+            if ( ((SVONode*) newLevels[levelIndex])[i].childPointers[j] != NULL)
+            {
+               pointerCount++;
+            }
+         }
+      }
+
+      // A level is made up of the pointers in the nodes and the masks of the nodes
+      levels[levelIndex] = (void*)malloc((pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * sizeof(uint64_t)));
+   }
+
+   // Just use the already allocated leafs of the compacted SVO instead of allocating a new one
+   levels[numLevels-2] = newLevels[numLevels-2];
+
+   // Set the masks and pointers of the level above the leafs
+   unsigned int currentLevelIndex = numLevels-3;
+   cout << "Working at level above the leafs: " << currentLevelIndex << endl;
+   uint64_t* maskPtr;
+   uint64_t** currPtr = (uint64_t**) levels[currentLevelIndex];
+   unordered_map<void*, void*>* leafParentMapping = new unordered_map<void*, void*>;
+   for (unsigned int i = 0; i < newLevelSizes[currentLevelIndex]; i++)
+   {
+      uint64_t mask = 0;
+      maskPtr = (uint64_t*) currPtr;
+      leafParentMapping->insert( std::make_pair<void*,void*>( (void*) &((SVONode*) newLevels[currentLevelIndex])[i], (void*)maskPtr ) );
+      cout << "Adding to Map: " << "( " <<  (void*) &((SVONode*) newLevels[currentLevelIndex])[i] << ", " << (void*)maskPtr << " )" << endl;
+      currPtr++;
+      for (int j = 0; j < 8; j++)
+      {
+         if ( ((SVONode*) newLevels[currentLevelIndex])[i].childPointers[j] != NULL)
+         {
+            // It is the same pointer as in the SVONodes because we are using the same leaf nodes
+            *currPtr = (uint64_t*) ((SVONode*) newLevels[currentLevelIndex])[i].childPointers[j];
+            mask |= 1;
+            currPtr++;
+         }
+         mask <<= 1;
+      }
+      *maskPtr = mask;
+   }
+
+   // cout << "Parent Range: (" << &(newLevels[currentLevelIndex]) << ", " << &((SVONode*) newLevels[currentLevelIndex])[newLevelSizes[currentLevelIndex]-1] << ")" << endl;
+   // std::cout << "leafParentMapping contains:";
+   // for ( std::unordered_map<void*, void*>::iterator it = leafParentMapping->begin(); it != leafParentMapping->end(); ++it )
+   //    std::cout << " " << it->first << ": " << it->second  << endl;
+   // std::cout << std::endl;
+
+   unordered_map<void*, void*>* currLevelsMap = leafParentMapping;
+   unordered_map<void*, void*>* prevLevelsMap = NULL;
+   
+   // For each levels nodes: set the mask 
+   for (int levelIndex = numLevels-4; levelIndex >= 0; levelIndex--)
+   {
+      cout << "Working at level: " << levelIndex << endl;
+      // Create a new map to 
+      delete prevLevelsMap;
+      prevLevelsMap = currLevelsMap;
+      currLevelsMap = new unordered_map<void*, void*>;
+
+      currPtr = (uint64_t**) levels[levelIndex];
+
+      for (unsigned int i = 0; i < newLevelSizes[levelIndex]; i++)
+      {
+         uint64_t mask = 0;
+         maskPtr = (uint64_t*) currPtr;
+         currLevelsMap->insert( std::make_pair<void*,void*>( (void*) &((SVONode*) newLevels[levelIndex])[i], (void*)maskPtr ) );
+         cout << "\tAdding to the map: ( " << &((SVONode*) newLevels[levelIndex])[i] << ", " << (void*)maskPtr << " )" << endl;
+         currPtr++;
+         
+         for (int j = 0; j < 8; j++)
+         {
+            if ( ((SVONode*) newLevels[levelIndex])[i].childPointers[j] != NULL)
+            {
+               cout << "Searching for: " << ((SVONode*) newLevels[levelIndex])[i].childPointers[j] << endl;
+               *currPtr = (uint64_t*) prevLevelsMap->at( ((SVONode*) newLevels[levelIndex])[i].childPointers[j] );
+               cout << "\tReturned value: " << *currPtr << endl;
+               mask |= 1;
+               currPtr++;
+            }
+            mask <<= 1;
+         }
+         *maskPtr = mask;
+      }
+      cout << endl;
    }
 
 }

@@ -1,9 +1,6 @@
 To Do:
-- Validate the SVO consolidation
-   - Validate the level above the parents of the leafs
-      - Do this by printing out the parents of the leafs as their 8 pointers on one line then check to see if there are any repeat lines
-      - If not I need to feed it a situation where there are repreats and then validate in the same way
-   - validate the rest
+- Convert consolidated SVO to DAG
+- Update the image output function to traverse the DAG
 
 - Fix Github readme.md to point to new blog for progress
 - Make function to write/read SVO to/from disk for faster iteration

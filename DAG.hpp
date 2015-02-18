@@ -16,6 +16,7 @@
 #include "SVONode.hpp"
 #include "Image.hpp"
 #include <algorithm>
+#include <unordered_map>
 
 #include <vector>
 #include <stdint.h>
@@ -39,6 +40,7 @@ class DAG
       unsigned int dimension; // Number of voxels for one side of the cube
       float voxelWidth; // The length of one voxel in world space
       SVONode* root;
+      void** levels;
       
 };
 
