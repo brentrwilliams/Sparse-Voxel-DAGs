@@ -21,6 +21,7 @@ DAG::DAG(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const 
    }
    
    levels = new void*[numLevels-1]; // has the -1 because the last two levels are uint64's 
+   sizeAtLevel = new unsigned int[numLevels-1](); // has the -1 because the last two levels are uint64's 
    boundingBox.square();
    voxelWidth = (boundingBox.maxs.x - boundingBox.mins.x) / dimension;
    build(triangles);
@@ -287,7 +288,8 @@ void DAG::build(const std::vector<Triangle> triangles)
    }
 
    // Go through each level and count the number of nonvoid pointers
-   for (unsigned int levelIndex = 0; levelIndex < numLevels-2; levelIndex++)
+   unsigned int levelIndex;
+   for (levelIndex = 0; levelIndex < numLevels-2; levelIndex++)
    {
       unsigned int pointerCount = 0;
       for (unsigned int i = 0; i < newLevelSizes[levelIndex]; i++)
@@ -303,7 +305,14 @@ void DAG::build(const std::vector<Triangle> triangles)
 
       // A level is made up of the pointers in the nodes and the masks of the nodes
       levels[levelIndex] = (void*)malloc((pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * sizeof(uint64_t)));
+      // cerr << "levelIndex = " << levelIndex << endl;
+      // cerr << "pointerCount: " << pointerCount << endl;
+      // cerr << "newLevelSizes[levelIndex]: " << newLevelSizes[levelIndex] << endl;
+      cerr << levelIndex << ": " << ((pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * sizeof(uint64_t))) / 8 << " uint64_t's or void*'s" << endl;
+      sizeAtLevel[levelIndex] = ((pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * sizeof(uint64_t))) / 8;
    }
+   cerr << levelIndex << " (leafs): " << numUniqueLeafs << " uint64_t's or void*'s" << endl << endl;
+   sizeAtLevel[levelIndex] = numUniqueLeafs;
 
    // Just use the already allocated leafs of the compacted SVO instead of allocating a new one
    levels[numLevels-2] = newLevels[numLevels-2];
@@ -335,12 +344,6 @@ void DAG::build(const std::vector<Triangle> triangles)
       *maskPtr = mask;
    }
 
-   // cout << "Parent Range: (" << &(newLevels[currentLevelIndex]) << ", " << &((SVONode*) newLevels[currentLevelIndex])[newLevelSizes[currentLevelIndex]-1] << ")" << endl;
-   // std::cout << "leafParentMapping contains:";
-   // for ( std::unordered_map<void*, void*>::iterator it = leafParentMapping->begin(); it != leafParentMapping->end(); ++it )
-   //    std::cout << " " << it->first << ": " << it->second  << endl;
-   // std::cout << std::endl;
-
    unordered_map<void*, void*>* currLevelsMap = leafParentMapping;
    unordered_map<void*, void*>* prevLevelsMap = NULL;
    
@@ -348,6 +351,7 @@ void DAG::build(const std::vector<Triangle> triangles)
    for (int levelIndex = numLevels-4; levelIndex >= 0; levelIndex--)
    {
       cout << "Working at level: " << levelIndex << endl;
+      cerr << "Level " << levelIndex << endl;
       // Create a new map to 
       delete prevLevelsMap;
       prevLevelsMap = currLevelsMap;
@@ -363,23 +367,31 @@ void DAG::build(const std::vector<Triangle> triangles)
          cout << "\tAdding to the map: ( " << &((SVONode*) newLevels[levelIndex])[i] << ", " << (void*)maskPtr << " )" << endl;
          currPtr++;
          
+         cerr << "\t";
          for (int j = 0; j < 8; j++)
          {
             if ( ((SVONode*) newLevels[levelIndex])[i].childPointers[j] != NULL)
             {
+               uint64_t toOr = 1 << j;
                cout << "Searching for: " << ((SVONode*) newLevels[levelIndex])[i].childPointers[j] << endl;
                *currPtr = (uint64_t*) prevLevelsMap->at( ((SVONode*) newLevels[levelIndex])[i].childPointers[j] );
                cout << "\tReturned value: " << *currPtr << endl;
-               mask |= 1;
+               mask |= toOr;
+               cerr << "1";
                currPtr++;
             }
-            mask <<= 1;
+            else 
+            {
+               cerr << "0";
+            }
          }
+         cerr << endl;
+         cerr << "\tmask(" << maskPtr << "): " << mask << endl << endl;
          *maskPtr = mask;
       }
       cout << endl;
    }
-
+   root=levels[0];
 }
 
 
@@ -389,6 +401,30 @@ void DAG::build(const std::vector<Triangle> triangles)
  *
  * Tested: 
  */
+// bool DAG::isSet(unsigned int x, unsigned int y, unsigned int z)
+// {
+//    void* currentNode = root;
+//    int currentLevel = numLevels;
+//    unsigned int mortonIndex = mortonCode(x,y,z,currentLevel);
+   
+//    int divBy = pow(8, currentLevel-1);
+//    int modBy = divBy;
+//    int index = mortonIndex / divBy;
+   
+//    while (divBy >= 64)
+//    {
+//       if (!isChildSet((SVONode*)currentNode, index)) 
+//       {
+//          return false;
+//       }
+//       currentNode = (void*) ((SVONode*)currentNode)->childPointers[index];
+//       modBy = divBy;
+//       divBy /= 8;
+//       index = (mortonIndex % modBy) / divBy;
+//    }
+//    index = mortonIndex % modBy;
+//    return isLeafSet((uint64_t*)currentNode, index);
+// }
 bool DAG::isSet(unsigned int x, unsigned int y, unsigned int z)
 {
    void* currentNode = root;
@@ -401,11 +437,11 @@ bool DAG::isSet(unsigned int x, unsigned int y, unsigned int z)
    
    while (divBy >= 64)
    {
-      if (!isChildSet((SVONode*)currentNode, index)) 
+      if (!isChildSet(currentNode, index)) 
       {
          return false;
       }
-      currentNode = (void*) ((SVONode*)currentNode)->childPointers[index];
+      currentNode = (void*) getChildPointer(currentNode, index);
       modBy = divBy;
       divBy /= 8;
       index = (mortonIndex % modBy) / divBy;
@@ -413,6 +449,92 @@ bool DAG::isSet(unsigned int x, unsigned int y, unsigned int z)
    index = mortonIndex % modBy;
    return isLeafSet((uint64_t*)currentNode, index);
 }
+
+
+void* DAG::getChildPointer(void* node, unsigned int index)
+{
+   void** pointer = (void**)node;
+   pointer++;
+   for (unsigned int i = 0; i < index; i++)
+   {
+      if (isChildSet(node, i))
+      {
+         pointer++;
+      }
+   }
+
+   cout << "Getting childpointer " << index << " for node " << node << " = " << *pointer << endl;
+   return *pointer;  
+}
+
+
+void DAG::printLevels() 
+{
+   // LEVEL 0
+   void* node = levels[0];
+   void** pointer = (void**)node;
+   unsigned int childCount = 0;
+   cout << "Level 0:" << endl;
+
+   cout << node << " (";
+   printMask(node);
+   cout << "): ";
+
+   for (unsigned int i = 0; i < 8; i++)
+   {
+      if (isChildSet(node, i))
+      {
+         pointer++;
+         cout << *pointer << " ";
+         childCount++;
+      }
+   }
+   cout << endl << endl;
+
+   // LEVEL 1
+   node = levels[1];
+   pointer = (void**)node;
+   cout << "Level 1:" << endl;
+
+   cout << node << " (";
+   printMask(node);
+   cout << "): ";
+   for (unsigned int i = 0; i < 8; i++)
+   {
+      if (isChildSet(node, i))
+      {
+         pointer++;
+         cout << *pointer << " ";
+         childCount++;
+      }
+   }
+   cout << endl << endl;
+
+   // for (int i = 0; i < childCount; i++)
+   // {
+      
+   // }
+
+}
+
+void DAG::printMask(void* node)
+{
+   uint64_t mask = *((uint64_t*)node);
+   for (unsigned int i = 0; i < 8; i++)
+   {
+      if (isChildSet(node,i))
+      {
+         cout << "1";
+      }
+      else
+      {
+         cout << "0";
+      }
+   }
+
+   cout << " " << mask;
+}
+
 
 
 /**
@@ -433,9 +555,12 @@ bool DAG::isLeafSet(uint64_t* node, unsigned int i)
  *
  * Tested: 
  */
-bool DAG::isChildSet(SVONode *node, unsigned int i)
+bool DAG::isChildSet(void* node, unsigned int i)
 {
-   return node->childPointers[i] != NULL;
+   uint64_t toAnd = 1L << i;
+   uint64_t mask = *((uint64_t*) node);
+   //cout << "\t\t(" << mask <<  " & " << toAnd << ") = " << (mask | toAnd) << endl;
+   return (mask & toAnd) != 0;
 }
 
 
@@ -470,9 +595,18 @@ void DAG::writeImages()
 }
 
 
-
-
-
+unsigned int DAG::getNumChildren(void* node)
+{
+   uint64_t mask = *((uint64_t*)node);
+   unsigned int count = 0;
+   for (int i = 0; i < 8; ++i)
+   {
+      uint64_t toOr = 1 << i;
+      if (toOr | mask)
+         count++;
+   }
+   return count;
+}
 
 
 

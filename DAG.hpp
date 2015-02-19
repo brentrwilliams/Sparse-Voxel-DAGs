@@ -30,17 +30,23 @@ class DAG
       ~DAG();
       void build(const std::vector<Triangle> triangles);
       bool isSet(unsigned int x, unsigned int y, unsigned int z);
+      void* getChildPointer(void* node, unsigned int index);
       bool isLeafSet(uint64_t* node, unsigned int i);
-      bool isChildSet(SVONode *node, unsigned int i);
+      bool isChildSet(void* node, unsigned int i);
       void writeImages();
+      void printLevels();
+      unsigned int getNumChildren(void* node);
+      void printMask(void* node);
 
       BoundingBox boundingBox;
       unsigned int numLevels;
       unsigned long size; // Total number of voxels if the SVO was full
       unsigned int dimension; // Number of voxels for one side of the cube
       float voxelWidth; // The length of one voxel in world space
-      SVONode* root;
+      //SVONode* root;
+      void* root;
       void** levels;
+      unsigned int * sizeAtLevel; // Number of uint64_t's a level takes up
       
 };
 
