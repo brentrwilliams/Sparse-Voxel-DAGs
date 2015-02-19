@@ -37,6 +37,10 @@ class DAG
       void printLevels();
       unsigned int getNumChildren(void* node);
       void printMask(void* node);
+      bool isSetSVO(unsigned int x, unsigned int y, unsigned int z);
+      bool isSVOChildSet(SVONode *node, unsigned int i);
+      void writeSVOImages();
+      void printSVOLevels();
 
       BoundingBox boundingBox;
       unsigned int numLevels;
@@ -45,8 +49,10 @@ class DAG
       float voxelWidth; // The length of one voxel in world space
       //SVONode* root;
       void* root;
+      void* svoRoot;
       void** levels;
-      unsigned int * sizeAtLevel; // Number of uint64_t's a level takes up
+      void** newLevels; //SVO levels
+      unsigned int * sizeAtLevel; // Number nodes at a level
       
 };
 

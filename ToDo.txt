@@ -1,4 +1,5 @@
 To Do:
+- Finish writing Compacted SVO print function in the DAG.cpp
 - Debug why the output of the DAG is not as expected
    - Look into the traversal function and verify it will work with the DAG
    - Verify again the compacted SVO
