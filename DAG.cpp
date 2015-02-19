@@ -522,12 +522,42 @@ void DAG::printLevels()
       pointer++;
       node = (void*)pointer;
    }
+   cout << endl << endl;
 }
 
 void DAG::printSVOLevels()
 {
-   cout << "Compacted SVO:" << endl;
+   unsigned int levelIndex;
+   SVONode* nodes;
+   cout << "Compacted SVO:" << endl << endl;
 
+   for (levelIndex = 0; levelIndex < numLevels-2; levelIndex++)
+   {
+      cout << "Level " << levelIndex << ":" << endl;
+      nodes = (SVONode*) newLevels[levelIndex];
+      for (unsigned int i = 0; i < sizeAtLevel[levelIndex]; i++)
+      {
+         cout << i << ": " << &nodes[i] << " (";
+         printSVOMask(&nodes[i]);
+         cout << "): ";
+         for (unsigned int j = 0; j < 8; j++)
+         {
+            if (isSVOChildSet(&nodes[i], j))
+            {
+               cout << nodes[i].childPointers[j] << " ";
+            }
+         }
+         cout << endl;
+      }
+      cout << endl;
+   }
+
+   cout << "Level " << levelIndex << ":" << endl;
+   uint64_t* leafs = (uint64_t*)newLevels[levelIndex];
+   for (unsigned int i = 0; i < sizeAtLevel[levelIndex]; i++)
+   {
+      cout << i << ": " << &leafs[i] << " = " << leafs[i] << endl;
+   }
 }
 
 
@@ -550,6 +580,21 @@ void DAG::printMask(void* node)
    cout << " " << mask;
 }
 
+
+void DAG::printSVOMask(SVONode* node)
+{
+   for (unsigned int i = 0; i < 8; i++)
+   {
+      if (isSVOChildSet(node,i))
+      {
+         cout << "1";
+      }
+      else
+      {
+         cout << "0";
+      }
+   }
+}
 
 
 /**

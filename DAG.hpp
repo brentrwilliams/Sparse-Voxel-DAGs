@@ -37,6 +37,7 @@ class DAG
       void printLevels();
       unsigned int getNumChildren(void* node);
       void printMask(void* node);
+      void printSVOMask(SVONode* node);
       bool isSetSVO(unsigned int x, unsigned int y, unsigned int z);
       bool isSVOChildSet(SVONode *node, unsigned int i);
       void writeSVOImages();

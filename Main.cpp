@@ -30,7 +30,8 @@ int main(int argc, char const *argv[])
    if (argc == 3)
    {
       dag.printLevels();
-      dag.writeImages();
+      dag.printSVOLevels();
+      //dag.writeImages();
       //dag.writeSVOImages();
    }
    return 0;
