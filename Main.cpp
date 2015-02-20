@@ -31,7 +31,7 @@ int main(int argc, char const *argv[])
    {
       dag.printLevels();
       dag.printSVOLevels();
-      //dag.writeImages();
+      dag.writeImages();
       //dag.writeSVOImages();
    }
    return 0;

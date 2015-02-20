@@ -324,12 +324,12 @@ void DAG::build(const std::vector<Triangle> triangles)
       {
          if ( ((SVONode*) newLevels[currentLevelIndex])[i].childPointers[j] != NULL)
          {
+            uint64_t toOr = 1 << j;
             // It is the same pointer as in the SVONodes because we are using the same leaf nodes
             *currPtr = (uint64_t*) ((SVONode*) newLevels[currentLevelIndex])[i].childPointers[j];
-            mask |= 1;
+            mask |= toOr;
             currPtr++;
          }
-         mask <<= 1;
       }
       *maskPtr = mask;
    }
