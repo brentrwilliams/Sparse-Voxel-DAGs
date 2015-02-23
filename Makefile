@@ -10,8 +10,20 @@ all: Main
 
 test: Main
 
-Main: Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o DAG.o Node.o Voxels.o MortonCode.o SVONode.o DAGNode.o Image.o Makefile
-	g++ -o main Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o DAG.o Node.o Voxels.o MortonCode.o SVONode.o DAGNode.o Image.o $(GCC_OPTS)
+Main: Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o DAG.o Node.o Voxels.o MortonCode.o SVONode.o DAGNode.o Image.o Raytracer.o Ray.o PhongMaterial.o AABB.o Makefile
+	g++ -o main Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o DAG.o Node.o Voxels.o MortonCode.o SVONode.o DAGNode.o Image.o Raytracer.o Ray.o PhongMaterial.o AABB.o $(GCC_OPTS)
+
+AABB.o: AABB.cpp AABB.hpp
+	g++ -c AABB.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+
+Ray.o: Ray.cpp Ray.hpp
+	g++ -c Ray.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+
+PhongMaterial.o: PhongMaterial.cpp PhongMaterial.hpp
+	g++ -c PhongMaterial.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+
+Raytracer.o: Raytracer.cpp Raytracer.hpp
+	g++ -c Raytracer.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
 
 SVONode.o: SVONode.cpp SVONode.hpp
 	g++ -c SVONode.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)

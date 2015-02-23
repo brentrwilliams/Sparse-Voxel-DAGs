@@ -15,15 +15,20 @@
 #include "SparseVoxelOctree.hpp"
 #include "SVONode.hpp"
 #include "Image.hpp"
+#include "Traceable.hpp"
+#include "Ray.hpp"
+#include "AABB.hpp"
+#include "MortonCode.hpp"
 #include <algorithm>
 #include <unordered_map>
 
 #include <vector>
 #include <stdint.h>
+#include <cfloat>
 
 #define SET_8_BITS 255
 
-class DAG 
+class DAG : public Traceable
 {
    public:
       DAG(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles);
@@ -42,6 +47,8 @@ class DAG
       bool isSVOChildSet(SVONode *node, unsigned int i);
       void writeSVOImages();
       void printSVOLevels();
+      bool intersect(const Ray& ray, float& t);
+      bool intersect(const Ray& ray, float& t, void* node, unsigned int level, AABB aabb);
 
       BoundingBox boundingBox;
       unsigned int numLevels;

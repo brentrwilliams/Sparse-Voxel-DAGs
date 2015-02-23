@@ -1,10 +1,5 @@
 To Do:
-- Finish writing Compacted SVO print function in the DAG.cpp
-- Debug why the output of the DAG is not as expected
-   - Look into the traversal function and verify it will work with the DAG
-   - Verify again the compacted SVO
-   - Compare compacted SVO to DAG
-- Work on raytracer
+- Debug raytracer
 
 - Fix Github readme.md to point to new blog for progress
 - Make function to write/read SVO to/from disk for faster iteration
@@ -20,12 +15,10 @@ DAG Implementation
    - Do one more pass to convert whole tree into DAG
 
 Notes:
-- I have Validated that the number of updates for the leafs is what is to be expected
-- I have validated that the parents of the leafs have been updated correctly
-- I have validated that the each level is being consolidated and updated
-- I have found out that I CANNOT cast a pointer to a class or a struct of a DAG node because the compiler will NOT guarantee that the memory layout will be continuous
+- 
 
 Debugging Ideas:
-- Traverse the whole tree just to see if it will segfault
-- Compare the values in the levels array against what I am getting when traversing
-- Just try ray casting against it and see what I get
+- 
+
+Performance Oportunities
+- Leaf node intersection

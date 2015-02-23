@@ -19,20 +19,15 @@ int main(int argc, char const *argv[])
    unsigned int numLevels = atoi(argv[2]);
    objFile.centerMesh();
 
-   //SparseVoxelOctree svo(numLevels, objFile.getBoundingBox(), objFile.getTriangles());
-   
-   // if (argc == 3)
-   // {
-   //    svo.writeImages();
-   // }
-
    DAG dag(numLevels, objFile.getBoundingBox(), objFile.getTriangles());
    if (argc == 3)
    {
-      dag.printLevels();
-      dag.printSVOLevels();
       dag.writeImages();
-      //dag.writeSVOImages();
    }
+
+   Raytracer raytracer(500,500, &dag);
+   raytracer.trace();
+   raytracer.writeImage("images/raytraced/image.tga");
+
    return 0;
 }

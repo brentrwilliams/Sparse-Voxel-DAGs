@@ -16,5 +16,7 @@
 #include "SparseVoxelOctree.hpp"
 #include "SVONode.hpp"
 #include "DAG.hpp"
+#include "Raytracer.hpp"
+#include "MortonCode.hpp"
 
 #endif

@@ -39,9 +39,9 @@ DAG::~DAG()
 
 void DAG::build(const std::vector<Triangle> triangles)
 {
-   SparseVoxelOctree svo(numLevels, boundingBox, triangles);
+   SparseVoxelOctree* svoPtr = new SparseVoxelOctree(numLevels, boundingBox, triangles);
+   SparseVoxelOctree svo = *svoPtr;
    svoRoot = svo.root;
-   //void** newLevels = new void*[numLevels-1]; // has the -1 because the last two levels are uint64's 
    unsigned int* newLevelSizes = new unsigned int[numLevels-1]();
    unsigned int newLevelIndex = numLevels-2;
 
@@ -654,6 +654,11 @@ void DAG::writeImages()
    }
 }
 
+/**
+ * Writes the voxel data to tga files where the file name is the z axis voxel number.
+ *
+ * Tested: 2/20/2015
+ */
 void DAG::writeSVOImages()
 {
    unsigned int i, j, k;
@@ -691,6 +696,115 @@ unsigned int DAG::getNumChildren(void* node)
    }
    return count;
 }
+
+
+/**
+ * Returns whether the ray provided intersects the DAG and t the distance along the ray
+ *
+ * Tested: 
+ */
+bool DAG::intersect(const Ray& ray, float& t)
+{
+   glm::vec3 mins(boundingBox.mins.x, boundingBox.mins.y, boundingBox.mins.z);
+   glm::vec3 maxs(boundingBox.maxs.x, boundingBox.maxs.y, boundingBox.maxs.z);
+   AABB aabb(mins, maxs);
+   return intersect(ray, t, root, 0, aabb);
+}
+
+/**
+ * Resursive intersection method that returns whether the ray provided intersects the DAG and t the
+ * distance along the ray.
+ *
+ * Tested: 
+ */
+bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AABB aabb)
+{
+   // Child values by index based on morton encoding
+   glm::vec3 childOffsets[8] = { 
+      glm::vec3(0, 0, 0),
+      glm::vec3(1, 0, 0),
+      glm::vec3(0, 1, 0),
+      glm::vec3(1, 1, 0),
+      glm::vec3(0, 0, 1),
+      glm::vec3(1, 0, 1),
+      glm::vec3(0, 1, 1),
+      glm::vec3(1, 1, 1) };
+
+
+   glm::vec3 mins = aabb.mins;
+   glm::vec3 maxs = aabb.maxs;
+
+   // node is not a leaf node
+   if (level < numLevels-2)
+   {
+      // If the parent node is hit
+      if (aabb.intersect(ray,t))
+      {
+         float newDim = (maxs.x - mins.x) / 2.0f;
+         bool isHit = false;
+         t = FLT_MAX;
+         
+         for (int i = 0; i < 8; i++)
+         {
+            if (isChildSet(node, i))
+            {
+               glm::vec3 newMins(mins + (childOffsets[i] * newDim));
+               glm::vec3 newMaxs(newMins.x + newDim, newMins.y + newDim, newMins.z + newDim);
+               AABB newAABB(newMins, newMaxs);
+               float newT;
+               bool newHit = intersect(ray, newT, getChildPointer(node,i), level-1, newAABB);
+               
+               if (newHit && newT < t)
+                  t = newT;
+               isHit = isHit || newHit;
+            }  
+         }
+
+         return isHit;
+      }
+      // If the parent node is not hit
+      else
+      {
+         return false;
+      }
+   }
+   // node is a leaf node
+   else
+   {
+      float newDim = (maxs.x - mins.x) / 4.0f;
+      t = FLT_MAX;
+      bool isHit = false;
+
+      // Go through each of the 64 child nodes stored in the given leaf
+      for (unsigned int i = 0; i < 64; i++)
+      {
+         // If the leaf is not empty
+         if (isLeafSet((uint64_t*)node, i))
+         {
+            unsigned int x, y, z;
+            mortonCodeToXYZ((uint32_t)i, &x, &y, &z, 2);
+            glm::vec3 offset((float)x,(float)y,(float)z);
+            glm::vec3 newMins(mins + (offset * newDim));
+            glm::vec3 newMaxs(newMins.x + newDim, newMins.y + newDim, newMins.z + newDim);
+            AABB newAABB(newMins, newMaxs);
+            float newT;
+            bool newHit = newAABB.intersect(ray,newT);
+
+            if (newHit && newT < t)
+               t = newT;
+            isHit = isHit || newHit;
+         }
+      }
+      return isHit;
+   }
+}
+
+
+
+
+
+
+
 
 
 
