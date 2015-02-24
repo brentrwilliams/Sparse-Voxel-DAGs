@@ -33,8 +33,8 @@ void Raytracer::trace()
          float t = 0.0f;
 
          // Orthographic Projection
-         vec3 position(float(x) - halfWidth, float(y) - halfHeight, -1000.0f);
-         vec3 direction(0, 0, 1);
+         vec3 position(float(x) - halfWidth, float(y) - halfHeight, 1000.0f);
+         vec3 direction(0, 0, -1);
          Ray ray(position, direction);
 
          if (traceable->intersect(ray, t))
@@ -43,7 +43,8 @@ void Raytracer::trace()
             //glm::vec3 normal = sphere.getNormal(hitPosition);
             glm::vec3 normal = glm::vec3(0.0f,0.0f,1.0f);
 
-            vec3 color = phongMat.calculateSurfaceColor(ray, hitPosition, normal);
+            //vec3 color = phongMat.calculateSurfaceColor(ray, hitPosition, normal);
+            vec3 color(1,1,1);
             image.addColor(x,y, color);
          }
          else

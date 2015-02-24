@@ -29,6 +29,7 @@ class AABB
       bool intersect(const Ray& ray, float& t);
       bool contains(const glm::vec3& val);
       bool inRange(float val, float min, float max);
+      void print() const;
 };
 
 

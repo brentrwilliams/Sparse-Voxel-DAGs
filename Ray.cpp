@@ -21,3 +21,9 @@ glm::vec3 Ray::at(float t) const
 {
    return position + (direction * t);
 }
+
+void Ray::print() const
+{
+   std::cout << "position <" << position.x << ", " << position.y << ", " << position.z << ">  ";
+   std::cout << "direction <" << direction.x << ", " << direction.y << ", " << direction.z << ">" << std::endl;
+}

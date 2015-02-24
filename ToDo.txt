@@ -1,5 +1,8 @@
 To Do:
 - Debug raytracer
+   - Test axis AABB intersect code
+   - Find out where it is returning false
+   - Stop after one or two levels and see if it works
 
 - Fix Github readme.md to point to new blog for progress
 - Make function to write/read SVO to/from disk for faster iteration

@@ -29,6 +29,10 @@ bool AABB::inRange(float val, float min, float max)
 
 bool AABB::intersect(const Ray& ray, float& t)
 {
+   cout << "AABB: ";
+   print();
+   cout << "Ray: ";
+   ray.print();
    // If the ray starts inside the box, or ends inside
    if (contains(ray.position))
       return true ; 
@@ -39,11 +43,20 @@ bool AABB::intersect(const Ray& ray, float& t)
    // LARGEST t is the only one we need to test if it's on the face.
    for (int i = 0 ; i < 3 ; i++)
    {
-      if(ray.direction[i] > 0) // CULL BACK FACE
+      if (ray.direction[i] == 0)
+         tVals[i] = 0;
+      else if(ray.direction[i] > 0) // CULL BACK FACE
          tVals[i] = ( mins[i] - ray.position[i] ) / ray.direction[i] ;
       else
          tVals[i] = ( maxs[i] - ray.position[i] ) / ray.direction[i] ;
    }
+
+   cout << "tVals: ";
+   for (int i = 0; i < 3; ++i)
+   {
+      cout << "(" << i << ": " << tVals[i] << ")  ";
+   }
+   cout << endl;
 
    // Get the max index
    float maxValue = tVals[0];
@@ -76,3 +89,9 @@ bool AABB::intersect(const Ray& ray, float& t)
    return false ; // the ray did not hit the box.
 }
 
+
+void AABB::print() const
+{
+   cout << "mins <" << mins.x << ", " << mins.y << ", " << mins.z << ">  ";
+   cout << "maxs <" << maxs.x << ", " << maxs.y << ", " << maxs.z << ">" << endl; 
+}
