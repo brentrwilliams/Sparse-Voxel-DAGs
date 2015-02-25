@@ -708,7 +708,7 @@ bool DAG::intersect(const Ray& ray, float& t)
    glm::vec3 mins(boundingBox.mins.x, boundingBox.mins.y, boundingBox.mins.z);
    glm::vec3 maxs(boundingBox.maxs.x, boundingBox.maxs.y, boundingBox.maxs.z);
    AABB aabb(mins, maxs);
-   return intersect(ray, t, root, 3, aabb);
+   return intersect(ray, t, root, 0, aabb);
 }
 
 /**
@@ -734,12 +734,16 @@ bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AA
    glm::vec3 mins = aabb.mins;
    glm::vec3 maxs = aabb.maxs;
 
+   //cout << "\tTraversing level " << level << endl;
+
+
    // node is not a leaf node
    if (level < numLevels-2)
    {
       // If the parent node is hit
       if (aabb.intersect(ray,t))
       {
+         //cout << "\tNode hit." << endl;
          float newDim = (maxs.x - mins.x) / 2.0f;
          bool isHit = false;
          t = FLT_MAX;
@@ -748,11 +752,18 @@ bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AA
          {
             if (isChildSet(node, i))
             {
+               //cout << "\tChild " << i << " is set." << endl;
                glm::vec3 newMins(mins + (childOffsets[i] * newDim));
                glm::vec3 newMaxs(newMins.x + newDim, newMins.y + newDim, newMins.z + newDim);
                AABB newAABB(newMins, newMaxs);
+               
+               //cout << "\tNew AABB: ";
+               //newAABB.print();
+               //cout <<  "\tIntersecting with child..." << endl << endl;
+               
                float newT;
-               bool newHit = intersect(ray, newT, getChildPointer(node,i), level-1, newAABB);
+               bool newHit = intersect(ray, newT, getChildPointer(node,i), level+1, newAABB);
+               //cout << "\n\tChild " << i << " hit: " << newHit << endl;
                
                if (newHit && newT < t)
                   t = newT;
@@ -768,41 +779,42 @@ bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AA
          return false;
       }
    }
-   else
-   {
-      bool retVal = aabb.intersect(ray,t);
-      cout << retVal << endl << endl;
-      return retVal;
-   }
-   // // node is a leaf node
    // else
    // {
-   //    float newDim = (maxs.x - mins.x) / 4.0f;
-   //    t = FLT_MAX;
-   //    bool isHit = false;
-
-   //    // Go through each of the 64 child nodes stored in the given leaf
-   //    for (unsigned int i = 0; i < 64; i++)
-   //    {
-   //       // If the leaf is not empty
-   //       if (isLeafSet((uint64_t*)node, i))
-   //       {
-   //          unsigned int x, y, z;
-   //          mortonCodeToXYZ((uint32_t)i, &x, &y, &z, 2);
-   //          glm::vec3 offset((float)x,(float)y,(float)z);
-   //          glm::vec3 newMins(mins + (offset * newDim));
-   //          glm::vec3 newMaxs(newMins.x + newDim, newMins.y + newDim, newMins.z + newDim);
-   //          AABB newAABB(newMins, newMaxs);
-   //          float newT;
-   //          bool newHit = newAABB.intersect(ray,newT);
-
-   //          if (newHit && newT < t)
-   //             t = newT;
-   //          isHit = isHit || newHit;
-   //       }
-   //    }
-   //    return isHit;
+   //    bool retVal = aabb.intersect(ray,t);
+   //    cout << "\tAt leaf level" << endl;
+   //    cout << "\tHit leaf:" << retVal << endl << endl;
+   //    return retVal;
    // }
+   // node is a leaf node
+   else
+   {
+      float newDim = (maxs.x - mins.x) / 4.0f;
+      t = FLT_MAX;
+      bool isHit = false;
+
+      // Go through each of the 64 child nodes stored in the given leaf
+      for (unsigned int i = 0; i < 64; i++)
+      {
+         // If the leaf is not empty
+         if (isLeafSet((uint64_t*)node, i))
+         {
+            unsigned int x, y, z;
+            mortonCodeToXYZ((uint32_t)i, &x, &y, &z, 2);
+            glm::vec3 offset((float)x,(float)y,(float)z);
+            glm::vec3 newMins(mins + (offset * newDim));
+            glm::vec3 newMaxs(newMins.x + newDim, newMins.y + newDim, newMins.z + newDim);
+            AABB newAABB(newMins, newMaxs);
+            float newT;
+            bool newHit = newAABB.intersect(ray,newT);
+
+            if (newHit && newT < t)
+               t = newT;
+            isHit = isHit || newHit;
+         }
+      }
+      return isHit;
+   }
 }
 
 

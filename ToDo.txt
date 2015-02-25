@@ -18,7 +18,8 @@ DAG Implementation
    - Do one more pass to convert whole tree into DAG
 
 Notes:
-- 
+- To render bunny with decent shape run: 
+   ./main bunny.obj 6 ccm > test.out
 
 Debugging Ideas:
 - 

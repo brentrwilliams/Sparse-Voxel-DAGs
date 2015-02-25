@@ -25,7 +25,7 @@ int main(int argc, char const *argv[])
       dag.writeImages();
    }
 
-   Raytracer raytracer(500,500, &dag);
+   Raytracer raytracer(200,200, &dag);
    raytracer.trace();
    raytracer.writeImage("images/raytraced/image.tga");
 
