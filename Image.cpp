@@ -146,6 +146,8 @@ void Image::writeTGA(const char *filename, unsigned int divisor)
    fputc(24,fp);                        
    fputc(0,fp);
    
+   capColors();
+
    //Write Data
    for (y = 0; y < height; y++)
    {
@@ -191,6 +193,24 @@ void Image::scaleColors()
          r[index] /= colorMax;
          g[index] /= colorMax;
          b[index] /= colorMax;
+      }
+   }
+}
+
+void Image::capColors()
+{
+   int i, j;
+   for (i = 0; i < width; i++)
+   {
+      for (j = 0; j < height; j++)
+      {
+         unsigned int index = index2D(i,j);
+         if (r[index] > 1.0f)
+            r[index] = 1.0f;
+         if (g[index] > 1.0f)
+            g[index] = 1.0f;
+         if (b[index] > 1.0f)
+            b[index] = 1.0f;
       }
    }
 }

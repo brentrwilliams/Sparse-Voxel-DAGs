@@ -27,15 +27,19 @@ bool AABB::inRange(float val, float min, float max)
    return val >= min && val <= max;
 }
 
-bool AABB::intersect(const Ray& ray, float& t)
+bool AABB::intersect(const Ray& ray, float& t, glm::vec3& normal)
 {
+   float normalDirection[3] = {1.0f,1.0f,1.0f};
+   normal = glm::vec3(0.0f,0.0f,0.0f);
    //cout << "AABB: ";
    //print();
    //cout << "Ray: ";
    //ray.print();
    // If the ray starts inside the box, or ends inside
    if (contains(ray.position))
-      return true ; 
+   {
+      return false; 
+   }
 
    // the algorithm says, find 3 t's,
    glm::vec3 tVals;
@@ -44,11 +48,25 @@ bool AABB::intersect(const Ray& ray, float& t)
    for (int i = 0 ; i < 3 ; i++)
    {
       if (ray.direction[i] == 0)
-         tVals[i] = 0;
+      {
+         tVals[i] = -FLT_MAX;
+      }
       else if(ray.direction[i] > 0) // CULL BACK FACE
-         tVals[i] = ( mins[i] - ray.position[i] ) / ray.direction[i] ;
+      {
+         tVals[i] = ( mins[i] - ray.position[i] ) / ray.direction[i];
+         
+         // If the ray direction is positive, it will hit the more negative AABB side which makes 
+         // the normal point in the negative direction
+         normalDirection[i] = -1.0f; 
+      }
       else
-         tVals[i] = ( maxs[i] - ray.position[i] ) / ray.direction[i] ;
+      {
+         tVals[i] = ( maxs[i] - ray.position[i] ) / ray.direction[i];
+
+         // If the ray direction is positive, it will hit the more positive AABB side which makes 
+         // the normal point in the positive direction
+         normalDirection[i] = 1.0f; 
+      }
    }
 
    // cout << "tVals: ";
@@ -74,6 +92,7 @@ bool AABB::intersect(const Ray& ray, float& t)
    }
 
    t = maxValue;
+   normal[maxIndex] = normalDirection[maxIndex];
 
    if (tVals[maxIndex] > 0.0f)
    {

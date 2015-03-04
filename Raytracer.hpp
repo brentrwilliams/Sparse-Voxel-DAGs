@@ -13,6 +13,7 @@
 #include "Image.hpp"
 #include "PhongMaterial.hpp"
 #include "Traceable.hpp"
+#include "Camera.hpp"
 
 class Raytracer
 {

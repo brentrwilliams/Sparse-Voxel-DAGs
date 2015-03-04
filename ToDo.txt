@@ -1,8 +1,6 @@
 To Do:
-- Debug raytracer
-   - Test axis AABB intersect code
-   - Find out where it is returning false
-   - Stop after one or two levels and see if it works
+- Write voxel cache (voxelization to a certain level stored as tga's so that if it has already been voxelized at that level I can just read in the cache)
+   - This will HEAVILY speed up development
 
 - Fix Github readme.md to point to new blog for progress
 - Make function to write/read SVO to/from disk for faster iteration

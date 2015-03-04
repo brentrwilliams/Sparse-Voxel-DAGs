@@ -48,6 +48,7 @@ class Image
       void readTGA(const char *filename);
       void writeTGA(const char *filename, unsigned int divisor = 1);
       void scaleColors();
+      void capColors();
       vec3 getColor(int x, int y);   
       void setColor(int x, int y, float newR, float newG, float newB);
       void setColor(int x, int y, const glm::vec3& color);

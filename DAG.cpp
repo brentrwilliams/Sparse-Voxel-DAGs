@@ -703,12 +703,12 @@ unsigned int DAG::getNumChildren(void* node)
  *
  * Tested: 
  */
-bool DAG::intersect(const Ray& ray, float& t)
+bool DAG::intersect(const Ray& ray, float& t, glm::vec3& normal)
 {
    glm::vec3 mins(boundingBox.mins.x, boundingBox.mins.y, boundingBox.mins.z);
    glm::vec3 maxs(boundingBox.maxs.x, boundingBox.maxs.y, boundingBox.maxs.z);
    AABB aabb(mins, maxs);
-   return intersect(ray, t, root, 0, aabb);
+   return intersect(ray, t, root, 0, aabb, normal);
 }
 
 /**
@@ -717,7 +717,7 @@ bool DAG::intersect(const Ray& ray, float& t)
  *
  * Tested: 
  */
-bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AABB aabb)
+bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AABB aabb, glm::vec3& normal)
 {
    // Child values by index based on morton encoding
    glm::vec3 childOffsets[8] = { 
@@ -733,6 +733,7 @@ bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AA
 
    glm::vec3 mins = aabb.mins;
    glm::vec3 maxs = aabb.maxs;
+   glm::vec3 uselessNormal;
 
    //cout << "\tTraversing level " << level << endl;
 
@@ -741,7 +742,7 @@ bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AA
    if (level < numLevels-2)
    {
       // If the parent node is hit
-      if (aabb.intersect(ray,t))
+      if (aabb.intersect(ray,t,uselessNormal))
       {
          //cout << "\tNode hit." << endl;
          float newDim = (maxs.x - mins.x) / 2.0f;
@@ -762,7 +763,7 @@ bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AA
                //cout <<  "\tIntersecting with child..." << endl << endl;
                
                float newT;
-               bool newHit = intersect(ray, newT, getChildPointer(node,i), level+1, newAABB);
+               bool newHit = intersect(ray, newT, getChildPointer(node,i), level+1, newAABB, normal);
                //cout << "\n\tChild " << i << " hit: " << newHit << endl;
                
                if (newHit && newT < t)
@@ -806,10 +807,14 @@ bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AA
             glm::vec3 newMaxs(newMins.x + newDim, newMins.y + newDim, newMins.z + newDim);
             AABB newAABB(newMins, newMaxs);
             float newT;
-            bool newHit = newAABB.intersect(ray,newT);
+            glm::vec3 tempNormal;
+            bool newHit = newAABB.intersect(ray,newT,tempNormal);
 
             if (newHit && newT < t)
+            {
                t = newT;
+               normal = tempNormal;
+            }
             isHit = isHit || newHit;
          }
       }

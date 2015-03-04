@@ -21,7 +21,8 @@ PhongMaterial::~PhongMaterial()
 
 glm::vec3 PhongMaterial::calculateSurfaceColor(Ray ray, glm::vec3 hitPosition, glm::vec3 n)
 {  
-   glm::vec3 lightPosition(500, 500, -500);
+   glm::vec3 finalColor;
+   glm::vec3 lightPosition(-500, 500, 500);
    glm::vec3 lc(1.0,1.0,1.0); // Light color
    glm::vec3 l = glm::normalize(lightPosition - hitPosition);
    glm::vec3 v = ray.direction;
@@ -38,5 +39,37 @@ glm::vec3 PhongMaterial::calculateSurfaceColor(Ray ray, glm::vec3 hitPosition, g
    float vDotR = max(glm::dot(v,r), 0.0f);
    glm::vec3 specularComponent = ks * pow(vDotR, ns) * lc;
 
-   return ambientComponent + diffuseComponent + specularComponent;
+   finalColor = ambientComponent + diffuseComponent + specularComponent;
+
+   // if (finalColor.x < 0.25 || finalColor.y < 0.25 || finalColor.z < 0.25)
+   // {
+   //    cout << "\n\tn = <" << n.x << ", " << n.y << ", " << n.z << ">" << endl;
+   //    cout << "\tl = <" << l.x << ", " << l.y << ", " << l.z << ">" << endl;
+   //    cout << "\tnDotL = " << nDotL << endl;
+
+   //    cout << "\tv = <" << v.x << ", " << v.y << ", " << v.z << ">" << endl;
+   //    cout << "\tr = <" << r.x << ", " << r.y << ", " << r.z << ">" << endl;
+   //    cout << "\tvDotR = " << vDotR << endl;
+   // }
+   return finalColor;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
