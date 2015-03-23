@@ -10,7 +10,7 @@
 /**
  * Instantiates and initializes the voxel data to be all empty (i.e. 0).
  */
-Voxels::Voxels(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles)
+Voxels::Voxels(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles, std::string meshFilePath)
  : data(0), 
    boundingBox(boundingBoxVal),
    levels(levelsVal),
@@ -37,8 +37,21 @@ Voxels::Voxels(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, 
    
    std::cout << "Number of 64bit ints allocated: " << dataSize << "\n";
    std::cout << "sizeof(uint64_t) " << sizeof(uint64_t) << "\n";
-   
-   build(triangles);
+
+   string fileName = getFileNameFromPath(meshFilePath);
+   std::cout << "FILENAME: " << fileName << endl;
+
+   if (!cacheExists(fileName))
+   {
+      std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  NO VOXEL CACHE... VOXELIZING NOW  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << endl;
+      build(triangles);
+      writeVoxelCache(fileName);
+   }
+   else
+   {
+      std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  FOUND VOXEL CACHE... READING IN VOXELIZATION  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << endl;
+      build(fileName);
+   }
 }
 
 /**
@@ -144,7 +157,7 @@ unsigned long Voxels::getSize() const
 }
 
 /**
- * Builds the volume of voxels 
+ * Builds the volume of voxels from triangles
  */
 void Voxels::build(const std::vector<Triangle> triangles)
 {
@@ -155,6 +168,40 @@ void Voxels::build(const std::vector<Triangle> triangles)
       fprintf(stderr, "%.2f\n", (((float)i)/triangles.size()) * 100.0f);
    }
 }
+
+
+/**
+ * Builds the volume of voxels from cache
+ */
+void Voxels::build(std::string fileName)
+{
+   unsigned int i, j, k;
+
+   for (k = 0; k < dimension; k++)
+   {  
+      //cout << "Witing image " << k << endl;
+      char filePath[1000];
+      sprintf(filePath, "./voxelCache/%s/%d/%04d.tga",fileName.c_str(),levels,k);
+      Image image(dimension,dimension);
+      image.readTGA(filePath);
+      for (j = 0; j < dimension; j++)
+      {
+         for (i = 0; i < dimension; i++)
+         {
+            glm::vec3 color = image.getColor(i,j);
+            if (color.x > 0)
+            {
+               set(i,j,k);
+            }
+            // if (isSet(i,j,k))
+            // {
+            //    image.setColor(i,j, 1.0f,1.0f,1.0f);
+            // }
+         }
+      }
+   }
+}
+
 
 /**
  * Voxelizes the given triangle into the volume 
@@ -308,4 +355,110 @@ void Voxels::writeImages()
       image.writeTGA((fileName));
    }
 }
+
+bool Voxels::cacheExists(std::string fileName)
+{
+   struct stat sb;
+   std::string parentFolderPath = "./voxelCache/";
+   parentFolderPath += fileName + "/";
+   std::ostringstream strm;
+   strm << levels;
+   std::string levelFolderName = strm.str();
+   std::string fullPath = parentFolderPath + levelFolderName;
+   
+   return stat(fullPath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode);
+}
+
+
+/**
+ * Writes the voxel cache to tga files where the file name is the z axis voxel number.
+ *
+ *
+ * Tested: 3-22-2015
+ */
+void Voxels::writeVoxelCache(std::string fileName)
+{
+   unsigned int i, j, k;
+
+   char meshFolderPath[1000];
+   sprintf(meshFolderPath, "./voxelCache/%s",fileName.c_str());
+   struct stat st1;  
+
+   // If the folder doesn not already exist, create it
+   if (stat(meshFolderPath, &st1) == -1) {
+      mkdir(meshFolderPath, 0777);
+   } 
+
+   char parentFolderPath[1000];
+   sprintf(parentFolderPath, "./voxelCache/%s/%d",fileName.c_str(),levels);
+   struct stat st2;
+
+   // If the folder doesn not already exist, create it
+   if (stat(parentFolderPath, &st2) == -1) {
+      mkdir(parentFolderPath, 0777);
+   }
+
+   for (k = 0; k < dimension; k++)
+   {  
+      cout << "Witing image " << k << endl;
+      Image image(dimension,dimension);
+      for (j = 0; j < dimension; j++)
+      {
+         for (i = 0; i < dimension; i++)
+         {
+            if (isSet(i,j,k))
+            {
+               image.setColor(i,j, 1.0f,1.0f,1.0f);
+            }
+         }
+      }
+
+      char filePath[1000];
+      sprintf(filePath, "./voxelCache/%s/%d/%04d.tga",fileName.c_str(),levels,k);
+      image.writeTGA((filePath));
+   }
+}
+
+
+
+std::string Voxels::getFileNameFromPath(string filePath)
+{
+   string filename = filePath;
+   // Remove directory if present.
+   // Do this before extension removal incase directory has a period character.
+   const size_t last_slash_idx = filename.find_last_of("\\/");
+   if (std::string::npos != last_slash_idx)
+   {
+       filename.erase(0, last_slash_idx + 1);
+   }
+
+   // Remove extension if present.
+   const size_t period_idx = filename.rfind('.');
+   if (std::string::npos != period_idx)
+   {
+       filename.erase(period_idx);
+   }
+   return filename;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

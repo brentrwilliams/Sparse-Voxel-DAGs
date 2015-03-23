@@ -14,12 +14,12 @@ int main(int argc, char const *argv[])
       exit(1);
    }
    
-   std::string fileName(argv[1]);
-   OBJFile objFile(fileName);
+   std::string filePath(argv[1]);
+   OBJFile objFile(filePath);
    unsigned int numLevels = atoi(argv[2]);
    objFile.centerMesh();
 
-   DAG dag(numLevels, objFile.getBoundingBox(), objFile.getTriangles());
+   DAG dag(numLevels, objFile.getBoundingBox(), objFile.getTriangles(), filePath);
    if (argc == 3)
    {
       dag.writeImages();

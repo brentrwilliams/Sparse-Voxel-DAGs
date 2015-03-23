@@ -20,6 +20,8 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "BoundingBox.hpp"
 #include "Triangle.hpp"
@@ -45,14 +47,18 @@ class Voxels
       void set(unsigned int x, unsigned int y, unsigned int z);
       bool isSet(unsigned int x, unsigned int y, unsigned int z);
       void build(const std::vector<Triangle> triangles);
+      void build(std::string meshFilePath);
       void voxelizeTriangle(const Triangle& triangle);
       unsigned int countSetVoxels();
       void printBinary();
       void writeImages();
+      bool cacheExists(std::string fileName);
+      void writeVoxelCache(std::string fileName);
+      std::string getFileNameFromPath(std::string fileName);
       
    //Will be
    //public:
-      Voxels(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles);
+      Voxels(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles, std::string meshFilePath);
       ~Voxels();
       uint64_t& operator[](unsigned int i);
       

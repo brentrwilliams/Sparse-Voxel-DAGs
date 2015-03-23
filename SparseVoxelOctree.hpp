@@ -18,6 +18,7 @@
 
 #include <vector>
 #include <stdint.h>
+#include <string>
 
 #define SET_8_BITS 255
 
@@ -26,9 +27,9 @@ class SparseVoxelOctree
    private:
       //Fix later
    public:
-      SparseVoxelOctree(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles);
+      SparseVoxelOctree(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles, std::string meshFilePath);
       ~SparseVoxelOctree();
-      void build(const std::vector<Triangle> triangles);
+      void build(const std::vector<Triangle> triangles, std::string meshFilePath);
       void setVoxel(unsigned int x, unsigned int y, unsigned int z, uint64_t* activeNodes, uint64_t* nodes);
       void voxelizeTriangle(const Triangle& triangle, uint64_t* activeNodes, uint64_t* nodes);
       bool isSet(unsigned int x, unsigned int y, unsigned int z);

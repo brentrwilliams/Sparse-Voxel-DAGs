@@ -6,7 +6,7 @@
 
 #include "DAG.hpp"
 
-DAG::DAG(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles)
+DAG::DAG(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles, std::string meshFilePath)
 : boundingBox(boundingBoxVal),
    numLevels(levelsVal),
    size(pow(8, levelsVal)), 
@@ -25,7 +25,7 @@ DAG::DAG(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const 
    newLevels = new void*[numLevels-1]; // has the -1 because the last two levels are uint64's 
    boundingBox.square();
    voxelWidth = (boundingBox.maxs.x - boundingBox.mins.x) / dimension;
-   build(triangles);
+   build(triangles, meshFilePath);
 }
 
 DAG::~DAG()
@@ -37,9 +37,9 @@ DAG::~DAG()
  * Tested: 
  */
 
-void DAG::build(const std::vector<Triangle> triangles)
+void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
 {
-   SparseVoxelOctree* svoPtr = new SparseVoxelOctree(numLevels, boundingBox, triangles);
+   SparseVoxelOctree* svoPtr = new SparseVoxelOctree(numLevels, boundingBox, triangles, meshFilePath);
    SparseVoxelOctree svo = *svoPtr;
    svoRoot = svo.root;
    unsigned int* newLevelSizes = new unsigned int[numLevels-1]();

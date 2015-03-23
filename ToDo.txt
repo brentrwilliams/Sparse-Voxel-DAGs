@@ -1,4 +1,5 @@
 To Do:
+- Fix voxel cache to differentiate between different obj files caches
 - Write voxel cache (voxelization to a certain level stored as tga's so that if it has already been voxelized at that level I can just read in the cache)
    - This will HEAVILY speed up development
 
@@ -17,7 +18,7 @@ DAG Implementation
 
 Notes:
 - To render bunny with decent shape run: 
-   ./main bunny.obj 6 ccm > test.out
+   ./main bunny.obj 6 > test.out
 
 Debugging Ideas:
 - 

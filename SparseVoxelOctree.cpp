@@ -9,7 +9,7 @@
 /**
  * Instantiates and initializes the SVO.
  */
-SparseVoxelOctree::SparseVoxelOctree(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles)
+SparseVoxelOctree::SparseVoxelOctree(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles, std::string meshFilePath)
  : boundingBox(boundingBoxVal),
    numLevels(levelsVal),
    size(pow(8, levelsVal)), 
@@ -26,7 +26,7 @@ SparseVoxelOctree::SparseVoxelOctree(const unsigned int levelsVal, const Boundin
    boundingBox.square();
    voxelWidth = (boundingBox.maxs.x - boundingBox.mins.x) / dimension;
    levels = new void*[numLevels-1]; // has the -1 because the last two levels are uint64's 
-   build(triangles);
+   build(triangles,meshFilePath);
 }
 
 /**
@@ -42,9 +42,9 @@ SparseVoxelOctree::~SparseVoxelOctree()
  *
  * Tested: 2-16-2014 
  */
-void SparseVoxelOctree::build(const std::vector<Triangle> triangles)
+void SparseVoxelOctree::build(const std::vector<Triangle> triangles, std::string meshFilePath)
 {
-   Voxels* leafVoxels = new Voxels(numLevels, boundingBox, triangles);
+   Voxels* leafVoxels = new Voxels(numLevels, boundingBox, triangles, meshFilePath);
    uint64_t* leafVoxelData = leafVoxels->data;
    unsigned int numLeafs = leafVoxels->dataSize;
    

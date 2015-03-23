@@ -25,15 +25,16 @@
 #include <vector>
 #include <stdint.h>
 #include <cfloat>
+#include <string>
 
 #define SET_8_BITS 255
 
 class DAG : public Traceable
 {
    public:
-      DAG(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles);
+      DAG(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles, std::string meshFilePath);
       ~DAG();
-      void build(const std::vector<Triangle> triangles);
+      void build(const std::vector<Triangle> triangles, std::string meshFilePath);
       bool isSet(unsigned int x, unsigned int y, unsigned int z);
       void* getChildPointer(void* node, unsigned int index);
       bool isLeafSet(uint64_t* node, unsigned int i);
