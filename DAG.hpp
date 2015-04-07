@@ -36,7 +36,7 @@ class DAG : public Traceable
       ~DAG();
       void build(const std::vector<Triangle> triangles, std::string meshFilePath);
       bool isSet(unsigned int x, unsigned int y, unsigned int z);
-      void* getChildPointer(void* node, unsigned int index);
+      void* getChildPointer(void* node, unsigned int index, unsigned int level);
       bool isLeafSet(uint64_t* node, unsigned int i);
       bool isChildSet(void* node, unsigned int i);
       void writeImages();

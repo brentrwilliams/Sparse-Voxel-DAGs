@@ -311,7 +311,7 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
    unsigned int currentLevelIndex = numLevels-3;
    cout << "Working at level above the leafs: " << currentLevelIndex << endl;
    uint64_t* maskPtr;
-   uint64_t** currPtr = (uint64_t**) levels[currentLevelIndex];
+   uint64_t* currPtr = (uint64_t*) levels[currentLevelIndex];
    unordered_map<void*, void*>* leafParentMapping = new unordered_map<void*, void*>;
    for (unsigned int i = 0; i < newLevelSizes[currentLevelIndex]; i++)
    {
@@ -329,7 +329,15 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
             //***
             // Add the pointer to the leaf to the new DAG node and update the mask
             // It is the same pointer as in the SVONodes because we are using the same leaf nodes
-            *currPtr = (uint64_t*) ((SVONode*) newLevels[currentLevelIndex])[i].childPointers[j];
+            uint64_t* pointerToChild = (uint64_t*) ((SVONode*) newLevels[currentLevelIndex])[i].childPointers[j];
+            uint64_t* pointerToStartOfChildsLevel = (uint64_t*)levels[numLevels-2];
+            // *currPtr = pointerToChild;
+            cout << "pointer to child = " << pointerToChild << endl;
+            cout << "pointer to start of child's level = " << pointerToStartOfChildsLevel << endl;
+            uint64_t offset = (uint64_t)(pointerToChild - pointerToStartOfChildsLevel);
+            cout << "\toffset = " << offset << endl << endl;
+            *currPtr = offset;
+
             mask |= toOr;
             currPtr++;
          }
@@ -351,7 +359,7 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
       prevLevelsMap = currLevelsMap;
       currLevelsMap = new unordered_map<void*, void*>;
 
-      currPtr = (uint64_t**) levels[levelIndex];
+      currPtr = (uint64_t*) levels[levelIndex];
 
       for (unsigned int i = 0; i < newLevelSizes[levelIndex]; i++)
       {
@@ -371,8 +379,17 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
 
                //***
                // Set the child pointer to the pointer of the new DAG/leaf node that is found from the mapping of the previous level
-               *currPtr = (uint64_t*) prevLevelsMap->at( ((SVONode*) newLevels[levelIndex])[i].childPointers[j] );
-               cout << "\tReturned value: " << *currPtr << endl;
+               // *currPtr = (uint64_t*) prevLevelsMap->at( ((SVONode*) newLevels[levelIndex])[i].childPointers[j] );
+               uint64_t* pointerToChild = (uint64_t*) prevLevelsMap->at( ((SVONode*) newLevels[levelIndex])[i].childPointers[j] );
+               uint64_t* pointerToStartOfChildsLevel = (uint64_t*) levels[levelIndex+1];
+               // *currPtr = pointerToChild;
+               cout << "\tReturned value: " << pointerToChild<< endl;
+               cout << "pointer to child = " << pointerToChild << endl;
+               cout << "pointer to start of child's level = " << pointerToStartOfChildsLevel << endl;
+               uint64_t offset = (uint64_t)(pointerToChild - pointerToStartOfChildsLevel);
+               cout << "\toffset = " << offset << endl << endl;
+               *currPtr = offset;
+               
                mask |= toOr;
                cerr << "1";
                currPtr++;
@@ -393,7 +410,7 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
    cout << "\nsizeAtLevel: " << endl;
    for (unsigned int i = 0; i < numLevels-1; ++i)
    {
-      cout << i << ": " << sizeAtLevel[i] << endl;
+      cout << i << " (" << levels[i] << ")" << ": " << sizeAtLevel[i] << endl;
    }
    cout << endl;
 }
@@ -443,10 +460,10 @@ bool DAG::isSVOChildSet(SVONode *node, unsigned int i)
 bool DAG::isSet(unsigned int x, unsigned int y, unsigned int z)
 {
    void* currentNode = levels[0];
-   int currentLevel = numLevels;
-   unsigned int mortonIndex = mortonCode(x,y,z,currentLevel);
+   int currentLevel = 0;
+   unsigned int mortonIndex = mortonCode(x,y,z,numLevels);
    
-   int divBy = pow(8, currentLevel-1);
+   int divBy = pow(8, numLevels-1);
    int modBy = divBy;
    int index = mortonIndex / divBy;
    
@@ -456,19 +473,20 @@ bool DAG::isSet(unsigned int x, unsigned int y, unsigned int z)
       {
          return false;
       }
-      currentNode = (void*) getChildPointer(currentNode, index);
+      currentNode = (void*) getChildPointer(currentNode, index, currentLevel);
       modBy = divBy;
       divBy /= 8;
       index = (mortonIndex % modBy) / divBy;
+      currentLevel++;
    }
    index = mortonIndex % modBy;
    return isLeafSet((uint64_t*)currentNode, index);
 }
 
 
-void* DAG::getChildPointer(void* node, unsigned int index)
+void* DAG::getChildPointer(void* node, unsigned int index, unsigned int level)
 {
-   void** pointer = (void**)node;
+   uint64_t** pointer = (uint64_t**)node;
    pointer++;
    for (unsigned int i = 0; i < index; i++)
    {
@@ -481,7 +499,10 @@ void* DAG::getChildPointer(void* node, unsigned int index)
    //cout << "Getting childpointer " << index << " for node " << node << " = " << *pointer << endl;
 
    //*** Update to calculate based on offset
-   return *pointer;  
+   uint64_t offset = (uint64_t) *pointer;
+   uint64_t* pointerToStartOfChildsLevel = (uint64_t*)levels[level+1];
+   return (void*) (pointerToStartOfChildsLevel + offset);
+   //return *pointer;  
 }
 
 
@@ -772,7 +793,7 @@ bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AA
                //cout <<  "\tIntersecting with child..." << endl << endl;
                
                float newT;
-               bool newHit = intersect(ray, newT, getChildPointer(node,i), level+1, newAABB, normal);
+               bool newHit = intersect(ray, newT, getChildPointer(node,i, level), level+1, newAABB, normal);
                //cout << "\n\tChild " << i << " hit: " << newHit << endl;
                
                if (newHit && newT < t)
