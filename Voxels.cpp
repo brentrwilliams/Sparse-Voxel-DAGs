@@ -120,6 +120,7 @@ void Voxels::set(unsigned int x, unsigned int y, unsigned int z)
    //The mask used to set the voxel
    uint64_t toOr = (1L << bitIndex);
    
+   #pragma omp atomic
    data[dataIndex] |= toOr; // sets the bitIndex bit 
 }
 
@@ -162,10 +163,22 @@ unsigned long Voxels::getSize() const
 void Voxels::build(const std::vector<Triangle> triangles)
 {
    unsigned int i;
+   unsigned int stepSize = triangles.size() / 100;
+   unsigned int progress = 0;
+   #pragma omp parallel for
    for (i = 0; i < triangles.size(); i++)
    {
       voxelizeTriangle(triangles[i]);
-      fprintf(stderr, "%.2f\n", (((float)i)/triangles.size()) * 100.0f);
+
+      #pragma omp atomic
+      progress += 1;
+
+      if (progress % (stepSize-1))
+      {
+         #pragma omp critical
+         fprintf(stderr, "%.2f\n", (((float)progress)/triangles.size()) * 100.0f);
+      }
+      
    }
 }
 

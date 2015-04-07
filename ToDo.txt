@@ -1,3 +1,8 @@
+Ideas:
+- Have offset for each node to be from start of level, not from root
+   - This will save space within each node and make implementation easier
+   - I DO NOT know if this will work with the scheme I had for figuring out which voxel we are talking about
+
 To Do:
 - Fix voxel cache to differentiate between different obj files caches
 - Write voxel cache (voxelization to a certain level stored as tga's so that if it has already been voxelized at that level I can just read in the cache)
@@ -25,3 +30,8 @@ Debugging Ideas:
 
 Performance Oportunities
 - Leaf node intersection
+
+Timing of Voxelization and Raytracing
+- bunny (~5k triangles)
+   - 7 levels: real  0m41.731s
+   - 8 levels: real  5m27.643s

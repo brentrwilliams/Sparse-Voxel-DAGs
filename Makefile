@@ -1,80 +1,75 @@
-NVCC=nvcc
-
-CUDA_INCLUDEPATH=/usr/local/cuda-5.0/include
-
-NVCC_OPTS=-O3 -arch=sm_20 -Xcompiler -Wall -Xcompiler -Wextra -m64
-
-GCC_OPTS= -Wall -Wextra -m64 -g -pg -O3
+CC=icpc
+OPTS= -Wall -Wextra -m64 -g -pg -O3 -openmp
 
 all: Main
 
 test: Main
 
 Main: Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o DAG.o Node.o Voxels.o MortonCode.o SVONode.o DAGNode.o Image.o Raytracer.o Ray.o PhongMaterial.o AABB.o Camera.o Makefile
-	g++ -o main Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o DAG.o Node.o Voxels.o MortonCode.o SVONode.o DAGNode.o Image.o Raytracer.o Ray.o PhongMaterial.o AABB.o Camera.o $(GCC_OPTS)
+	$(CC) -o main Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o DAG.o Node.o Voxels.o MortonCode.o SVONode.o DAGNode.o Image.o Raytracer.o Ray.o PhongMaterial.o AABB.o Camera.o $(OPTS)
 
 Camera.o: Camera.cpp Camera.hpp
-	g++ -c Camera.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(CC) -c Camera.cpp $(OPTS) 
 
 AABB.o: AABB.cpp AABB.hpp
-	g++ -c AABB.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(CC) -c AABB.cpp $(OPTS) 
 
 Ray.o: Ray.cpp Ray.hpp
-	g++ -c Ray.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(CC) -c Ray.cpp $(OPTS) 
 
 PhongMaterial.o: PhongMaterial.cpp PhongMaterial.hpp
-	g++ -c PhongMaterial.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(CC) -c PhongMaterial.cpp $(OPTS) 
 
 Raytracer.o: Raytracer.cpp Raytracer.hpp
-	g++ -c Raytracer.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(CC) -c Raytracer.cpp $(OPTS) 
 
 SVONode.o: SVONode.cpp SVONode.hpp
-	g++ -c SVONode.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(CC) -c SVONode.cpp $(OPTS) 
 
 DAGNode.o: DAGNode.cpp DAGNode.hpp
-	g++ -c DAGNode.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(CC) -c DAGNode.cpp $(OPTS) 
 
 MortonCode.o: MortonCode.cpp MortonCode.hpp
-	g++ -c MortonCode.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(CC) -c MortonCode.cpp $(OPTS) 
 
 Vec2.o: Vec2.cpp Vec2.hpp
-	g++ -c Vec2.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(CC) -c Vec2.cpp $(OPTS) 
 
 Vec3.o: Vec3.cpp Vec3.hpp
-	g++ -c Vec3.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(CC) -c Vec3.cpp $(OPTS) 
 
 Triangle.o: Triangle.cpp Triangle.hpp Vec3.hpp
-	g++ -c Triangle.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(CC) -c Triangle.cpp $(OPTS) 
 
 Face.o: Face.cpp Face.hpp
-	g++ -c Face.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(CC) -c Face.cpp $(OPTS) 
 
 OBJFile.o: OBJFile.cpp OBJFile.hpp Vec3.hpp Face.hpp Triangle.hpp BoundingBox.hpp
-	g++ -c OBJFile.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(CC) -c OBJFile.cpp $(OPTS) 
 
 Intersect.o: Intersect.cpp Intersect.hpp Vec3.hpp Triangle.hpp Vec2.hpp
-	g++ -c Intersect.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(CC) -c Intersect.cpp $(OPTS) 
 
 BoundingBox.o: BoundingBox.cpp BoundingBox.hpp Vec3.hpp
-	g++ -c BoundingBox.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(CC) -c BoundingBox.cpp $(OPTS) 
 
 SparseVoxelOctree.o: SparseVoxelOctree.cpp Intersect.hpp Vec3.hpp Triangle.hpp Vec2.hpp Voxels.hpp SVONode.hpp
-	g++ -c SparseVoxelOctree.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(CC) -c SparseVoxelOctree.cpp $(OPTS) 
 
 DAG.o: DAG.cpp SparseVoxelOctree.hpp Intersect.hpp Vec3.hpp Triangle.hpp Vec2.hpp Voxels.hpp
-	g++ -c DAG.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(CC) -c DAG.cpp $(OPTS) 
 
 Node.o: Node.cpp Node.hpp
-	g++ -c Node.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(CC) -c Node.cpp $(OPTS) 
 
 Voxels.o: Voxels.cpp Voxels.hpp 
-	g++ -c Voxels.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(CC) -c Voxels.cpp $(OPTS) 
 
 Image.o: Image.cpp Image.hpp 
-	g++ -c Image.cpp $(GCC_OPTS) -I $(CUDA_INCLUDEPATH)
+	$(CC) -c Image.cpp $(OPTS) 
 
 Main.o: Main.cpp Intersect.hpp
-	g++ -c Main.cpp $(GCC_OPTS)
+	$(CC) -c Main.cpp $(OPTS)
 
 cleanOs:
 	rm -f *.o

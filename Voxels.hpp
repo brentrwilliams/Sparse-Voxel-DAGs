@@ -23,6 +23,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+// OpenMP
+#include <omp.h>
+
 #include "BoundingBox.hpp"
 #include "Triangle.hpp"
 #include "Intersect.hpp"
