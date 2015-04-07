@@ -317,6 +317,7 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
    {
       uint64_t mask = 0;
       maskPtr = (uint64_t*) currPtr;
+      // Make a mapping from the address of the node of the compacted SVO to what the address is of the new DAG node
       leafParentMapping->insert( std::make_pair<void*,void*>( (void*) &((SVONode*) newLevels[currentLevelIndex])[i], (void*)maskPtr ) );
       cout << "Adding to Map: " << "( " <<  (void*) &((SVONode*) newLevels[currentLevelIndex])[i] << ", " << (void*)maskPtr << " )" << endl;
       currPtr++;
@@ -325,6 +326,8 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
          if ( ((SVONode*) newLevels[currentLevelIndex])[i].childPointers[j] != NULL)
          {
             uint64_t toOr = 1 << j;
+            //***
+            // Add the pointer to the leaf to the new DAG node and update the mask
             // It is the same pointer as in the SVONodes because we are using the same leaf nodes
             *currPtr = (uint64_t*) ((SVONode*) newLevels[currentLevelIndex])[i].childPointers[j];
             mask |= toOr;
@@ -342,7 +345,8 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
    {
       cout << "Working at level: " << levelIndex << endl;
       cerr << "Level " << levelIndex << endl;
-      // Create a new map to 
+      
+      // Update the maps releasing previous, setting previous to current, and creating a new current
       delete prevLevelsMap;
       prevLevelsMap = currLevelsMap;
       currLevelsMap = new unordered_map<void*, void*>;
@@ -364,6 +368,9 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
             {
                uint64_t toOr = 1 << j;
                cout << "Searching for[" << j << "]: " << ((SVONode*) newLevels[levelIndex])[i].childPointers[j] << endl;
+
+               //***
+               // Set the child pointer to the pointer of the new DAG/leaf node that is found from the mapping of the previous level
                *currPtr = (uint64_t*) prevLevelsMap->at( ((SVONode*) newLevels[levelIndex])[i].childPointers[j] );
                cout << "\tReturned value: " << *currPtr << endl;
                mask |= toOr;
@@ -472,6 +479,8 @@ void* DAG::getChildPointer(void* node, unsigned int index)
    }
 
    //cout << "Getting childpointer " << index << " for node " << node << " = " << *pointer << endl;
+
+   //*** Update to calculate based on offset
    return *pointer;  
 }
 
