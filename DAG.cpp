@@ -296,10 +296,10 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
          }
       }
 
-      // A level is made up of the pointers in the nodes and the masks of the nodes
-      levels[levelIndex] = (void*)malloc((pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * sizeof(uint64_t)));
-      cerr << levelIndex << ": " << ((pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * sizeof(uint64_t))) / 8 << " uint64_t's or void*'s" << endl;
-      sizeAtLevel[levelIndex] = newLevelSizes[levelIndex];//((pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * sizeof(uint64_t))) / 8;
+      // A level is made up of              the pointers in the nodes,     the masks of the nodes, and the space for the empty counts (the first 8 bits is for the mask and the next 56+64+64 bits is for the empty node counts)
+      levels[levelIndex] = (void*)malloc( (pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * 3 * sizeof(uint64_t)) );
+      cerr << levelIndex << ": " << ( (pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * 3 * sizeof(uint64_t)) ) / 8 << " uint64_t's or void*'s" << endl;
+      sizeAtLevel[levelIndex] = newLevelSizes[levelIndex];
    }
    cerr << levelIndex << " (leafs): " << numUniqueLeafs << " uint64_t's or void*'s" << endl << endl;
    sizeAtLevel[levelIndex] = numUniqueLeafs;
@@ -320,7 +320,10 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
       // Make a mapping from the address of the node of the compacted SVO to what the address is of the new DAG node
       leafParentMapping->insert( std::make_pair<void*,void*>( (void*) &((SVONode*) newLevels[currentLevelIndex])[i], (void*)maskPtr ) );
       cout << "Adding to Map: " << "( " <<  (void*) &((SVONode*) newLevels[currentLevelIndex])[i] << ", " << (void*)maskPtr << " )" << endl;
-      currPtr++;
+      
+      // Move 3 x 64bit sections down to get to where the child pointers should be
+      currPtr+=3;
+
       for (int j = 0; j < 8; j++)
       {
          if ( ((SVONode*) newLevels[currentLevelIndex])[i].childPointers[j] != NULL)
@@ -367,7 +370,9 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
          maskPtr = (uint64_t*) currPtr;
          currLevelsMap->insert( std::make_pair<void*,void*>( (void*) &((SVONode*) newLevels[levelIndex])[i], (void*)maskPtr ) );
          cout << "\tAdding to the map: ( " << &((SVONode*) newLevels[levelIndex])[i] << ", " << (void*)maskPtr << " )" << endl;
-         currPtr++;
+         
+         // Move 3 x 64bit sections down to get to where the child pointers should be
+         currPtr+=3;
          
          cerr << "\t";
          for (int j = 0; j < 8; j++)
@@ -487,7 +492,9 @@ bool DAG::isSet(unsigned int x, unsigned int y, unsigned int z)
 void* DAG::getChildPointer(void* node, unsigned int index, unsigned int level)
 {
    uint64_t** pointer = (uint64_t**)node;
-   pointer++;
+
+   // Move 3 x 64bit sections down to get to where the child pointers should be (mask + space for empty count = 3x64bits)
+   pointer+=3;
    for (unsigned int i = 0; i < index; i++)
    {
       if (isChildSet(node, i))
