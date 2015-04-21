@@ -1,25 +1,43 @@
-Ideas:
-- Have offset for each node to be from start of level, not from root
-   - This will save space within each node and make implementation easier
-   - I DO NOT know if this will work with the scheme I had for figuring out which voxel we are talking about
-
 To Do:
-- Fix voxel cache to differentiate between different obj files caches
-- Write voxel cache (voxelization to a certain level stored as tga's so that if it has already been voxelized at that level I can just read in the cache)
-   - This will HEAVILY speed up development
+- Create the Moxel Table (Material Voxel Table)
+   - Turn off voxel caching
+      - This is necessary to allow us to calculate per voxel normals from the triangles
+   - After voxelization calculate the number of filled voxels
+   - Allocate material info for each voxel 
+      - 1 x uint32_t for the material index 
+      - 3 x sizeof(float) for the normal
+   - Allocate and fill the material information array
+   - Loop through all the voxels starting at index 0 and calculate its normal
+      - For each triangle:
+         - Make a ray where:
+            - The eye is the center of the voxel
+            - The direction is the inverse normal of the triangle (i.e. the normal * -1.0f)
+         - Calculate ray-triangle intersection
+         - If it intersects:
+            - Check to see if the intersection is within the distance from the center of the voxel to one of its corners
+            - If it is, set the normal for that voxel as the normal of the triangle and break out of the triangle loop
+      - Set the material index
 
-- Fix Github readme.md to point to new blog for progress
-- Make function to write/read SVO to/from disk for faster iteration
+- Add to DAG Nodes the empty voxel counts
+   - Add 2 x uint64_t to each DAG Node and make sure it still works
+   - Calculate the number of empty voxels to the left of each node
+      - For each unique leaf node calculate its empty counts and put it in a map with the key as its memory address and its value ast the empty count
+      - For each level above the leafs
+         - For each node at that level
+            - For each node's children
+               - Calculate its empty count based on the empty count map of the previous level
+            - Save to the empty count area of the node the empty counts for the first seven children
+            - Make a map of the current level with the keys being the address of the current node and the values being the total empty count of all of its children for that node
 
-DAG Implementation
-- Implement DAG
-   - Build top N-10 levels from top down as an SVO
-   - For each leaf of those N-10 top levels:
-      - Build an SVO
-      - Convert SVO to a DAG
-         - Make sure the DAG copies everything into new memory so we can release all the SVO's memory
-      - Connect DAG to leaf of top N-10 levels
-   - Do one more pass to convert whole tree into DAG
+- Calculate the index in the Moxel Table while traversing
+   - Calculate what index it would be if we had data for all voxels (even the empty ones) by keeping a running indexSum where at each level
+      - ... TODO
+   - Calculate the number of nodes that are empty by keeping a running emptySum where...
+      - ... TODO
+   - moxelIndex = indexSum - emptySum
+
+
+
 
 Notes:
 - To render bunny with decent shape run: 
@@ -35,3 +53,19 @@ Timing of Voxelization and Raytracing
 - bunny (~5k triangles)
    - 7 levels: real  0m41.731s
    - 8 levels: real  5m27.643s
+
+
+Voxel Number Calculation (Binary Tree) in 
+- As you traverse the tree:
+   - Calculate what index it would be if we had data for all voxels (even the empty ones) by keeping a running indexSum where at each level
+      - If you go to a right child 
+         - indexSum += 2^(numLevels - currLevelNumber - 1)
+         - numLevels doesn't include the root
+         - The root is level 0, the roots children are level 1, ... the leafs are level numLevels
+   - Calculate the number of nodes that are empty by keeping a running emptySum where
+      - If you go to a right child:
+         - emptySum += emptyCount
+         - emptyCount is the number stored next to the mask
+- shadingIndex = indexSum - emptySum
+
+
