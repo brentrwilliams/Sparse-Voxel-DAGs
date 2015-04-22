@@ -418,6 +418,75 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
       cout << i << " (" << levels[i] << ")" << ": " << sizeAtLevel[i] << endl;
    }
    cout << endl;
+
+   
+   //*** Calculate and set the empty counts ***\\
+   cout << "Calculating empty counts" << endl << endl;
+
+   // For each unique leaf node calculate its empty counts and put it in a map with the key 
+   // as its memory address and its value as the empty count
+   uint64_t* leafNodes = (uint64_t*) levels[numLevels-2];
+   unordered_map<void*, unsigned int>* leafEmptyCountMap = new unordered_map<void*, unsigned int>;
+
+   cout << "Level " << numLevels-2 << " (leafs)" << endl;
+   for (unsigned int i = 0; i < sizeAtLevel[numLevels-2]; i++)
+   {
+      unsigned int emptyCount = getNumEmptyLeafNodes(leafNodes[i]);
+      leafEmptyCountMap->insert( std::make_pair<void*,unsigned int>( (void*) &(leafNodes[i]), emptyCount ) );
+      cout << "\t" << &(leafNodes[i]) << " => " << leafNodes[i] << " = " << emptyCount << endl;
+   }
+   cout << endl;
+
+   unordered_map<void*, unsigned int>* currLevelsEmptyMap = leafEmptyCountMap;
+   unordered_map<void*, unsigned int>* prevLevelsEmptyMap = NULL;
+   // for each level above the leafs
+   for (int levelIndex = numLevels-3; levelIndex >= 0; levelIndex--)
+   {
+      cout << "Level " << levelIndex << endl;
+      // Update the maps releasing previous, setting previous to current, and creating a new current
+      delete prevLevelsEmptyMap;
+      prevLevelsEmptyMap = currLevelsEmptyMap;
+      currLevelsEmptyMap = new unordered_map<void*, unsigned int>;
+
+      currPtr = (uint64_t*) levels[levelIndex];
+      uint64_t* pointerToStartOfChildsLevel = (uint64_t*)levels[levelIndex+1];
+
+      // for each node at that level
+      for (unsigned int i = 0; i < newLevelSizes[levelIndex]; i++)
+      {
+         uint64_t* maskPtr = currPtr;
+         unsigned int emptyCounts[8];
+         unsigned int emptyCountsSum = 0;
+         currPtr += 3;
+
+         // for each child node
+         for (int j = 0; j < 8; j++)
+         {
+            if (isChildSet((void*)maskPtr, j))
+            {
+               uint64_t offset = (uint64_t) *currPtr;;
+               uint64_t* childPointer = pointerToStartOfChildsLevel + offset;
+               emptyCounts[j] = prevLevelsEmptyMap->at((void*)childPointer);
+               cout << "\t[ " <<  (void*)childPointer << " ] = " << emptyCounts[j] << endl;
+               currPtr++;
+            }
+            else
+            {
+               uint64_t emptyBranchCount = 1;
+               unsigned int power = numLevels - levelIndex - 1;
+               for (unsigned int k = 0; k < power; k++)
+               {
+                  emptyBranchCount *= 8;
+               }
+               emptyCounts[j] = emptyBranchCount;
+            }
+            emptyCountsSum += emptyCounts[j];
+         }
+
+         currLevelsEmptyMap->insert( std::make_pair<void*,unsigned int>( (void*) (maskPtr), emptyCountsSum ) );
+      }
+   }
+
 }
 
 
@@ -732,6 +801,27 @@ unsigned int DAG::getNumChildren(void* node)
          count++;
    }
    return count;
+}
+
+
+/**
+ * Returns the number of empty leaf nodes
+ *
+ * Tested: 
+ */
+unsigned int DAG::getNumEmptyLeafNodes(uint64_t leafNode)
+{
+   unsigned int count = 0;
+   for (int i = 0; i < 64; i++)
+   {
+      uint64_t toAnd = 1L << i;
+      if (toAnd & leafNode)
+      {
+         count++;
+      }
+   }
+   
+   return 64 - count;
 }
 
 

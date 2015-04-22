@@ -1,9 +1,14 @@
+
+
+*** ARE THE LEAF-NODES OUT OF ORDER AND WILL THIS EFFECT THE EXPECTED RESULTS???
+*** FIX THE getNumEmptyLeafNodes FUNCTION
+
+
 To Do:
 
 - Add to DAG Nodes the empty voxel counts
-   - Add 2 x uint64_t to each DAG Node and make sure it still works
    - Calculate the number of empty voxels to the left of each node
-      - For each unique leaf node calculate its empty counts and put it in a map with the key as its memory address and its value ast the empty count
+      - For each unique leaf node calculate its empty counts and put it in a map with the key as its memory address and its value as the empty count
       - For each level above the leafs
          - For each node at that level
             - For each node's children
