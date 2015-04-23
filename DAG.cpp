@@ -455,8 +455,8 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
       for (unsigned int i = 0; i < newLevelSizes[levelIndex]; i++)
       {
          uint64_t* maskPtr = currPtr;
-         unsigned int emptyCounts[8];
-         unsigned int emptyCountsSum = 0;
+         uint64_t emptyCounts[8];
+         uint64_t emptyCountsSum = 0;
          currPtr += 3;
 
          // for each child node
@@ -479,12 +479,63 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
                   emptyBranchCount *= 8;
                }
                emptyCounts[j] = emptyBranchCount;
+               cout << "\t[                ] = " << emptyCounts[j] << endl;
             }
             emptyCountsSum += emptyCounts[j];
          }
 
+         // Setting the empty counts next to the mask
+         
+         // Set child 0 empty count
+         uint64_t* emptyCountPtr = maskPtr; 
+         uint64_t value = 0;
+         uint64_t toOr = emptyCounts[0] << 8;
+         value = value | toOr;
+
+         // Set child 1 empty count
+         toOr = emptyCounts[1] << (8+24); // 8 for mask, 24 for last empty count
+         value = value | toOr;
+
+         // Set child 2 empty count
+         // This overlaps 2 uint64_t's so must do extra operations to handle that
+         toOr = emptyCounts[2] << (8+24+24); // 8 for mask, 24 + 24 for last two empty counts
+         value = value | toOr;
+         *emptyCountPtr = *emptyCountPtr | value;
+         emptyCountPtr++;
+
+         value = 0;
+         toOr = emptyCounts[2] >> (8); // 8 for how much was saved in last uint64_t
+         value = value | toOr;
+
+         // Set child 3 empty count
+         toOr = emptyCounts[3] << (16); // 16 for the part of empty count 2
+         value = value | toOr;
+
+         // Set child 4 empty count
+         // This one exactly fill the uint64_t
+         toOr = emptyCounts[4] << (16 + 24); // 16 for the part of empty count 2, 24 for last empty count
+         value = value | toOr;
+
+         *emptyCountPtr = value;
+         emptyCountPtr++;
+         value = 0;
+
+         // Set child 5 empty count
+         toOr = emptyCounts[5] << (0);
+         value = value | toOr;
+
+         // Set child 6 empty count
+         toOr = emptyCounts[6] << (0 + 24); // 24 for last empty count
+         value = value | toOr;
+         *emptyCountPtr = value;
+
+         //END Setting the empty counts next to the mask
+
+         getEmptyCount((void*)maskPtr,0);
+         cout << endl;
          currLevelsEmptyMap->insert( std::make_pair<void*,unsigned int>( (void*) (maskPtr), emptyCountsSum ) );
       }
+      cout << endl;
    }
 
 }
@@ -809,9 +860,9 @@ unsigned int DAG::getNumChildren(void* node)
  *
  * Tested: 
  */
-unsigned int DAG::getNumEmptyLeafNodes(uint64_t leafNode)
+uint64_t DAG::getNumEmptyLeafNodes(uint64_t leafNode)
 {
-   unsigned int count = 0;
+   uint64_t count = 0;
    for (int i = 0; i < 64; i++)
    {
       uint64_t toAnd = 1L << i;
@@ -822,6 +873,67 @@ unsigned int DAG::getNumEmptyLeafNodes(uint64_t leafNode)
    }
    
    return 64 - count;
+}
+
+/**
+ * Returns the number of empty leaf nodes
+ *
+ * Tested: 
+ */
+uint64_t DAG::getEmptyCount(void* node, unsigned int index)
+{
+   uint64_t *emptyCountPtr = (uint64_t*)node;
+   uint64_t emptyCounts[7];
+   uint64_t mask24 = 16777215L;
+   uint64_t mask16 = 65535L;
+   uint64_t mask8 = 255L;
+   uint64_t value;
+   uint64_t sum = 0;
+
+   for (int i = 0; i < 7; ++i)
+   {
+      emptyCounts[i] = 0L;
+   }
+
+   // Get empty count 0
+   value = *emptyCountPtr;
+   emptyCounts[0] = mask24 & (value >> 8);
+
+   // Get empty count 1
+   emptyCounts[1] = mask24 & (value >> (8 + 24));
+
+   // Get empty count 2
+   emptyCounts[2] = mask8 & (value >> (8 + 24 + 24));
+   emptyCountPtr++;
+   value = *emptyCountPtr;
+   emptyCounts[2] = emptyCounts[2] | ((value & mask16) << 8);
+
+   // Get empty count 3
+   emptyCounts[3] = mask24 & (value >> (16));
+
+   // Get empty count 4
+   emptyCounts[4] = mask24 & (value >> (16 + 24));
+   emptyCountPtr++;
+   value = *emptyCountPtr;
+
+   // Get empty count 5
+   emptyCounts[5] = mask24 & (value >> (0));
+
+   // Get empty count 6
+   emptyCounts[6] = mask24 & (value >> (24));
+
+
+   for (int i = 0; i < 7; ++i)
+   {
+      cout << i << ": " << emptyCounts[i] << endl;
+   }
+
+   for (int i = 0; i < index; ++i)
+   {
+      sum += emptyCounts[i];
+   }
+   
+   return sum;
 }
 
 

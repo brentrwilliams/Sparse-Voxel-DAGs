@@ -1,12 +1,6 @@
-
-
-*** ARE THE LEAF-NODES OUT OF ORDER AND WILL THIS EFFECT THE EXPECTED RESULTS???
-*** FIX THE getNumEmptyLeafNodes FUNCTION
-
-
 To Do:
 
-- Add to DAG Nodes the empty voxel counts
+- Add to DAG Nodes the empty voxel counts   (DONE)
    - Calculate the number of empty voxels to the left of each node
       - For each unique leaf node calculate its empty counts and put it in a map with the key as its memory address and its value as the empty count
       - For each level above the leafs
@@ -33,12 +27,13 @@ To Do:
    - Allocate and fill the material information array
    - Loop through all the voxels starting at index 0 and calculate its normal
       - For each triangle:
-         - Make a ray where:
+         - Get the Normal
+         - Method 1: Make a ray where:
             - The eye is the center of the voxel
             - The direction is the inverse normal of the triangle (i.e. the normal * -1.0f)
-         - Calculate ray-triangle intersection
-         - If it intersects:
-            - Check to see if the intersection is within the distance from the center of the voxel to one of its corners
+            - Calculate ray-triangle intersection
+            - If it intersects:
+               - Check to see if the intersection is within the distance from the center of the voxel to one of its corners
             - If it is, set the normal for that voxel as the normal of the triangle and break out of the triangle loop
       - Set the material index
 

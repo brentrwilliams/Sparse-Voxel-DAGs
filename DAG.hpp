@@ -48,7 +48,8 @@ class DAG : public Traceable
       bool isSVOChildSet(SVONode *node, unsigned int i);
       void writeSVOImages();
       void printSVOLevels();
-      unsigned int getNumEmptyLeafNodes(uint64_t leafNode);
+      uint64_t getNumEmptyLeafNodes(uint64_t leafNode);
+      uint64_t getEmptyCount(void* node, unsigned int index);
       bool intersect(const Ray& ray, float& t, glm::vec3& normal);
       bool intersect(const Ray& ray, float& t, void* node, unsigned int level, AABB aabb, glm::vec3& normal);
 
