@@ -50,8 +50,10 @@ class DAG : public Traceable
       void printSVOLevels();
       uint64_t getNumEmptyLeafNodes(uint64_t leafNode);
       uint64_t getEmptyCount(void* node, unsigned int index);
-      bool intersect(const Ray& ray, float& t, glm::vec3& normal);
-      bool intersect(const Ray& ray, float& t, void* node, unsigned int level, AABB aabb, glm::vec3& normal);
+      uint64_t getLeafNodeEmptyCount(uint64_t leafNode, unsigned int index);
+      uint64_t getLevelIndexSum(unsigned int level, unsigned int index);
+      bool intersect(const Ray& ray, float& t, glm::vec3& normal, uint64_t& moxelIndex);
+      bool intersect(const Ray& ray, float& t, void* node, unsigned int level, AABB aabb, glm::vec3& normal, uint64_t& moxelIndex);
 
       BoundingBox boundingBox;
       unsigned int numLevels;

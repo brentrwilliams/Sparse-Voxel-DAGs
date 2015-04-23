@@ -27,7 +27,7 @@ bool AABB::inRange(float val, float min, float max)
    return val >= min && val <= max;
 }
 
-bool AABB::intersect(const Ray& ray, float& t, glm::vec3& normal)
+bool AABB::intersect(const Ray& ray, float& t, glm::vec3& normal, uint64_t moxelIndex)
 {
    float normalDirection[3] = {1.0f,1.0f,1.0f};
    normal = glm::vec3(0.0f,0.0f,0.0f);

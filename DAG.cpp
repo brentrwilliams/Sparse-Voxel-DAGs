@@ -923,10 +923,10 @@ uint64_t DAG::getEmptyCount(void* node, unsigned int index)
    emptyCounts[6] = mask24 & (value >> (24));
 
 
-   for (int i = 0; i < 7; ++i)
-   {
-      cout << i << ": " << emptyCounts[i] << endl;
-   }
+   // for (int i = 0; i < 7; ++i)
+   // {
+   //    cout << i << ": " << emptyCounts[i] << endl;
+   // }
 
    for (int i = 0; i < index; ++i)
    {
@@ -938,16 +938,52 @@ uint64_t DAG::getEmptyCount(void* node, unsigned int index)
 
 
 /**
+ * Returns the number of empty leaf nodes
+ *
+ * Tested: 
+ */
+uint64_t DAG::getLeafNodeEmptyCount(uint64_t leafNode, unsigned int index)
+{
+   uint64_t count = 0;
+   for (int i = 0; i < index; i++)
+   {
+      uint64_t toAnd = 1L << i;
+      if (!(toAnd & leafNode))
+      {
+         count++;
+      }
+   }
+   
+   return count;
+}
+
+uint64_t DAG::getLevelIndexSum(unsigned int level, unsigned int index)
+{
+   uint64_t sum = 0;
+   uint64_t perChild = 1;
+
+   for (unsigned int i = 0; i < (numLevels - level - 1); i++)
+   {
+      perChild *= 8;
+   }
+   sum = perChild * index;
+
+   return sum;
+}
+
+
+
+/**
  * Returns whether the ray provided intersects the DAG and t the distance along the ray
  *
  * Tested: 
  */
-bool DAG::intersect(const Ray& ray, float& t, glm::vec3& normal)
+bool DAG::intersect(const Ray& ray, float& t, glm::vec3& normal, uint64_t& moxelIndex)
 {
    glm::vec3 mins(boundingBox.mins.x, boundingBox.mins.y, boundingBox.mins.z);
    glm::vec3 maxs(boundingBox.maxs.x, boundingBox.maxs.y, boundingBox.maxs.z);
    AABB aabb(mins, maxs);
-   return intersect(ray, t, root, 0, aabb, normal);
+   return intersect(ray, t, root, 0, aabb, normal, moxelIndex);
 }
 
 /**
@@ -956,7 +992,7 @@ bool DAG::intersect(const Ray& ray, float& t, glm::vec3& normal)
  *
  * Tested: 
  */
-bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AABB aabb, glm::vec3& normal)
+bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AABB aabb, glm::vec3& normal, uint64_t& moxelIndex)
 {
    // Child values by index based on morton encoding
    glm::vec3 childOffsets[8] = { 
@@ -973,6 +1009,7 @@ bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AA
    glm::vec3 mins = aabb.mins;
    glm::vec3 maxs = aabb.maxs;
    glm::vec3 uselessNormal;
+   uint64_t uselessMoxelIndex;
 
    //cout << "\tTraversing level " << level << endl;
 
@@ -981,14 +1018,14 @@ bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AA
    if (level < numLevels-2)
    {
       // If the parent node is hit
-      if (aabb.intersect(ray,t,uselessNormal))
+      if (aabb.intersect(ray,t,uselessNormal,uselessMoxelIndex))
       {
          //cout << "\tNode hit." << endl;
          float newDim = (maxs.x - mins.x) / 2.0f;
          bool isHit = false;
          t = FLT_MAX;
          
-         for (int i = 0; i < 8; i++)
+         for (unsigned int i = 0; i < 8; i++)
          {
             if (isChildSet(node, i))
             {
@@ -1001,12 +1038,20 @@ bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AA
                //newAABB.print();
                //cout <<  "\tIntersecting with child..." << endl << endl;
                
+               uint64_t emptyCount = getEmptyCount((void*)node,i);
+               uint64_t levelIndexSum = getLevelIndexSum(level,i);
+               uint64_t tempMoxelIndex = moxelIndex + levelIndexSum - emptyCount;
+
                float newT;
-               bool newHit = intersect(ray, newT, getChildPointer(node,i, level), level+1, newAABB, normal);
+               
+               bool newHit = intersect(ray, newT, getChildPointer(node,i, level), level+1, newAABB, normal, tempMoxelIndex);
                //cout << "\n\tChild " << i << " hit: " << newHit << endl;
                
                if (newHit && newT < t)
+               {
                   t = newT;
+                  moxelIndex = tempMoxelIndex;
+               }
                isHit = isHit || newHit;
             }  
          }
@@ -1019,13 +1064,6 @@ bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AA
          return false;
       }
    }
-   // else
-   // {
-   //    bool retVal = aabb.intersect(ray,t);
-   //    cout << "\tAt leaf level" << endl;
-   //    cout << "\tHit leaf:" << retVal << endl << endl;
-   //    return retVal;
-   // }
    // node is a leaf node
    else
    {
@@ -1047,12 +1085,17 @@ bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AA
             AABB newAABB(newMins, newMaxs);
             float newT;
             glm::vec3 tempNormal;
-            bool newHit = newAABB.intersect(ray,newT,tempNormal);
+            bool newHit = newAABB.intersect(ray,newT,tempNormal,uselessMoxelIndex);
+
+            uint64_t emptyCount = getLeafNodeEmptyCount( *((uint64_t*)node), i);
+            uint64_t levelIndexSum = i; // Beacause at the last 2 levels it is just the # to the left of it which in this case is the index within the uint64_t
+            uint64_t tempMoxelIndex = moxelIndex + levelIndexSum - emptyCount;
 
             if (newHit && newT < t)
             {
                t = newT;
                normal = tempNormal;
+               moxelIndex = tempMoxelIndex;
             }
             isHit = isHit || newHit;
          }

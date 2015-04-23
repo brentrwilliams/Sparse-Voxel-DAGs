@@ -22,7 +22,7 @@ using namespace std;
 class Traceable
 {
    public:
-      virtual bool intersect(const Ray& ray, float& t, glm::vec3& normal) = 0;
+      virtual bool intersect(const Ray& ray, float& t, glm::vec3& normal, uint64_t& moxelIndex) = 0;
 };
 
 

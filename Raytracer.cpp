@@ -67,12 +67,14 @@ void Raytracer::trace()
 
          glm::vec3 color;
          glm::vec3 normal;
+         uint64_t moxelIndex = 0;
 
-         if (traceable->intersect(ray, t, normal))
+         if (traceable->intersect(ray, t, normal, moxelIndex))
          {
             glm::vec3 hitPosition = ray.position + (t * ray.direction);
             color = phongMat.calculateSurfaceColor(ray, hitPosition, normal);
             //cout << "(" << x << ", " << y << ") => Full -> (" << color.x << ", " << color.y << ", " << color.z << ")" << " Normal -> (" << normal.x << ", " << normal.y << ", " << normal.z << ")  t = " << t << endl;
+            cout << "(" << x << ", " << y << ") => moxelIndex = " << moxelIndex << endl;
          }
          else
          {

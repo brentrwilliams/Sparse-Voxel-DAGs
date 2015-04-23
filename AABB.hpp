@@ -26,7 +26,7 @@ class AABB
       glm::vec3 maxs;
 
       AABB(const glm::vec3& mins, const glm::vec3& maxs);
-      bool intersect(const Ray& ray, float& t, glm::vec3& normal);
+      bool intersect(const Ray& ray, float& t, glm::vec3& normal, uint64_t moxelIndex);
       bool contains(const glm::vec3& val);
       bool inRange(float val, float min, float max);
       void print() const;

@@ -10,11 +10,15 @@ To Do:
             - Save to the empty count area of the node the empty counts for the first seven children
             - Make a map of the current level with the keys being the address of the current node and the values being the total empty count of all of its children for that node
 
-- Calculate the index in the Moxel Table while traversing
+- Calculate the index in the Moxel Table while traversing  (DONE as far as I can tell without testing)
    - Calculate what index it would be if we had data for all voxels (even the empty ones) by keeping a running indexSum where at each level
-      - ... TODO
+      - indexSum = (numLevels - currentLevel - 1) * index;
    - Calculate the number of nodes that are empty by keeping a running emptySum where...
-      - ... TODO
+      - For every node you traverse
+         - emptySum += getEmptyCount(allNodesToLeftOfIt)
+         - Which means get the empty counts for all the childrens indices are less than the current
+
+
    - moxelIndex = indexSum - emptySum
 
 - Create the Moxel Table (Material Voxel Table)
