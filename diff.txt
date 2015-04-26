@@ -1,0 +1,506 @@
+diff --git a/DAG.cpp b/DAG.cpp
+index 491c087..eb427c0 100644
+--- a/DAG.cpp
++++ b/DAG.cpp
+@@ -26,6 +26,9 @@ DAG::DAG(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const
+    boundingBox.square();
+    voxelWidth = (boundingBox.maxs.x - boundingBox.mins.x) / dimension;
+    build(triangles, meshFilePath);
++   numFilledVoxels = getNumFilledVoxels();
++   cout << "numFilledVoxels: " << numFilledVoxels << endl;
++   buildMoxelTable(triangles);
+ }
+ 
+ DAG::~DAG()
+@@ -540,6 +543,127 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
+ 
+ }
+ 
++/**
++ * Returns the number of filled
++ *
++ * Tested: 
++ */
++uint64_t DAG::getNumFilledVoxels()
++{
++   unsigned int x, y, z;
++   unsigned int count = 0;
++   for (uint32_t i = 0; i < size; i++)
++   {
++      if (isSet(i))
++      {
++         count++;
++      }
++   }
++   return count;
++}
++
++void DAG::buildMoxelTable(const std::vector<Triangle> triangles)
++{
++   unsigned int moxelTableAllocSize = sizeof(float) * 3 * numFilledVoxels; // Only space for normals
++   moxelTable = (void*) malloc(moxelTableAllocSize);
++   unsigned int x, y, z;
++   glm::vec3 boundingBoxMins(boundingBox.mins.x, boundingBoxMins.y, boundingBoxMins.z);
++   float halfVoxelWidth = 0.5f * voxelWidth;
++   float voxelRadius = sqrtf(2.0f) * halfVoxelWidth; // Length from center of voxel to any corner
++   float epsilon = voxelRadius * 0.01f;
++   float voxelRadiusPlusEpsilon = voxelRadius + epsilon;
++   float* moxelTablePointer = (float*) moxelTable;
++   unsigned int moxelIndex = 0;
++
++   boundingBox.print();
++   cout << "Creating moxel table for size " << size <<  "..." << endl;
++
++   for (uint32_t i = 0; i < size; i++)
++   {
++      mortonCodeToXYZ((uint32_t)i, &x, &y, &z, numLevels);
++      if (isSet(x,y,z))
++      {  
++         glm::vec3 voxelMins(boundingBox.mins.x + (x*voxelWidth), boundingBox.mins.y + (y*voxelWidth), boundingBox.mins.z + (z*voxelWidth) );
++         glm::vec3 voxelCenter(voxelMins.x + halfVoxelWidth, voxelMins.y + halfVoxelWidth, voxelMins.z + halfVoxelWidth);
++         glm::vec3 voxelMaxs(voxelMins.x + voxelWidth, voxelMins.y + voxelWidth, voxelMins.z + voxelWidth);
++         bool foundTriangle = false;
++         glm::vec3 normal;
++         float smallestDist = 1000000.0f;
++
++         for (unsigned int j = 0; j < triangles.size() && !foundTriangle; j++)
++         {
++            Triangle triangle = triangles[j];
++            glm::vec3 v0(triangle.v0.x,triangle.v0.y,triangle.v0.z);
++            glm::vec3 v1(triangle.v1.x,triangle.v1.y,triangle.v1.z);
++            glm::vec3 v2(triangle.v2.x,triangle.v2.y,triangle.v2.z);
++
++            // Calculate the normal of the triangle/plane
++            normal = glm::normalize( glm::cross(v0-v1, v0-v2) );
++            float distance = fabs( glm::dot( normal, (voxelCenter-v0) ) );
++
++            // DIST CALC TAKE 2
++
++            float a = normal.x;
++            float b = normal.y;
++            float c = normal.z;
++            float d = 0 - (a * v0.x) - (b * v0.y) - (c * v0.z);
++            float numerator = fabs( (a * voxelCenter.x) + (b * voxelCenter.y) + (c * voxelCenter.z) + d );
++            float denominator = sqrtf( (a*a) + (b*b) + (c*c) );
++            float distance2 = numerator / denominator;
++
++            // END DIST CALC TAKE 2            
++            
++            // Get the smallest distance
++            smallestDist = (distance2 < smallestDist) ? distance2 : smallestDist;
++
++            if (distance2 < voxelRadiusPlusEpsilon )
++            {
++               cout << "\tMoxelIndex: " << moxelIndex << endl;
++               cout << "\tIndex (" << i << ") => (" << x << ", " << y << ", " << z << ")" << endl;
++               cout << "\tVoxel Center: (" << voxelCenter.x << ", " << voxelCenter.y << ", " << voxelCenter.z << ")" << endl;
++               cout << "\tVoxel Mins: (" << voxelMins.x << ", " << voxelMins.y << ", " << voxelMins.z << ")" << endl;  
++               cout << "\tVoxel Maxs: (" << (voxelMins.x + voxelWidth) << ", " << (voxelMins.y + voxelWidth) << ", " << (voxelMins.z + voxelWidth) << ")" << endl;  
++               cout << "\tTriangle #: " << j << " => ";
++               triangle.print();
++               cout << "\tTriangle Normal: <" << normal.x << ", " << normal.y << ", " << normal.z << ">" << endl; 
++               cout << "\tVoxel Radius: " << voxelRadius << endl;
++               cout << "\tVoxel Radius + Epsilon: " << voxelRadiusPlusEpsilon << endl;
++               cout << "\tDistance: " << distance << endl;
++               cout << "\tDistance2 (one we are using): " << distance2 << endl;
++
++               cout << endl;
++               
++               foundTriangle = true;
++            }
++         }
++         if (foundTriangle == false)
++         {
++            cout << "### ERROR: Could not find triangle for moxel index " << moxelIndex << endl;
++            cout << "\tIndex (" << i << ") => (" << x << ", " << y << ", " << z << ")" << endl;
++            cout << "\tThe smallest distance found: " << smallestDist << endl;
++            cout << "\tVoxel Radius + Epsilon: " << voxelRadiusPlusEpsilon << endl;
++            cout << "\tMoxelIndex: " << moxelIndex << endl;
++            cout << "\tVoxel Center: (" << voxelCenter.x << ", " << voxelCenter.y << ", " << voxelCenter.z << ")" << endl;
++            cout << "\tVoxel Mins: (" << voxelMins.x << ", " << voxelMins.y << ", " << voxelMins.z << ")" << endl;  
++            cout << "\tVoxel Maxs: (" << (voxelMins.x + voxelWidth) << ", " << (voxelMins.y + voxelWidth) << ", " << (voxelMins.z + voxelWidth) << ")" << endl;  
++            cout << "\tDimension: " << dimension << endl; 
++            cout << "\tVoxelWidth: " << voxelWidth << endl; 
++
++            cout << endl;
++         }
++
++         *moxelTablePointer = (float) normal.x;
++         moxelTablePointer++;
++         *moxelTablePointer = (float) normal.y;
++         moxelTablePointer++;
++         *moxelTablePointer = (float) normal.z;
++         moxelTablePointer++;
++
++         moxelIndex++;
++      }
++   }
++}
++
+ 
+ /**
+  * Returns a boolean indicating whether the voxel, in the reduced SVO, at the given coordinate is 
+@@ -608,6 +732,32 @@ bool DAG::isSet(unsigned int x, unsigned int y, unsigned int z)
+    return isLeafSet((uint64_t*)currentNode, index);
+ }
+ 
++bool DAG::isSet(unsigned int mi)
++{
++   void* currentNode = levels[0];
++   int currentLevel = 0;
++   unsigned int mortonIndex = mi;
++   
++   int divBy = pow(8, numLevels-1);
++   int modBy = divBy;
++   int index = mortonIndex / divBy;
++   
++   while (divBy >= 64)
++   {
++      if (!isChildSet(currentNode, index)) 
++      {
++         return false;
++      }
++      currentNode = (void*) getChildPointer(currentNode, index, currentLevel);
++      modBy = divBy;
++      divBy /= 8;
++      index = (mortonIndex % modBy) / divBy;
++      currentLevel++;
++   }
++   index = mortonIndex % modBy;
++   return isLeafSet((uint64_t*)currentNode, index);
++}
++
+ 
+ void* DAG::getChildPointer(void* node, unsigned int index, unsigned int level)
+ {
+@@ -972,6 +1122,19 @@ uint64_t DAG::getLevelIndexSum(unsigned int level, unsigned int index)
+ }
+ 
+ 
++glm::vec3 DAG::getNormalFromMoxelTable(uint32_t index)
++{
++   float x, y, z;
++   float* moxelTablePointer = (float*)moxelTable;
++
++   x = moxelTablePointer[3 * index];
++   y = moxelTablePointer[(3 * index) + 1];
++   z = moxelTablePointer[(3 * index) + 2];
++
++   glm::vec3 normal(x,y,z);
++   return normal;
++}
++
+ 
+ /**
+  * Returns whether the ray provided intersects the DAG and t the distance along the ray
+diff --git a/DAG.hpp b/DAG.hpp
+index 35a3bed..e92d5d6 100644
+--- a/DAG.hpp
++++ b/DAG.hpp
+@@ -26,6 +26,7 @@
+ #include <stdint.h>
+ #include <cfloat>
+ #include <string>
++#include <math.h>
+ 
+ #define SET_8_BITS 255
+ 
+@@ -35,12 +36,15 @@ class DAG : public Traceable
+       DAG(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles, std::string meshFilePath);
+       ~DAG();
+       void build(const std::vector<Triangle> triangles, std::string meshFilePath);
++      void buildMoxelTable(const std::vector<Triangle> triangles);
+       bool isSet(unsigned int x, unsigned int y, unsigned int z);
++      bool isSet(unsigned int mi);
+       void* getChildPointer(void* node, unsigned int index, unsigned int level);
+       bool isLeafSet(uint64_t* node, unsigned int i);
+       bool isChildSet(void* node, unsigned int i);
+       void writeImages();
+       void printLevels();
++      uint64_t getNumFilledVoxels();
+       unsigned int getNumChildren(void* node);
+       void printMask(void* node);
+       void printSVOMask(SVONode* node);
+@@ -52,6 +56,7 @@ class DAG : public Traceable
+       uint64_t getEmptyCount(void* node, unsigned int index);
+       uint64_t getLeafNodeEmptyCount(uint64_t leafNode, unsigned int index);
+       uint64_t getLevelIndexSum(unsigned int level, unsigned int index);
++      glm::vec3 getNormalFromMoxelTable(uint32_t index);
+       bool intersect(const Ray& ray, float& t, glm::vec3& normal, uint64_t& moxelIndex);
+       bool intersect(const Ray& ray, float& t, void* node, unsigned int level, AABB aabb, glm::vec3& normal, uint64_t& moxelIndex);
+ 
+@@ -60,12 +65,14 @@ class DAG : public Traceable
+       unsigned long size; // Total number of voxels if the SVO was full
+       unsigned int dimension; // Number of voxels for one side of the cube
+       float voxelWidth; // The length of one voxel in world space
++      uint64_t numFilledVoxels;
+       //SVONode* root;
+       void* root;
+       void* svoRoot;
+       void** levels;
+       void** newLevels; //SVO levels
+       unsigned int * sizeAtLevel; // Number nodes at a level
++      void* moxelTable;
+       
+ };
+ 
+diff --git a/Main.cpp b/Main.cpp
+index c5a1ba8..20c1ccf 100644
+--- a/Main.cpp
++++ b/Main.cpp
+@@ -17,12 +17,21 @@ int main(int argc, char const *argv[])
+    std::string filePath(argv[1]);
+    OBJFile objFile(filePath);
+    unsigned int numLevels = atoi(argv[2]);
++   
++   cout << "Before Centered Triangles: " << endl;
++   objFile.printTriangles();
++   cout << endl;
++
+    objFile.centerMesh();
+ 
++   cout << "After Centered Triangles: " << endl;
++   objFile.printTriangles();
++   cout << endl;
++
+    DAG dag(numLevels, objFile.getBoundingBox(), objFile.getTriangles(), filePath);
+    if (argc == 3)
+    {
+-      dag.writeImages();
++      //dag.writeImages();
+    }
+ 
+    Raytracer raytracer(500,500, &dag);
+diff --git a/OBJFile.cpp b/OBJFile.cpp
+index 32ccbb0..ce72d3e 100644
+--- a/OBJFile.cpp
++++ b/OBJFile.cpp
+@@ -177,3 +177,12 @@ void OBJFile::updateBoundingBox()
+          boundingBox.maxs.z = v.z;
+    }
+ }
++
++void OBJFile::printTriangles() 
++{
++   for (unsigned long i = 0; i < triangles.size(); i++)
++   {
++      Triangle& triangle = triangles.at(i);
++      triangle.print();
++   }
++}
+diff --git a/OBJFile.hpp b/OBJFile.hpp
+index f60e6b5..1ff9b7b 100644
+--- a/OBJFile.hpp
++++ b/OBJFile.hpp
+@@ -41,6 +41,7 @@ class OBJFile
+       unsigned int getNumTriangles();
+       void centerMesh();
+       void updateBoundingBox();
++      void printTriangles();
+ };
+ 
+ #endif
+diff --git a/Raytracer.cpp b/Raytracer.cpp
+index 5041fb1..a7a87ce 100644
+--- a/Raytracer.cpp
++++ b/Raytracer.cpp
+@@ -6,13 +6,13 @@
+ 
+ #include "Raytracer.hpp"
+ 
+-Raytracer::Raytracer(unsigned int imageWidth, unsigned int imageHeight, Traceable* traceable) 
++Raytracer::Raytracer(unsigned int imageWidth, unsigned int imageHeight, DAG* dag) 
+    : image(imageWidth, imageHeight)
+ {
+    this->imageWidth = imageWidth;
+    this->imageHeight = imageHeight;
+    fillColor = glm::vec3(0,0,0);
+-   this->traceable = traceable;
++   this->dag = dag;
+ }
+ 
+ void Raytracer::trace()
+@@ -69,12 +69,21 @@ void Raytracer::trace()
+          glm::vec3 normal;
+          uint64_t moxelIndex = 0;
+ 
+-         if (traceable->intersect(ray, t, normal, moxelIndex))
++         if (dag->intersect(ray, t, normal, moxelIndex))
+          {
+             glm::vec3 hitPosition = ray.position + (t * ray.direction);
+             color = phongMat.calculateSurfaceColor(ray, hitPosition, normal);
++            
++            glm::vec3 moxelNormal = dag->getNormalFromMoxelTable(moxelIndex);
++            color = moxelNormal;
++            //color = normal;
++            //color = phongMat.calculateSurfaceColor(ray, hitPosition, moxelNormal);
++
+             //cout << "(" << x << ", " << y << ") => Full -> (" << color.x << ", " << color.y << ", " << color.z << ")" << " Normal -> (" << normal.x << ", " << normal.y << ", " << normal.z << ")  t = " << t << endl;
+             cout << "(" << x << ", " << y << ") => moxelIndex = " << moxelIndex << endl;
++            cout << "Expected Normal: <" << normal.x << ", " << normal.y << ", "<< normal.z << ">" << endl;
++            cout << "Moxel Normal: <" << moxelNormal.x << ", " << moxelNormal.y << ", "<< moxelNormal.z << ">" << endl;
++            cout << endl;
+          }
+          else
+          {
+diff --git a/Raytracer.hpp b/Raytracer.hpp
+index 5044338..52c8690 100644
+--- a/Raytracer.hpp
++++ b/Raytracer.hpp
+@@ -14,6 +14,7 @@
+ #include "PhongMaterial.hpp"
+ #include "Traceable.hpp"
+ #include "Camera.hpp"
++#include "DAG.hpp"
+ 
+ class Raytracer
+ {
+@@ -22,9 +23,9 @@ class Raytracer
+       unsigned int imageHeight;
+       Image image;
+       glm::vec3 fillColor;
+-      Traceable* traceable;
++      DAG* dag;
+ 
+-      Raytracer(unsigned int imageWidth, unsigned int imageHeight, Traceable* traceable);
++      Raytracer(unsigned int imageWidth, unsigned int imageHeight, DAG* dag);
+       void trace();
+       void writeImage(const char* imageName);
+ };
+diff --git a/SparseVoxelOctree.cpp b/SparseVoxelOctree.cpp
+index a498538..e30da35 100644
+--- a/SparseVoxelOctree.cpp
++++ b/SparseVoxelOctree.cpp
+@@ -27,6 +27,7 @@ SparseVoxelOctree::SparseVoxelOctree(const unsigned int levelsVal, const Boundin
+    voxelWidth = (boundingBox.maxs.x - boundingBox.mins.x) / dimension;
+    levels = new void*[numLevels-1]; // has the -1 because the last two levels are uint64's 
+    build(triangles,meshFilePath);
++   //writeImages();
+ }
+ 
+ /**
+diff --git a/ToDo.txt b/ToDo.txt
+index 32a314c..a47aa73 100644
+--- a/ToDo.txt
++++ b/ToDo.txt
+@@ -1,5 +1,19 @@
+ To Do:
+ 
++- Fix voxel mins/maxs calculation in buildMoxelTable()
++   - mins/maxs don't match up with values calculated in voxelization
++
++- Fix normal calculation for moxels:
++   - Some of the voxels can't find a triangle close enough
++   - Try rewriting distance between plane and point method (TRIED IT BUT I GET THE SAME THING NO MATTER THE METHOD)
++   - Re-check that I am calculating the voxel dimensions correctly
++
++- Fix moxel calculation on traversal.
++   - I know it is wrong because:
++      - On cube.obj with 5 levels some of the moxel indices go over the number of filled nodes
++      - Also on cube.obj, there are less than 
++- 
++
+ - Add to DAG Nodes the empty voxel counts   (DONE)
+    - Calculate the number of empty voxels to the left of each node
+       - For each unique leaf node calculate its empty counts and put it in a map with the key as its memory address and its value as the empty count
+@@ -22,24 +36,10 @@ To Do:
+    - moxelIndex = indexSum - emptySum
+ 
+ - Create the Moxel Table (Material Voxel Table)
+-   - Turn off voxel caching
+-      - This is necessary to allow us to calculate per voxel normals from the triangles
+-   - After voxelization calculate the number of filled voxels
+-   - Allocate material info for each voxel 
+-      - 1 x uint32_t for the material index 
+-      - 3 x sizeof(float) for the normal
+-   - Allocate and fill the material information array
+-   - Loop through all the voxels starting at index 0 and calculate its normal
+-      - For each triangle:
+-         - Get the Normal
+-         - Method 1: Make a ray where:
+-            - The eye is the center of the voxel
+-            - The direction is the inverse normal of the triangle (i.e. the normal * -1.0f)
+-            - Calculate ray-triangle intersection
+-            - If it intersects:
+-               - Check to see if the intersection is within the distance from the center of the voxel to one of its corners
+-            - If it is, set the normal for that voxel as the normal of the triangle and break out of the triangle loop
+-      - Set the material index
++   - WILL ONLY BE STORING NORMALS FOR THE MOMENT
++   - Find a triangle whose closest point to the center of the voxel is less that the distance from the center of the voxel to one of its corners
++      - Use closest point on plane algorithm
++   - Use normal from plane calculation as normal of voxel
+ 
+ 
+ Notes:
+diff --git a/Voxels.cpp b/Voxels.cpp
+index 55ad93b..2d2c28a 100644
+--- a/Voxels.cpp
++++ b/Voxels.cpp
+@@ -41,17 +41,18 @@ Voxels::Voxels(const unsigned int levelsVal, const BoundingBox& boundingBoxVal,
+    string fileName = getFileNameFromPath(meshFilePath);
+    std::cout << "FILENAME: " << fileName << endl;
+ 
+-   if (!cacheExists(fileName))
+-   {
++   // if (!cacheExists(fileName))
++   // {
+       std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  NO VOXEL CACHE... VOXELIZING NOW  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << endl;
+       build(triangles);
++      writeImages();
+       writeVoxelCache(fileName);
+-   }
+-   else
+-   {
+-      std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  FOUND VOXEL CACHE... READING IN VOXELIZATION  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << endl;
+-      build(fileName);
+-   }
++   // }
++   // else
++   // {
++   //    std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  FOUND VOXEL CACHE... READING IN VOXELIZATION  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << endl;
++   //    build(fileName);
++   // }
+ }
+ 
+ /**
+@@ -120,7 +121,7 @@ void Voxels::set(unsigned int x, unsigned int y, unsigned int z)
+    //The mask used to set the voxel
+    uint64_t toOr = (1L << bitIndex);
+    
+-   #pragma omp atomic
++   //pragma omp atomic
+    data[dataIndex] |= toOr; // sets the bitIndex bit 
+ }
+ 
+@@ -165,17 +166,19 @@ void Voxels::build(const std::vector<Triangle> triangles)
+    unsigned int i;
+    unsigned int stepSize = triangles.size() / 100;
+    unsigned int progress = 0;
+-   #pragma omp parallel for
++   //pragma omp parallel for
+    for (i = 0; i < triangles.size(); i++)
+    {
++      cout << "Triangle " << i << ": " << endl;
+       voxelizeTriangle(triangles[i]);
++      cout << endl;
+ 
+-      #pragma omp atomic
++      //pragma omp atomic
+       progress += 1;
+ 
+       if (progress % (stepSize-1))
+       {
+-         #pragma omp critical
++         //pragma omp critical
+          fprintf(stderr, "%.2f\n", (((float)progress)/triangles.size()) * 100.0f);
+       }
+       
+@@ -252,6 +255,8 @@ void Voxels::voxelizeTriangle(const Triangle& triangle)
+              boundingBox.mins.z + (z*voxelWidth) );
+              
+             if (triangleAABBIntersect(triangle, p, deltaP))
++               cout << "\t(" << x << ", " << y << ", " << z << ") => width: " << voxelWidth << " mins <" << p.x << ", " << p.y << ", " << p.z << ">" << endl;
++
+                set(x,y,z);
+          }
+       }

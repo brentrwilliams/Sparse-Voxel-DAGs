@@ -35,6 +35,7 @@ class DAG : public Traceable
       DAG(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles, std::string meshFilePath);
       ~DAG();
       void build(const std::vector<Triangle> triangles, std::string meshFilePath);
+      void buildMoxelTable(const std::vector<Triangle> triangles);
       bool isSet(unsigned int x, unsigned int y, unsigned int z);
       void* getChildPointer(void* node, unsigned int index, unsigned int level);
       bool isLeafSet(uint64_t* node, unsigned int i);
@@ -42,6 +43,7 @@ class DAG : public Traceable
       void writeImages();
       void printLevels();
       unsigned int getNumChildren(void* node);
+      uint64_t getNumFilledVoxels();
       void printMask(void* node);
       void printSVOMask(SVONode* node);
       bool isSetSVO(unsigned int x, unsigned int y, unsigned int z);
@@ -60,12 +62,14 @@ class DAG : public Traceable
       unsigned long size; // Total number of voxels if the SVO was full
       unsigned int dimension; // Number of voxels for one side of the cube
       float voxelWidth; // The length of one voxel in world space
+      uint64_t numFilledVoxels;
       //SVONode* root;
       void* root;
       void* svoRoot;
       void** levels;
       void** newLevels; //SVO levels
       unsigned int * sizeAtLevel; // Number nodes at a level
+      void* moxelTable;
       
 };
 
