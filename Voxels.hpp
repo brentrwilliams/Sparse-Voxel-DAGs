@@ -31,6 +31,7 @@
 #include "Intersect.hpp"
 #include "MortonCode.hpp"
 #include "Image.hpp"
+#include <unordered_map>
 
 
 class Voxels
@@ -58,6 +59,7 @@ class Voxels
       bool cacheExists(std::string fileName);
       void writeVoxelCache(std::string fileName);
       std::string getFileNameFromPath(std::string fileName);
+      unordered_map<unsigned int, unsigned int>* voxelTriangleIndexMap;
       
    //Will be
    //public:

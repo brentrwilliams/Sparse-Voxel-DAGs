@@ -41,6 +41,8 @@ Voxels::Voxels(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, 
    string fileName = getFileNameFromPath(meshFilePath);
    std::cout << "FILENAME: " << fileName << endl;
 
+   voxelTriangleIndexMap = new unordered_map<unsigned int, unsigned int>();
+
    // if (!cacheExists(fileName))
    // {
    //    std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  NO VOXEL CACHE... VOXELIZING NOW  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << endl;
@@ -264,6 +266,8 @@ void Voxels::voxelizeTriangle(const Triangle& triangle, unsigned int i)
                cout << "\tTriangle (" << i << ") " << endl;
                cout << "\tTriangle Normal: <" << normal.x << ", " << normal.y << ", " << normal.z << ">" << endl; 
                cout << endl;
+
+               voxelTriangleIndexMap->insert( std::make_pair<unsigned int,unsigned int>( mortonIndex, i ) );
 
                set(x,y,z);
             }

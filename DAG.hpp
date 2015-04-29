@@ -71,6 +71,7 @@ class DAG : public Traceable
       void** newLevels; //SVO levels
       unsigned int * sizeAtLevel; // Number nodes at a level
       void* moxelTable;
+      unordered_map<unsigned int, unsigned int>* voxelTriangleIndexMap;
       
 };
 

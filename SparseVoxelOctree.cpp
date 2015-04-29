@@ -47,6 +47,8 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles, std::string
    Voxels* leafVoxels = new Voxels(numLevels, boundingBox, triangles, meshFilePath);
    uint64_t* leafVoxelData = leafVoxels->data;
    unsigned int numLeafs = leafVoxels->dataSize;
+
+   voxelTriangleIndexMap = leafVoxels->voxelTriangleIndexMap;
    
    std::cout << "levels: " << numLevels << "\n";
    std::cout << "Number of leaf nodes: " << numLeafs << "\n";

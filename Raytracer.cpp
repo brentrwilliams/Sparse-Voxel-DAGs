@@ -74,9 +74,9 @@ void Raytracer::trace()
             glm::vec3 hitPosition = ray.position + (t * ray.direction);
             
             glm::vec3 moxelNormal = dag->getNormalFromMoxelTable(moxelIndex);
-            // color = phongMat.calculateSurfaceColor(ray, hitPosition, moxelNormal);
+            color = phongMat.calculateSurfaceColor(ray, hitPosition, moxelNormal);
             //color = normal;
-            color = moxelNormal;
+            //color = moxelNormal;
             // color = phongMat.calculateSurfaceColor(ray, hitPosition, normal);
 
             //cout << "(" << x << ", " << y << ") => Full -> (" << color.x << ", " << color.y << ", " << color.z << ")" << " Normal -> (" << normal.x << ", " << normal.y << ", " << normal.z << ")  t = " << t << endl;

@@ -49,6 +49,8 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
    unsigned int* newLevelSizes = new unsigned int[numLevels-1]();
    unsigned int newLevelIndex = numLevels-2;
 
+   voxelTriangleIndexMap = svoPtr->voxelTriangleIndexMap;
+
    cerr << "Levels: " << endl;
    for (int i = 0; i < 2; ++i)
    {
@@ -564,6 +566,108 @@ uint64_t DAG::getNumFilledVoxels()
    return count;
 }
 
+// void DAG::buildMoxelTable(const std::vector<Triangle> triangles)
+// {
+//    unsigned int moxelTableAllocSize = sizeof(float) * 3 * numFilledVoxels; // Only space for normals
+//    moxelTable = (void*) malloc(moxelTableAllocSize);
+//    unsigned int x, y, z;
+//    glm::vec3 boundingBoxMins(boundingBox.mins.x, boundingBoxMins.y, boundingBoxMins.z);
+//    float halfVoxelWidth = 0.5f * voxelWidth;
+//    float voxelRadius = sqrtf(2.0f) * halfVoxelWidth; // Length from center of voxel to any corner
+//    float epsilon = voxelRadius * 0.001f;
+//    float voxelRadiusPlusEpsilon = voxelRadius + epsilon;
+//    float* moxelTablePointer = (float*) moxelTable;
+//    unsigned int moxelIndex = 0;
+
+//    boundingBox.print();
+//    cout << "Creating moxel table for size " << size <<  "..." << endl;
+
+//    for (uint32_t i = 0; i < size; i++)
+//    {
+//       mortonCodeToXYZ((uint32_t)i, &x, &y, &z, numLevels);
+//       if (isSet(x,y,z))
+//       {  
+//          glm::vec3 voxelMins(boundingBox.mins.x + (x*voxelWidth), boundingBox.mins.y + (y*voxelWidth), boundingBox.mins.z + (z*voxelWidth) );
+//          glm::vec3 voxelCenter(voxelMins.x + halfVoxelWidth, voxelMins.y + halfVoxelWidth, voxelMins.z + halfVoxelWidth);
+//          glm::vec3 voxelMaxs(voxelMins.x + voxelWidth, voxelMins.y + voxelWidth, voxelMins.z + voxelWidth);
+//          bool foundTriangle = false;
+//          glm::vec3 normal;
+//          float smallestDist = 1000000.0f;
+
+//          for (unsigned int j = 0; j < triangles.size() && !foundTriangle; j++)
+//          {
+//             Triangle triangle = triangles[j];
+//             glm::vec3 v0(triangle.v0.x,triangle.v0.y,triangle.v0.z);
+//             glm::vec3 v1(triangle.v1.x,triangle.v1.y,triangle.v1.z);
+//             glm::vec3 v2(triangle.v2.x,triangle.v2.y,triangle.v2.z);
+
+//             // Calculate the normal of the triangle/plane
+//             normal = glm::normalize( glm::cross(v1-v0, v2-v0) );
+//             float distance = fabs( glm::dot( normal, (voxelCenter-v0) ) );
+
+//             // DIST CALC TAKE 2
+
+//             float a = normal.x;
+//             float b = normal.y;
+//             float c = normal.z;
+//             float d = 0 - (a * v0.x) - (b * v0.y) - (c * v0.z);
+//             float numerator = fabs( (a * voxelCenter.x) + (b * voxelCenter.y) + (c * voxelCenter.z) + d );
+//             float denominator = sqrtf( (a*a) + (b*b) + (c*c) );
+//             float distance2 = numerator / denominator;
+
+//             // END DIST CALC TAKE 2            
+            
+//             // Get the smallest distance
+//             smallestDist = (distance2 < smallestDist) ? distance2 : smallestDist;
+
+//             if (distance2 < voxelRadiusPlusEpsilon )
+//             {
+//                // cout << "\tMoxelIndex: " << moxelIndex << endl;
+//                cout << "Moxel Table: (" << i << ") => (" << x << ", " << y << ", " << z << ")" << endl;
+//                // cout << "\tVoxel Center: (" << voxelCenter.x << ", " << voxelCenter.y << ", " << voxelCenter.z << ")" << endl;
+//                // cout << "\tVoxel Mins: (" << voxelMins.x << ", " << voxelMins.y << ", " << voxelMins.z << ")" << endl;  
+//                // cout << "\tVoxel Maxs: (" << (voxelMins.x + voxelWidth) << ", " << (voxelMins.y + voxelWidth) << ", " << (voxelMins.z + voxelWidth) << ")" << endl;  
+//                cout << "\tTriangle #: " << j << " => ";
+//                triangle.print();
+//                cout << "\tTriangle Normal: <" << normal.x << ", " << normal.y << ", " << normal.z << ">" << endl; 
+//                // cout << "\tVoxel Radius: " << voxelRadius << endl;
+//                // cout << "\tVoxel Radius + Epsilon: " << voxelRadiusPlusEpsilon << endl;
+//                // cout << "\tDistance: " << distance << endl;
+//                // cout << "\tDistance2 (one we are using): " << distance2 << endl;
+
+//                cout << endl;
+               
+//                foundTriangle = true;
+//             }
+//          }
+//          if (foundTriangle == false)
+//          {
+//             cout << "### ERROR: Could not find triangle for moxel index " << moxelIndex << endl;
+//             cout << "\tIndex (" << i << ") => (" << x << ", " << y << ", " << z << ")" << endl;
+//             cout << "\tThe smallest distance found: " << smallestDist << endl;
+//             cout << "\tVoxel Radius + Epsilon: " << voxelRadiusPlusEpsilon << endl;
+//             cout << "\tMoxelIndex: " << moxelIndex << endl;
+//             cout << "\tVoxel Center: (" << voxelCenter.x << ", " << voxelCenter.y << ", " << voxelCenter.z << ")" << endl;
+//             cout << "\tVoxel Mins: (" << voxelMins.x << ", " << voxelMins.y << ", " << voxelMins.z << ")" << endl;  
+//             cout << "\tVoxel Maxs: (" << (voxelMins.x + voxelWidth) << ", " << (voxelMins.y + voxelWidth) << ", " << (voxelMins.z + voxelWidth) << ")" << endl;  
+//             cout << "\tDimension: " << dimension << endl; 
+//             cout << "\tVoxelWidth: " << voxelWidth << endl; 
+
+//             cout << endl;
+//          }
+
+//          *moxelTablePointer = (float) normal.x;
+//          moxelTablePointer++;
+//          *moxelTablePointer = (float) normal.y;
+//          moxelTablePointer++;
+//          *moxelTablePointer = (float) normal.z;
+//          moxelTablePointer++;
+
+//          moxelIndex++;
+//       }
+//    }
+// }
+
 void DAG::buildMoxelTable(const std::vector<Triangle> triangles)
 {
    unsigned int moxelTableAllocSize = sizeof(float) * 3 * numFilledVoxels; // Only space for normals
@@ -585,74 +689,14 @@ void DAG::buildMoxelTable(const std::vector<Triangle> triangles)
       mortonCodeToXYZ((uint32_t)i, &x, &y, &z, numLevels);
       if (isSet(x,y,z))
       {  
-         glm::vec3 voxelMins(boundingBox.mins.x + (x*voxelWidth), boundingBox.mins.y + (y*voxelWidth), boundingBox.mins.z + (z*voxelWidth) );
-         glm::vec3 voxelCenter(voxelMins.x + halfVoxelWidth, voxelMins.y + halfVoxelWidth, voxelMins.z + halfVoxelWidth);
-         glm::vec3 voxelMaxs(voxelMins.x + voxelWidth, voxelMins.y + voxelWidth, voxelMins.z + voxelWidth);
-         bool foundTriangle = false;
-         glm::vec3 normal;
-         float smallestDist = 1000000.0f;
+         unsigned int triangleIndex = voxelTriangleIndexMap->at(i);
+         Triangle triangle = triangles[triangleIndex];
+         glm::vec3 v0(triangle.v0.x,triangle.v0.y,triangle.v0.z);
+         glm::vec3 v1(triangle.v1.x,triangle.v1.y,triangle.v1.z);
+         glm::vec3 v2(triangle.v2.x,triangle.v2.y,triangle.v2.z);
 
-         for (unsigned int j = 0; j < triangles.size() && !foundTriangle; j++)
-         {
-            Triangle triangle = triangles[j];
-            glm::vec3 v0(triangle.v0.x,triangle.v0.y,triangle.v0.z);
-            glm::vec3 v1(triangle.v1.x,triangle.v1.y,triangle.v1.z);
-            glm::vec3 v2(triangle.v2.x,triangle.v2.y,triangle.v2.z);
-
-            // Calculate the normal of the triangle/plane
-            normal = glm::normalize( glm::cross(v1-v0, v2-v0) );
-            float distance = fabs( glm::dot( normal, (voxelCenter-v0) ) );
-
-            // DIST CALC TAKE 2
-
-            float a = normal.x;
-            float b = normal.y;
-            float c = normal.z;
-            float d = 0 - (a * v0.x) - (b * v0.y) - (c * v0.z);
-            float numerator = fabs( (a * voxelCenter.x) + (b * voxelCenter.y) + (c * voxelCenter.z) + d );
-            float denominator = sqrtf( (a*a) + (b*b) + (c*c) );
-            float distance2 = numerator / denominator;
-
-            // END DIST CALC TAKE 2            
-            
-            // Get the smallest distance
-            smallestDist = (distance2 < smallestDist) ? distance2 : smallestDist;
-
-            if (distance2 < voxelRadiusPlusEpsilon )
-            {
-               // cout << "\tMoxelIndex: " << moxelIndex << endl;
-               cout << "Moxel Table: (" << i << ") => (" << x << ", " << y << ", " << z << ")" << endl;
-               // cout << "\tVoxel Center: (" << voxelCenter.x << ", " << voxelCenter.y << ", " << voxelCenter.z << ")" << endl;
-               // cout << "\tVoxel Mins: (" << voxelMins.x << ", " << voxelMins.y << ", " << voxelMins.z << ")" << endl;  
-               // cout << "\tVoxel Maxs: (" << (voxelMins.x + voxelWidth) << ", " << (voxelMins.y + voxelWidth) << ", " << (voxelMins.z + voxelWidth) << ")" << endl;  
-               cout << "\tTriangle #: " << j << " => ";
-               triangle.print();
-               cout << "\tTriangle Normal: <" << normal.x << ", " << normal.y << ", " << normal.z << ">" << endl; 
-               // cout << "\tVoxel Radius: " << voxelRadius << endl;
-               // cout << "\tVoxel Radius + Epsilon: " << voxelRadiusPlusEpsilon << endl;
-               // cout << "\tDistance: " << distance << endl;
-               // cout << "\tDistance2 (one we are using): " << distance2 << endl;
-
-               cout << endl;
-               
-               foundTriangle = true;
-            }
-         }
-         if (foundTriangle == false)
-         {
-            cout << "### ERROR: Could not find triangle for moxel index " << moxelIndex << endl;
-            cout << "\tIndex (" << i << ") => (" << x << ", " << y << ", " << z << ")" << endl;
-            cout << "\tThe smallest distance found: " << smallestDist << endl;
-            cout << "\tVoxel Radius + Epsilon: " << voxelRadiusPlusEpsilon << endl;
-            cout << "\tMoxelIndex: " << moxelIndex << endl;
-            cout << "\tVoxel Center: (" << voxelCenter.x << ", " << voxelCenter.y << ", " << voxelCenter.z << ")" << endl;
-            cout << "\tVoxel Mins: (" << voxelMins.x << ", " << voxelMins.y << ", " << voxelMins.z << ")" << endl;  
-            cout << "\tVoxel Maxs: (" << (voxelMins.x + voxelWidth) << ", " << (voxelMins.y + voxelWidth) << ", " << (voxelMins.z + voxelWidth) << ")" << endl;  
-            cout << "\tDimension: " << dimension << endl; 
-            cout << "\tVoxelWidth: " << voxelWidth << endl; 
-
-            cout << endl;
-         }
+         // Calculate the normal of the triangle
+         glm::vec3 normal = glm::normalize( glm::cross(v1-v0, v2-v0) );
 
          *moxelTablePointer = (float) normal.x;
          moxelTablePointer++;
@@ -665,6 +709,7 @@ void DAG::buildMoxelTable(const std::vector<Triangle> triangles)
       }
    }
 }
+
 
 
 /**
