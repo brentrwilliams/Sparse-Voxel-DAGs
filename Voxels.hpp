@@ -51,7 +51,7 @@ class Voxels
       bool isSet(unsigned int x, unsigned int y, unsigned int z);
       void build(const std::vector<Triangle> triangles);
       void build(std::string meshFilePath);
-      void voxelizeTriangle(const Triangle& triangle);
+      void voxelizeTriangle(const Triangle& triangle, unsigned int i);
       unsigned int countSetVoxels();
       void printBinary();
       void writeImages();

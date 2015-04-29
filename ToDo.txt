@@ -1,5 +1,12 @@
 To Do:
 
+- Figure out what the expected normals should be
+   - Print out for every set voxel, the triangle # and the normal
+      - Do this in voxels.cpp
+   - In the moxel table construction, print out the voxel index, the triangle, and the normal
+   - Compare these to see where things go wrong
+
+
 - Add to DAG Nodes the empty voxel counts   (DONE)
    - Calculate the number of empty voxels to the left of each node
       - For each unique leaf node calculate its empty counts and put it in a map with the key as its memory address and its value as the empty count

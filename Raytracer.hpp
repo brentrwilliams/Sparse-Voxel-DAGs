@@ -14,6 +14,7 @@
 #include "PhongMaterial.hpp"
 #include "Traceable.hpp"
 #include "Camera.hpp"
+#include "DAG.hpp"
 
 class Raytracer
 {
@@ -22,9 +23,9 @@ class Raytracer
       unsigned int imageHeight;
       Image image;
       glm::vec3 fillColor;
-      Traceable* traceable;
+      DAG* dag;
 
-      Raytracer(unsigned int imageWidth, unsigned int imageHeight, Traceable* traceable);
+      Raytracer(unsigned int imageWidth, unsigned int imageHeight, DAG* dag);
       void trace();
       void writeImage(const char* imageName);
 };

@@ -6,13 +6,13 @@
 
 #include "Raytracer.hpp"
 
-Raytracer::Raytracer(unsigned int imageWidth, unsigned int imageHeight, Traceable* traceable) 
+Raytracer::Raytracer(unsigned int imageWidth, unsigned int imageHeight, DAG* dag) 
    : image(imageWidth, imageHeight)
 {
    this->imageWidth = imageWidth;
    this->imageHeight = imageHeight;
    fillColor = glm::vec3(0,0,0);
-   this->traceable = traceable;
+   this->dag = dag;
 }
 
 void Raytracer::trace()
@@ -69,12 +69,27 @@ void Raytracer::trace()
          glm::vec3 normal;
          uint64_t moxelIndex = 0;
 
-         if (traceable->intersect(ray, t, normal, moxelIndex))
+         if (dag->intersect(ray, t, normal, moxelIndex))
          {
             glm::vec3 hitPosition = ray.position + (t * ray.direction);
-            color = phongMat.calculateSurfaceColor(ray, hitPosition, normal);
+            
+            glm::vec3 moxelNormal = dag->getNormalFromMoxelTable(moxelIndex);
+            // color = phongMat.calculateSurfaceColor(ray, hitPosition, moxelNormal);
+            //color = normal;
+            color = moxelNormal;
+            // color = phongMat.calculateSurfaceColor(ray, hitPosition, normal);
+
             //cout << "(" << x << ", " << y << ") => Full -> (" << color.x << ", " << color.y << ", " << color.z << ")" << " Normal -> (" << normal.x << ", " << normal.y << ", " << normal.z << ")  t = " << t << endl;
-            cout << "(" << x << ", " << y << ") => moxelIndex = " << moxelIndex << endl;
+            if (moxelIndex >= dag->numFilledVoxels)
+            {
+               cout << "@ERROR: moxelIndex > numFilledVoxels (" << dag->numFilledVoxels << ")\n\t(" << x << ", " << y << ") => moxelIndex = " << moxelIndex << endl;
+            }
+            else 
+            {
+               cout << "(" << x << ", " << y << ") => moxelIndex = " << moxelIndex << endl;
+               cout << "\tmoxelNormal Normal: <" << moxelNormal.x << ", " << moxelNormal.y << ", " << moxelNormal.z << ">" << endl; 
+               cout << "\tTriangle Normal: <" << normal.x << ", " << normal.y << ", " << normal.z << ">" << endl; 
+            }
          }
          else
          {

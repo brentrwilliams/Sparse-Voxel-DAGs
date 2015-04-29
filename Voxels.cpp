@@ -41,17 +41,17 @@ Voxels::Voxels(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, 
    string fileName = getFileNameFromPath(meshFilePath);
    std::cout << "FILENAME: " << fileName << endl;
 
-   if (!cacheExists(fileName))
-   {
-      std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  NO VOXEL CACHE... VOXELIZING NOW  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << endl;
+   // if (!cacheExists(fileName))
+   // {
+   //    std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  NO VOXEL CACHE... VOXELIZING NOW  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << endl;
       build(triangles);
-      writeVoxelCache(fileName);
-   }
-   else
-   {
-      std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  FOUND VOXEL CACHE... READING IN VOXELIZATION  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << endl;
-      build(fileName);
-   }
+   //    writeVoxelCache(fileName);
+   // }
+   // else
+   // {
+   //    std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  FOUND VOXEL CACHE... READING IN VOXELIZATION  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@" << endl;
+   //    build(fileName);
+   // }
 }
 
 /**
@@ -165,17 +165,17 @@ void Voxels::build(const std::vector<Triangle> triangles)
    unsigned int i;
    unsigned int stepSize = triangles.size() / 100;
    unsigned int progress = 0;
-   #pragma omp parallel for
+   //#pragma omp parallel for
    for (i = 0; i < triangles.size(); i++)
    {
-      voxelizeTriangle(triangles[i]);
+      voxelizeTriangle(triangles[i], i);
 
-      #pragma omp atomic
+      //#pragma omp atomic
       progress += 1;
 
       if (progress % (stepSize-1))
       {
-         #pragma omp critical
+         //#pragma omp critical
          fprintf(stderr, "%.2f\n", (((float)progress)/triangles.size()) * 100.0f);
       }
       
@@ -219,7 +219,7 @@ void Voxels::build(std::string fileName)
 /**
  * Voxelizes the given triangle into the volume 
  */
-void Voxels::voxelizeTriangle(const Triangle& triangle)
+void Voxels::voxelizeTriangle(const Triangle& triangle, unsigned int i)
 {
    Vec3 triMins(triangle.getMins());
    Vec3 triMaxs(triangle.getMaxs());
@@ -252,7 +252,21 @@ void Voxels::voxelizeTriangle(const Triangle& triangle)
              boundingBox.mins.z + (z*voxelWidth) );
              
             if (triangleAABBIntersect(triangle, p, deltaP))
+            {
+               unsigned int mortonIndex = mortonCode(x, y, z, levels);
+               glm::vec3 v0(triangle.v0.x,triangle.v0.y,triangle.v0.z);
+               glm::vec3 v1(triangle.v1.x,triangle.v1.y,triangle.v1.z);
+               glm::vec3 v2(triangle.v2.x,triangle.v2.y,triangle.v2.z);
+
+               // Calculate the normal of the triangle/plane
+               glm::vec3 normal = glm::normalize( glm::cross(v1-v0, v2-v0) );
+               cout << "Voxelization: (" << x << ", " << y << ", " << z << ") => mortonIndex: " << mortonIndex << endl;
+               cout << "\tTriangle (" << i << ") " << endl;
+               cout << "\tTriangle Normal: <" << normal.x << ", " << normal.y << ", " << normal.z << ">" << endl; 
+               cout << endl;
+
                set(x,y,z);
+            }
          }
       }
    }   

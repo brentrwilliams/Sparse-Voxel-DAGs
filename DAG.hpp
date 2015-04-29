@@ -54,6 +54,7 @@ class DAG : public Traceable
       uint64_t getEmptyCount(void* node, unsigned int index);
       uint64_t getLeafNodeEmptyCount(uint64_t leafNode, unsigned int index);
       uint64_t getLevelIndexSum(unsigned int level, unsigned int index);
+      glm::vec3 getNormalFromMoxelTable(uint32_t index);
       bool intersect(const Ray& ray, float& t, glm::vec3& normal, uint64_t& moxelIndex);
       bool intersect(const Ray& ray, float& t, void* node, unsigned int level, AABB aabb, glm::vec3& normal, uint64_t& moxelIndex);
 

@@ -572,7 +572,7 @@ void DAG::buildMoxelTable(const std::vector<Triangle> triangles)
    glm::vec3 boundingBoxMins(boundingBox.mins.x, boundingBoxMins.y, boundingBoxMins.z);
    float halfVoxelWidth = 0.5f * voxelWidth;
    float voxelRadius = sqrtf(2.0f) * halfVoxelWidth; // Length from center of voxel to any corner
-   float epsilon = voxelRadius * 0.01f;
+   float epsilon = voxelRadius * 0.001f;
    float voxelRadiusPlusEpsilon = voxelRadius + epsilon;
    float* moxelTablePointer = (float*) moxelTable;
    unsigned int moxelIndex = 0;
@@ -600,7 +600,7 @@ void DAG::buildMoxelTable(const std::vector<Triangle> triangles)
             glm::vec3 v2(triangle.v2.x,triangle.v2.y,triangle.v2.z);
 
             // Calculate the normal of the triangle/plane
-            normal = glm::normalize( glm::cross(v0-v1, v0-v2) );
+            normal = glm::normalize( glm::cross(v1-v0, v2-v0) );
             float distance = fabs( glm::dot( normal, (voxelCenter-v0) ) );
 
             // DIST CALC TAKE 2
@@ -620,18 +620,18 @@ void DAG::buildMoxelTable(const std::vector<Triangle> triangles)
 
             if (distance2 < voxelRadiusPlusEpsilon )
             {
-               cout << "\tMoxelIndex: " << moxelIndex << endl;
-               cout << "\tIndex (" << i << ") => (" << x << ", " << y << ", " << z << ")" << endl;
-               cout << "\tVoxel Center: (" << voxelCenter.x << ", " << voxelCenter.y << ", " << voxelCenter.z << ")" << endl;
-               cout << "\tVoxel Mins: (" << voxelMins.x << ", " << voxelMins.y << ", " << voxelMins.z << ")" << endl;  
-               cout << "\tVoxel Maxs: (" << (voxelMins.x + voxelWidth) << ", " << (voxelMins.y + voxelWidth) << ", " << (voxelMins.z + voxelWidth) << ")" << endl;  
+               // cout << "\tMoxelIndex: " << moxelIndex << endl;
+               cout << "Moxel Table: (" << i << ") => (" << x << ", " << y << ", " << z << ")" << endl;
+               // cout << "\tVoxel Center: (" << voxelCenter.x << ", " << voxelCenter.y << ", " << voxelCenter.z << ")" << endl;
+               // cout << "\tVoxel Mins: (" << voxelMins.x << ", " << voxelMins.y << ", " << voxelMins.z << ")" << endl;  
+               // cout << "\tVoxel Maxs: (" << (voxelMins.x + voxelWidth) << ", " << (voxelMins.y + voxelWidth) << ", " << (voxelMins.z + voxelWidth) << ")" << endl;  
                cout << "\tTriangle #: " << j << " => ";
                triangle.print();
                cout << "\tTriangle Normal: <" << normal.x << ", " << normal.y << ", " << normal.z << ">" << endl; 
-               cout << "\tVoxel Radius: " << voxelRadius << endl;
-               cout << "\tVoxel Radius + Epsilon: " << voxelRadiusPlusEpsilon << endl;
-               cout << "\tDistance: " << distance << endl;
-               cout << "\tDistance2 (one we are using): " << distance2 << endl;
+               // cout << "\tVoxel Radius: " << voxelRadius << endl;
+               // cout << "\tVoxel Radius + Epsilon: " << voxelRadiusPlusEpsilon << endl;
+               // cout << "\tDistance: " << distance << endl;
+               // cout << "\tDistance2 (one we are using): " << distance2 << endl;
 
                cout << endl;
                
@@ -1150,6 +1150,7 @@ bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AA
          float newDim = (maxs.x - mins.x) / 2.0f;
          bool isHit = false;
          t = FLT_MAX;
+         uint64_t finalMoxelIndex;
          
          for (unsigned int i = 0; i < 8; i++)
          {
@@ -1168,20 +1169,24 @@ bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AA
                uint64_t levelIndexSum = getLevelIndexSum(level,i);
                uint64_t tempMoxelIndex = moxelIndex + levelIndexSum - emptyCount;
 
+               // cout << "Level " << level << ", child = " << i << endl;
+               // cout << "\ttempMoxelIndex = moxelIndex + levelIndexSum - emptyCount;" << endl;
+               // cout << "\t" << tempMoxelIndex << " = " << moxelIndex << " + " << levelIndexSum << " - " << emptyCount << endl << endl;
+
                float newT;
                
                bool newHit = intersect(ray, newT, getChildPointer(node,i, level), level+1, newAABB, normal, tempMoxelIndex);
                //cout << "\n\tChild " << i << " hit: " << newHit << endl;
-               
+
                if (newHit && newT < t)
                {
                   t = newT;
-                  moxelIndex = tempMoxelIndex;
+                  finalMoxelIndex = tempMoxelIndex;
                }
                isHit = isHit || newHit;
             }  
          }
-
+         moxelIndex = finalMoxelIndex;
          return isHit;
       }
       // If the parent node is not hit
@@ -1196,6 +1201,7 @@ bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AA
       float newDim = (maxs.x - mins.x) / 4.0f;
       t = FLT_MAX;
       bool isHit = false;
+      uint64_t finalMoxelIndex;
 
       // Go through each of the 64 child nodes stored in the given leaf
       for (unsigned int i = 0; i < 64; i++)
@@ -1219,19 +1225,35 @@ bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AA
 
             if (newHit && newT < t)
             {
+               // cout << "Level " << level << ", child = " << i << endl;
+               // cout << "\ttempMoxelIndex = moxelIndex + levelIndexSum - emptyCount;" << endl;
+               // cout << "\t" << tempMoxelIndex << " = " << moxelIndex << " + " << levelIndexSum << " - " << emptyCount << endl << endl;
+
                t = newT;
                normal = tempNormal;
-               moxelIndex = tempMoxelIndex;
+               finalMoxelIndex = tempMoxelIndex;
             }
             isHit = isHit || newHit;
          }
       }
+      moxelIndex = finalMoxelIndex;
       return isHit;
    }
 }
 
 
+glm::vec3 DAG::getNormalFromMoxelTable(uint32_t index)
+{
+   float x, y, z;
+   float* moxelTablePointer = (float*)moxelTable;
 
+   x = moxelTablePointer[3 * index];
+   y = moxelTablePointer[(3 * index) + 1];
+   z = moxelTablePointer[(3 * index) + 2];
+
+   glm::vec3 normal(x,y,z);
+   return normal;
+}
 
 
 
