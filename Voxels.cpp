@@ -122,8 +122,11 @@ void Voxels::set(unsigned int x, unsigned int y, unsigned int z)
    //The mask used to set the voxel
    uint64_t toOr = (1L << bitIndex);
    
-   #pragma omp atomic
+   tbb::mutex::scoped_lock lock;
+   lock.acquire(sMutex);
+   //#pragma omp atomic
    data[dataIndex] |= toOr; // sets the bitIndex bit 
+   lock.release();
 }
 
 /**
@@ -159,59 +162,59 @@ unsigned long Voxels::getSize() const
    return size;
 }
 
-/**
- * Builds the volume of voxels from triangles
- */
-void Voxels::build(const std::vector<Triangle> triangles)
-{
-   unsigned int i;
-   unsigned int stepSize = triangles.size() / 100;
-   unsigned int progress = 0;
-   #pragma omp parallel for
-   for (i = 0; i < triangles.size(); i++)
-   {
-      voxelizeTriangle(triangles[i], i);
-
-      #pragma omp atomic
-      progress += 1;
-
-      if (progress % (stepSize-1))
-      {
-         #pragma omp critical
-         fprintf(stderr, "%.2f\n", (((float)progress)/triangles.size()) * 100.0f);
-      }
-      
-   }
-}
-
-
 // /**
 //  * Builds the volume of voxels from triangles
 //  */
 // void Voxels::build(const std::vector<Triangle> triangles)
 // {
-//    //unsigned int i;
+//    unsigned int i;
 //    unsigned int stepSize = triangles.size() / 100;
-//    tbb::atomic<unsigned int> progress;
-//    tbb::mutex sm;
-
-//    parallel_for(0, triangles.size(), [&](unsigned int i) {
-
-//       tbb::mutex::scoped_lock lock;
+//    unsigned int progress = 0;
+//    #pragma omp parallel for
+//    for (i = 0; i < triangles.size(); i++)
+//    {
 //       voxelizeTriangle(triangles[i], i);
 
-//       progress.fetch_and_increment()
+//       #pragma omp atomic
+//       progress += 1;
 
 //       if (progress % (stepSize-1))
 //       {
-         
-//          lock.acquire(sm)
+//          #pragma omp critical
 //          fprintf(stderr, "%.2f\n", (((float)progress)/triangles.size()) * 100.0f);
-//          lock.release();
 //       }
       
-//    });
+//    }
 // }
+
+
+/**
+ * Builds the volume of voxels from triangles
+ */
+void Voxels::build(const std::vector<Triangle> triangles)
+{
+   //unsigned int i;
+   unsigned int stepSize = triangles.size() / 100;
+   tbb::atomic<unsigned int> progress;
+   tbb::mutex sm;
+
+   tbb::parallel_for((unsigned int)0, (unsigned int)triangles.size(), [&](unsigned int i) {
+
+      tbb::mutex::scoped_lock lock;
+      voxelizeTriangle(triangles[i], i);
+
+      progress.fetch_and_increment();
+
+      if (progress % (stepSize-1))
+      {
+         
+         lock.acquire(sm);
+         fprintf(stderr, "%.2f\n", (((float)progress)/triangles.size()) * 100.0f);
+         lock.release();
+      }
+      
+   });
+}
 
 
 

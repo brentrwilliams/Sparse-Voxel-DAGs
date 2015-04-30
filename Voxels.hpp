@@ -35,6 +35,7 @@
 #include "tbb/concurrent_unordered_map.h"
 #include "tbb/mutex.h"
 #include "tbb/atomic.h"
+#include "tbb/tbb.h"
 
 
 class Voxels
@@ -49,6 +50,7 @@ class Voxels
       unsigned int dimension; // Number of voxels for one side of the cube
       float voxelWidth; // The length of one voxel in world space
       unsigned int dataSize; // The number of uint64_t allocated to data
+      tbb::mutex sMutex;
       
       unsigned int calculateDataSize(unsigned int levels);
       void set(unsigned int x, unsigned int y, unsigned int z);
