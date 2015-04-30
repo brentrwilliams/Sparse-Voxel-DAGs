@@ -21,6 +21,7 @@
 #include "MortonCode.hpp"
 #include <algorithm>
 #include <unordered_map>
+#include "tbb/concurrent_unordered_map.h"
 
 #include <vector>
 #include <stdint.h>
@@ -71,7 +72,7 @@ class DAG : public Traceable
       void** newLevels; //SVO levels
       unsigned int * sizeAtLevel; // Number nodes at a level
       void* moxelTable;
-      unordered_map<unsigned int, unsigned int>* voxelTriangleIndexMap;
+      tbb::concurrent_unordered_map<unsigned int, unsigned int>* voxelTriangleIndexMap;
       
 };
 

@@ -41,7 +41,7 @@ Voxels::Voxels(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, 
    string fileName = getFileNameFromPath(meshFilePath);
    std::cout << "FILENAME: " << fileName << endl;
 
-   voxelTriangleIndexMap = new unordered_map<unsigned int, unsigned int>();
+   voxelTriangleIndexMap = new tbb::concurrent_unordered_map<unsigned int, unsigned int>();
 
    // if (!cacheExists(fileName))
    // {
@@ -167,17 +167,17 @@ void Voxels::build(const std::vector<Triangle> triangles)
    unsigned int i;
    unsigned int stepSize = triangles.size() / 100;
    unsigned int progress = 0;
-   //#pragma omp parallel for
+   #pragma omp parallel for
    for (i = 0; i < triangles.size(); i++)
    {
       voxelizeTriangle(triangles[i], i);
 
-      //#pragma omp atomic
+      #pragma omp atomic
       progress += 1;
 
       if (progress % (stepSize-1))
       {
-         //#pragma omp critical
+         #pragma omp critical
          fprintf(stderr, "%.2f\n", (((float)progress)/triangles.size()) * 100.0f);
       }
       
@@ -261,11 +261,11 @@ void Voxels::voxelizeTriangle(const Triangle& triangle, unsigned int i)
                glm::vec3 v2(triangle.v2.x,triangle.v2.y,triangle.v2.z);
 
                // Calculate the normal of the triangle/plane
-               glm::vec3 normal = glm::normalize( glm::cross(v1-v0, v2-v0) );
-               cout << "Voxelization: (" << x << ", " << y << ", " << z << ") => mortonIndex: " << mortonIndex << endl;
-               cout << "\tTriangle (" << i << ") " << endl;
-               cout << "\tTriangle Normal: <" << normal.x << ", " << normal.y << ", " << normal.z << ">" << endl; 
-               cout << endl;
+               // glm::vec3 normal = glm::normalize( glm::cross(v1-v0, v2-v0) );
+               // cout << "Voxelization: (" << x << ", " << y << ", " << z << ") => mortonIndex: " << mortonIndex << endl;
+               // cout << "\tTriangle (" << i << ") " << endl;
+               // cout << "\tTriangle Normal: <" << normal.x << ", " << normal.y << ", " << normal.z << ">" << endl; 
+               // cout << endl;
 
                voxelTriangleIndexMap->insert( std::make_pair<unsigned int,unsigned int>( mortonIndex, i ) );
 

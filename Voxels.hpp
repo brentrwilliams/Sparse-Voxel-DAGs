@@ -32,6 +32,7 @@
 #include "MortonCode.hpp"
 #include "Image.hpp"
 #include <unordered_map>
+#include "tbb/concurrent_unordered_map.h"
 
 
 class Voxels
@@ -59,7 +60,7 @@ class Voxels
       bool cacheExists(std::string fileName);
       void writeVoxelCache(std::string fileName);
       std::string getFileNameFromPath(std::string fileName);
-      unordered_map<unsigned int, unsigned int>* voxelTriangleIndexMap;
+      tbb::concurrent_unordered_map<unsigned int, unsigned int>* voxelTriangleIndexMap;
       
    //Will be
    //public:

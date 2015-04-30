@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <string>
 #include <unordered_map>
+#include "tbb/concurrent_unordered_map.h"
 
 #define SET_8_BITS 255
 
@@ -48,7 +49,7 @@ class SparseVoxelOctree
       float voxelWidth; // The length of one voxel in world space
       void** levels; // Array of SVONode*'s that correspond to the levels of the SVO with 0 as root
       SVONode* root;
-      unordered_map<unsigned int, unsigned int>* voxelTriangleIndexMap;
+      tbb::concurrent_unordered_map<unsigned int, unsigned int>* voxelTriangleIndexMap;
 };
 
 
