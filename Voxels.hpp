@@ -33,6 +33,8 @@
 #include "Image.hpp"
 #include <unordered_map>
 #include "tbb/concurrent_unordered_map.h"
+#include "tbb/mutex.h"
+#include "tbb/atomic.h"
 
 
 class Voxels

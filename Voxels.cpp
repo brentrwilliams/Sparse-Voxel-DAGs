@@ -185,6 +185,36 @@ void Voxels::build(const std::vector<Triangle> triangles)
 }
 
 
+// /**
+//  * Builds the volume of voxels from triangles
+//  */
+// void Voxels::build(const std::vector<Triangle> triangles)
+// {
+//    //unsigned int i;
+//    unsigned int stepSize = triangles.size() / 100;
+//    tbb::atomic<unsigned int> progress;
+//    tbb::mutex sm;
+
+//    parallel_for(0, triangles.size(), [&](unsigned int i) {
+
+//       tbb::mutex::scoped_lock lock;
+//       voxelizeTriangle(triangles[i], i);
+
+//       progress.fetch_and_increment()
+
+//       if (progress % (stepSize-1))
+//       {
+         
+//          lock.acquire(sm)
+//          fprintf(stderr, "%.2f\n", (((float)progress)/triangles.size()) * 100.0f);
+//          lock.release();
+//       }
+      
+//    });
+// }
+
+
+
 /**
  * Builds the volume of voxels from cache
  */
@@ -267,7 +297,7 @@ void Voxels::voxelizeTriangle(const Triangle& triangle, unsigned int i)
                // cout << "\tTriangle Normal: <" << normal.x << ", " << normal.y << ", " << normal.z << ">" << endl; 
                // cout << endl;
 
-               voxelTriangleIndexMap->insert( std::make_pair<unsigned int,unsigned int>( mortonIndex, i ) );
+               voxelTriangleIndexMap->insert( std::make_pair<unsigned int,unsigned int>( (unsigned int)mortonIndex, (unsigned int)i ) );
 
                set(x,y,z);
             }

@@ -438,7 +438,7 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
    for (unsigned int i = 0; i < sizeAtLevel[numLevels-2]; i++)
    {
       unsigned int emptyCount = getNumEmptyLeafNodes(leafNodes[i]);
-      leafEmptyCountMap->insert( std::make_pair<void*,unsigned int>( (void*) &(leafNodes[i]), emptyCount ) );
+      leafEmptyCountMap->insert( std::make_pair<void*,unsigned int>( (void*) &(leafNodes[i]), (unsigned int) emptyCount ) );
       cout << "\t" << &(leafNodes[i]) << " => " << leafNodes[i] << " = " << emptyCount << endl;
    }
    cout << endl;
@@ -539,7 +539,7 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
 
          getEmptyCount((void*)maskPtr,0);
          cout << endl;
-         currLevelsEmptyMap->insert( std::make_pair<void*,unsigned int>( (void*) (maskPtr), emptyCountsSum ) );
+         currLevelsEmptyMap->insert( std::make_pair<void*,unsigned int>( (void*) (maskPtr), (unsigned int) emptyCountsSum ) );
       }
       cout << endl;
    }
@@ -724,7 +724,7 @@ bool DAG::isSetSVO(unsigned int x, unsigned int y, unsigned int z)
    int currentLevel = numLevels;
    unsigned int mortonIndex = mortonCode(x,y,z,currentLevel);
    
-   int divBy = pow(8, currentLevel-1);
+   int divBy = pow(8.0f, (float)currentLevel-1);
    int modBy = divBy;
    int index = mortonIndex / divBy;
    

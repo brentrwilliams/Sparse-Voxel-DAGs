@@ -175,7 +175,7 @@ bool SparseVoxelOctree::isSet(unsigned int x, unsigned int y, unsigned int z)
    int currentLevel = numLevels;
    unsigned int mortonIndex = mortonCode(x,y,z,currentLevel);
    
-   int divBy = pow(8, currentLevel-1);
+   int divBy = pow(8.0f, (float)currentLevel-1);
    int modBy = divBy;
    int index = mortonIndex / divBy;
    
