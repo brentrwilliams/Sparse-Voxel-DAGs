@@ -18,6 +18,7 @@
 
 #include "Vec3.hpp"
 #include "Triangle.hpp"
+#include "PhongMaterial.hpp"
 #include "Face.hpp"
 #include "BoundingBox.hpp"
 #include <assimp/Importer.hpp>      // C++ importer interface
@@ -36,6 +37,7 @@ class OBJFile
       std::string fileName;
       BoundingBox boundingBox;
       std::vector<Triangle> triangles;
+      std::vector<PhongMaterial> materials;
       void parse();
    
    public:

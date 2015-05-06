@@ -100,6 +100,8 @@ void OBJFile::parse()
    for (int i = 0; i < scene->mNumMeshes; i++)
    {
       const struct aiMesh* mesh = scene->mMeshes[i];
+      unsigned int materialIndex = mesh->mMaterialIndex;
+      cout << "materialIndex = " << materialIndex << endl;
 
       for (int f = 0; f < mesh->mNumFaces; f++) 
       {
@@ -117,13 +119,65 @@ void OBJFile::parse()
          Vec3 v1(mesh->mVertices[vertexIndex1].x, mesh->mVertices[vertexIndex1].y, mesh->mVertices[vertexIndex1].z);
          Vec3 v2(mesh->mVertices[vertexIndex2].x, mesh->mVertices[vertexIndex2].y, mesh->mVertices[vertexIndex2].z);
 
-         Triangle triangle(v0,v1,v2);
+         Triangle triangle(v0,v1,v2,materialIndex);
          triangles.push_back(triangle);
       }
    }
 
+   for (int i = 0; i < scene->mNumMaterials; i++)
+   {
+      const struct aiMaterial* mtl = scene->mMaterials[i];
+      int ret1, ret2;
+      unsigned int max;
+      float shininess, strength;
 
+      aiColor4D kdAi;
+      aiColor4D ksAi;
+      aiColor4D kaAi;
 
+      glm::vec3 ka(0.0f,0.0f,0.0f);
+      glm::vec3 kd(0.5f,0.5f,0.5f);
+      glm::vec3 ks(0.5f,0.5f,0.5f);
+      float ns = 1.0f;
+
+      if(AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_AMBIENT, &kaAi))
+      {
+         ka = glm::vec3(kaAi.r, kaAi.g, kaAi.b);
+      }
+
+      if(AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &kdAi))
+      {
+         kd = glm::vec3(kdAi.r, kdAi.g, kdAi.b);
+      }
+
+      if(AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_SPECULAR, &ksAi))
+      {
+         ks = glm::vec3(ksAi.r, ksAi.g, ksAi.b);
+      }
+
+      max = 1;
+      ret1 = aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS, &shininess, &max);
+      max = 1;
+      ret2 = aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS_STRENGTH, &strength, &max);
+
+      cout << "ret1 = " << ret1 << endl;
+      cout << "ret2 = " << ret2 << endl;
+      if((ret2 == AI_SUCCESS))
+      {
+         ns = strength;
+      }
+
+      PhongMaterial material(ka,kd,ks,ns);
+      materials.push_back(material);
+
+      cout << endl;
+      cout << "material " << i << ":" << endl;
+      cout << "\tambient: <" << ka.x << ", " << ka.y << ", " << ka.z << ">" << endl;
+      cout << "\tdiffuse: <" << kd.x << ", " << kd.y << ", " << kd.z << ">" << endl;
+      cout << "\tspecular: <" << ks.x << ", " << ks.y << ", " << ks.z << ">" << endl;
+      cout << "\tshininess: " << ns << endl;
+      cout << endl;
+   }
 
    updateBoundingBox();
 }

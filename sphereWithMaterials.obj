@@ -1,6 +1,6 @@
 # This file uses centimeters as units for non-parametric coordinates.
 
-mtllib SphereDetailed.mtl
+mtllib sphereWithMaterials.mtl
 v -0.026298 0.000264 -0.006253
 v -0.028208 0.000264 -0.010002
 v -0.031184 0.000264 -0.012978

@@ -20,6 +20,14 @@ Triangle::Triangle(const Vec3& v0Val, const Vec3& v1Val, const Vec3& v2Val)
 {
 }
 
+Triangle::Triangle(const Vec3& v0Val, const Vec3& v1Val, const Vec3& v2Val, unsigned int materialIndexVal)
+ : v0(v0Val),
+   v1(v1Val),
+   v2(v2Val),
+   materialIndex(materialIndexVal)
+{
+}
+
 void Triangle::print() const
 {
    printf("<%f, %f, %f>, <%f, %f, %f>, <%f, %f, %f>\n", v0.x, v0.y, v0.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z);  
