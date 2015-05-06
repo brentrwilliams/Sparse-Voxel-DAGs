@@ -17,63 +17,112 @@ OBJFile::OBJFile(std::string fileNameVal)
    parse();
 }
 
+// void OBJFile::parse()
+// {
+//    std::vector<Vec3> vertices;
+//    std::vector<Face> faces;
+//    int result, tempI1, tempI2, tempI3;
+//    unsigned int i;
+//    float tempF1, tempF2, tempF3;
+//    char buffer[MAX_CHARS_PER_LINE];
+   
+//    std::ifstream objFile (fileName.c_str(), std::ifstream::in);
+   
+//    if (!(objFile.is_open() && objFile.good()))
+//    {
+//       std::cerr << "Unable to open file " << fileName << "\n";
+//       exit(1);
+//    }
+   
+//    //Read in all vertices and faces
+//    while (objFile.good())
+//    {
+//       objFile.getline(buffer, MAX_CHARS_PER_LINE);
+      
+//       result = sscanf(buffer, " v %f %f %f ", &tempF1, &tempF2, &tempF3);
+//       if (result == 3)
+//       {
+//          vertices.push_back(Vec3(tempF1, tempF2, tempF3));
+         
+//          //check for boundingBox.mins and boundingBox.maxs
+//          if (tempF1 < boundingBox.mins.x)
+//             boundingBox.mins.x = tempF1;
+//          if (tempF2 < boundingBox.mins.y)
+//             boundingBox.mins.y = tempF2;
+//          if (tempF3 < boundingBox.mins.z)
+//             boundingBox.mins.z = tempF3;
+            
+//          if (tempF1 > boundingBox.maxs.x)
+//             boundingBox.maxs.x = tempF1;
+//          if (tempF2 > boundingBox.maxs.y)
+//             boundingBox.maxs.y = tempF2;
+//          if (tempF3 > boundingBox.maxs.z)
+//             boundingBox.maxs.z = tempF3;
+//       }
+      
+//       result = sscanf(buffer, " f %d %d %d ", &tempI1, &tempI2, &tempI3);
+//       if (result == 3)
+//       {
+//          //Faces are indexed by 1 and not 0 in the .obj file
+//          faces.push_back(Face(tempI1-1, tempI2-1, tempI3-1));
+//       }
+//    }
+   
+//    //Convert the vertices and faces into triangles
+//    for (i = 0; i < faces.size(); i++)
+//    {
+//       triangles.push_back(Triangle(vertices[faces[i].v1], vertices[faces[i].v2], 
+//        vertices[faces[i].v3])); 
+//    }
+
+
+//    updateBoundingBox();
+// }
+
 void OBJFile::parse()
 {
-   std::vector<Vec3> vertices;
-   std::vector<Face> faces;
-   int result, tempI1, tempI2, tempI3;
-   unsigned int i;
-   float tempF1, tempF2, tempF3;
-   char buffer[MAX_CHARS_PER_LINE];
-   
-   std::ifstream objFile (fileName.c_str(), std::ifstream::in);
-   
-   if (!(objFile.is_open() && objFile.good()))
+   Assimp::Importer importer;
+   // And have it read the given file with some example postprocessing
+   // Usually - if speed is not the most important aspect for you - you'll 
+   // propably to request more postprocessing than we do in this example.
+   const aiScene* scene = importer.ReadFile( fileName, 
+        aiProcess_CalcTangentSpace       | 
+        aiProcess_Triangulate            |
+        aiProcess_JoinIdenticalVertices  |
+        aiProcess_SortByPType);
+  
+   // If the import failed, report it
+   if( !scene)
    {
-      std::cerr << "Unable to open file " << fileName << "\n";
-      exit(1);
+      cerr << "ERROR: Failed to import mesh!!!" << endl;
    }
-   
-   //Read in all vertices and faces
-   while (objFile.good())
+
+   for (int i = 0; i < scene->mNumMeshes; i++)
    {
-      objFile.getline(buffer, MAX_CHARS_PER_LINE);
-      
-      result = sscanf(buffer, " v %f %f %f ", &tempF1, &tempF2, &tempF3);
-      if (result == 3)
+      const struct aiMesh* mesh = scene->mMeshes[i];
+
+      for (int f = 0; f < mesh->mNumFaces; f++) 
       {
-         vertices.push_back(Vec3(tempF1, tempF2, tempF3));
-         
-         //check for boundingBox.mins and boundingBox.maxs
-         if (tempF1 < boundingBox.mins.x)
-            boundingBox.mins.x = tempF1;
-         if (tempF2 < boundingBox.mins.y)
-            boundingBox.mins.y = tempF2;
-         if (tempF3 < boundingBox.mins.z)
-            boundingBox.mins.z = tempF3;
-            
-         if (tempF1 > boundingBox.maxs.x)
-            boundingBox.maxs.x = tempF1;
-         if (tempF2 > boundingBox.maxs.y)
-            boundingBox.maxs.y = tempF2;
-         if (tempF3 > boundingBox.maxs.z)
-            boundingBox.maxs.z = tempF3;
-      }
-      
-      result = sscanf(buffer, " f %d %d %d ", &tempI1, &tempI2, &tempI3);
-      if (result == 3)
-      {
-         //Faces are indexed by 1 and not 0 in the .obj file
-         faces.push_back(Face(tempI1-1, tempI2-1, tempI3-1));
+         const struct aiFace* face = &mesh->mFaces[f];
+         if (face->mNumIndices != 3)
+         {
+            cerr << "ERROR: Found non-triangle geometry!" << endl;
+            return;
+         }
+         int vertexIndex0 = face->mIndices[0];
+         int vertexIndex1 = face->mIndices[1];
+         int vertexIndex2 = face->mIndices[2];
+
+         Vec3 v0(mesh->mVertices[vertexIndex0].x, mesh->mVertices[vertexIndex0].y, mesh->mVertices[vertexIndex0].z);
+         Vec3 v1(mesh->mVertices[vertexIndex1].x, mesh->mVertices[vertexIndex1].y, mesh->mVertices[vertexIndex1].z);
+         Vec3 v2(mesh->mVertices[vertexIndex2].x, mesh->mVertices[vertexIndex2].y, mesh->mVertices[vertexIndex2].z);
+
+         Triangle triangle(v0,v1,v2);
+         triangles.push_back(triangle);
       }
    }
-   
-   //Convert the vertices and faces into triangles
-   for (i = 0; i < faces.size(); i++)
-   {
-      triangles.push_back(Triangle(vertices[faces[i].v1], vertices[faces[i].v2], 
-       vertices[faces[i].v3])); 
-   }
+
+
 
 
    updateBoundingBox();

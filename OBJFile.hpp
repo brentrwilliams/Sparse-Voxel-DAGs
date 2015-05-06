@@ -20,11 +20,15 @@
 #include "Triangle.hpp"
 #include "Face.hpp"
 #include "BoundingBox.hpp"
+#include <assimp/Importer.hpp>      // C++ importer interface
+#include <assimp/scene.h>           // Output data structure
+#include <assimp/postprocess.h>     // Post processing flags
 
 #define MAX_CHARS_PER_LINE 256
 #define MIN_FLOAT -1000000000
 #define MAX_FLOAT 1000000000
 
+using namespace std;
 
 class OBJFile
 {

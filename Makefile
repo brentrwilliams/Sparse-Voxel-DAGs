@@ -1,5 +1,5 @@
 CC=icpc
-OPTS= -Wall -Wextra -m64 -g -pg -O3 -openmp -ltbb -std=c++11
+OPTS= -Wall -Wextra -m64 -g -pg -O3 -openmp -ltbb -std=c++11 -lassimp
 
 all: Main
 

@@ -1,4 +1,12 @@
 To Do:
+- Remove all print outs
+- Print the number of nodes at each level
+- Calculate the ammount of memory it would take if implemented most efficientlt
+- Figure out test scene that can fit in 9 voxel levels
+- Get some clarification on the level of detail a thesis needs to be written to
+
+
+Done:
 
 - Figure out what the expected normals should be
    - Print out for every set voxel, the triangle # and the normal
@@ -77,5 +85,55 @@ Voxel Number Calculation (Binary Tree) in
          - emptySum += emptyCount
          - emptyCount is the number stored next to the mask
 - shadingIndex = indexSum - emptySum
+
+Calculate the Point on the Triangle Within the Voxel That is Sampled for Normals/UVs/etc
+- Clip the triangle to the AABB creating a polygon 
+- Calculate the centroid of the polygon and return that
+   - This can be done by breaking the polygon into multiple triangles and returning the average of the area weighted centroids of the triangles
+   -  See "Centroid of a 3D shell described by 3 vertex facets" at http://paulbourke.net/geometry/polygonmesh/
+
+Clip a Triangle to AABB and find the centroid
+- 5 Cases
+   - Triangle Completely within AABB
+      - Condition: All points are within the AABB
+         - Return the centroid of the triangle
+   - 1 Plane intersection 
+      - Condition: The points are outside the AABB in only 1 axis direction (i.e. +x, -x, +y, -y, +z, or -z)
+         - Using line-plane intersection, find the points where the plane of the AABB intersect with the triangle, and add them to the set of the points that are contained within the AABB (making a convex hull)
+         - Use the Incremental Algorithm on the convex hull and return the returned triangles
+   - 2 Plane Intersection 
+      - Condition: The points are outside the AABB in only 2 axis directions (i.e. +x, -x, +y, -y, +z, or -z)
+         - Using line-plane intersection, find the points where the plane of the AABB intersect with the triangle, and add them to the set of the points that are contained within the AABB (making a convex hull)
+         - Use the Incremental Algorithm on the convex hull and return the returned triangles
+   - 3 Plane Intersection 
+      - Condition: The points are outside the AABB in only 3 axis directions (i.e. +x, -x, +y, -y, +z, or -z)
+         - Using line-plane intersection, find the points where the plane of the AABB intersect with the triangle, and add them to the set of the points that are contained within the AABB (making a convex hull)
+         - Use the Incremental Algorithm on the convex hull and return the returned triangles
+   - 4 Plane Intersection 
+      - Condition: The points are outside the AABB in only 4 axis directions (i.e. +x, -x, +y, -y, +z, or -z)
+         - Using line-plane intersection, find the points where the plane of the AABB intersect with the triangle, and add them to the set of the points that are contained within the AABB (making a convex hull)
+         - Use the Incremental Algorithm on the convex hull and return the returned triangles
+
+Incremental Algorithm
+- Sort the convex hull along the x-axis
+- P is a point in the convex hull
+- N is the number of points in the convex hull
+- for (i = 0; i <= N - 3; i++)
+   - P_i, P_i+1, P_i+2 make a triangle
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
