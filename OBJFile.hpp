@@ -37,10 +37,10 @@ class OBJFile
       std::string fileName;
       BoundingBox boundingBox;
       std::vector<Triangle> triangles;
-      std::vector<PhongMaterial> materials;
       void parse();
    
    public:
+      std::vector<PhongMaterial> materials;
       OBJFile(std::string fileNameVal);
       const BoundingBox& getBoundingBox();
       const std::vector<Triangle>& getTriangles();

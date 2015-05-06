@@ -1,4 +1,6 @@
 To Do:
+- Add material indices to the moxel table along with the material table
+
 - Remove all print outs
 - Print the number of nodes at each level
 - Calculate the ammount of memory it would take if implemented most efficientlt

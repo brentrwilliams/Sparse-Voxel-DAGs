@@ -160,11 +160,9 @@ void OBJFile::parse()
       max = 1;
       ret2 = aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS_STRENGTH, &strength, &max);
 
-      cout << "ret1 = " << ret1 << endl;
-      cout << "ret2 = " << ret2 << endl;
-      if((ret2 == AI_SUCCESS))
+      if((ret1 == AI_SUCCESS))
       {
-         ns = strength;
+         ns = shininess / 4.0f;
       }
 
       PhongMaterial material(ka,kd,ks,ns);

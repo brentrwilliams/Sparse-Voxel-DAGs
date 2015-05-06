@@ -19,6 +19,7 @@
 #include "Ray.hpp"
 #include "AABB.hpp"
 #include "MortonCode.hpp"
+#include "PhongMaterial.hpp"
 #include <algorithm>
 #include <unordered_map>
 #include "tbb/concurrent_unordered_map.h"
@@ -33,7 +34,7 @@
 class DAG : public Traceable
 {
    public:
-      DAG(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles, std::string meshFilePath);
+      DAG(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles, std::string meshFilePath, std::vector<PhongMaterial> materialsVal);
       ~DAG();
       void build(const std::vector<Triangle> triangles, std::string meshFilePath);
       void buildMoxelTable(const std::vector<Triangle> triangles);
@@ -55,7 +56,7 @@ class DAG : public Traceable
       uint64_t getEmptyCount(void* node, unsigned int index);
       uint64_t getLeafNodeEmptyCount(uint64_t leafNode, unsigned int index);
       uint64_t getLevelIndexSum(unsigned int level, unsigned int index);
-      glm::vec3 getNormalFromMoxelTable(uint32_t index);
+      void getNormalFromMoxelTable(uint32_t index, glm::vec3& normal, unsigned int& materialIndex);
       bool intersect(const Ray& ray, float& t, glm::vec3& normal, uint64_t& moxelIndex);
       bool intersect(const Ray& ray, float& t, void* node, unsigned int level, AABB aabb, glm::vec3& normal, uint64_t& moxelIndex);
 
@@ -73,6 +74,7 @@ class DAG : public Traceable
       unsigned int * sizeAtLevel; // Number nodes at a level
       void* moxelTable;
       tbb::concurrent_unordered_map<unsigned int, unsigned int>* voxelTriangleIndexMap;
+      std::vector<PhongMaterial> materials;
       
 };
 

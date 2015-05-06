@@ -19,7 +19,7 @@ int main(int argc, char const *argv[])
    unsigned int numLevels = atoi(argv[2]);
    objFile.centerMesh();
 
-   DAG dag(numLevels, objFile.getBoundingBox(), objFile.getTriangles(), filePath);
+   DAG dag(numLevels, objFile.getBoundingBox(), objFile.getTriangles(), filePath, objFile.materials);
    if (argc == 3)
    {
       dag.writeImages();

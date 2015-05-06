@@ -6,7 +6,7 @@
 
 #include "DAG.hpp"
 
-DAG::DAG(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles, std::string meshFilePath)
+DAG::DAG(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const std::vector<Triangle> triangles, std::string meshFilePath, std::vector<PhongMaterial> materialsVal)
 : boundingBox(boundingBoxVal),
    numLevels(levelsVal),
    size(pow(8, levelsVal)), 
@@ -25,6 +25,7 @@ DAG::DAG(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const 
    newLevels = new void*[numLevels-1]; // has the -1 because the last two levels are uint64's 
    boundingBox.square();
    voxelWidth = (boundingBox.maxs.x - boundingBox.mins.x) / dimension;
+   materials = materialsVal;
    build(triangles, meshFilePath);
 
    numFilledVoxels = getNumFilledVoxels();
@@ -670,7 +671,7 @@ uint64_t DAG::getNumFilledVoxels()
 
 void DAG::buildMoxelTable(const std::vector<Triangle> triangles)
 {
-   unsigned int moxelTableAllocSize = sizeof(float) * 3 * numFilledVoxels; // Only space for normals
+   unsigned int moxelTableAllocSize = ((sizeof(float) * 3) + (sizeof(unsigned int) * 1)) * numFilledVoxels; // Only space for normals and material index
    moxelTable = (void*) malloc(moxelTableAllocSize);
    unsigned int x, y, z;
    glm::vec3 boundingBoxMins(boundingBox.mins.x, boundingBoxMins.y, boundingBoxMins.z);
@@ -678,7 +679,7 @@ void DAG::buildMoxelTable(const std::vector<Triangle> triangles)
    float voxelRadius = sqrtf(2.0f) * halfVoxelWidth; // Length from center of voxel to any corner
    float epsilon = voxelRadius * 0.001f;
    float voxelRadiusPlusEpsilon = voxelRadius + epsilon;
-   float* moxelTablePointer = (float*) moxelTable;
+   void* moxelTablePointer = moxelTable;
    unsigned int moxelIndex = 0;
 
    boundingBox.print();
@@ -698,12 +699,14 @@ void DAG::buildMoxelTable(const std::vector<Triangle> triangles)
          // Calculate the normal of the triangle
          glm::vec3 normal = glm::normalize( glm::cross(v1-v0, v2-v0) );
 
-         *moxelTablePointer = (float) normal.x;
-         moxelTablePointer++;
-         *moxelTablePointer = (float) normal.y;
-         moxelTablePointer++;
-         *moxelTablePointer = (float) normal.z;
-         moxelTablePointer++;
+         *((float*)moxelTablePointer) = (float) normal.x;
+         moxelTablePointer += sizeof(float);
+         *((float*)moxelTablePointer) = (float) normal.y;
+         moxelTablePointer += sizeof(float);
+         *((float*)moxelTablePointer) = (float) normal.z;
+         moxelTablePointer += sizeof(float);
+         *((unsigned int *)moxelTablePointer) = (unsigned int) triangle.materialIndex;
+         moxelTablePointer += sizeof(unsigned int);
 
          moxelIndex++;
       }
@@ -1287,17 +1290,23 @@ bool DAG::intersect(const Ray& ray, float& t, void* node, unsigned int level, AA
 }
 
 
-glm::vec3 DAG::getNormalFromMoxelTable(uint32_t index)
+void DAG::getNormalFromMoxelTable(uint32_t index, glm::vec3& normal, unsigned int& materialIndex)
 {
    float x, y, z;
-   float* moxelTablePointer = (float*)moxelTable;
+   void* moxelTablePointer = moxelTable;
+   moxelTablePointer += ((3 * sizeof(float)) + sizeof(unsigned int)) * index;
+   
+   normal.x = *((float*)moxelTablePointer);
+   moxelTablePointer += sizeof(float);
+   
+   normal.y = *((float*)moxelTablePointer);
+   moxelTablePointer += sizeof(float);
+   
+   normal.z = *((float*)moxelTablePointer);
+   moxelTablePointer += sizeof(float);
 
-   x = moxelTablePointer[3 * index];
-   y = moxelTablePointer[(3 * index) + 1];
-   z = moxelTablePointer[(3 * index) + 2];
+   materialIndex = *((unsigned int*)moxelTablePointer);
 
-   glm::vec3 normal(x,y,z);
-   return normal;
 }
 
 
