@@ -4,3 +4,4 @@ main
 *.tga
 toyStore.mtl
 toyStore.obj
+store/*
