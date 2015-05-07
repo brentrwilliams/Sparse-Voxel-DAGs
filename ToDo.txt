@@ -1,11 +1,22 @@
 To Do:
-- Add material indices to the moxel table along with the material table
+- By Friday:
+   - Finish building scene like Bob's Toy Store
+      - Add more to the middle of the store
+      - Add materials to the meshes
+      - Change the camera to render a nicer image
+   - Remove all unneeded print outs
+   - Print the number of nodes at each level
+   - Calculate the ammount of memory it would take if implemented most efficiently
+   - Calculate what the DAG is without my thesis stuff added to it
+   - Calculate both of above for multiple different levels
+- By Monday:
+   - Render triangulated version from same perspective for visual comparison
+- If Time:
+   - Add another 64bit chunk to the DAG nodes to allow for up to 12 levels of voxelization
+   - Shadows
+   - Smooth normals
+   - Textures
 
-- Remove all print outs
-- Print the number of nodes at each level
-- Calculate the ammount of memory it would take if implemented most efficientlt
-- Figure out test scene that can fit in 9 voxel levels
-- Get some clarification on the level of detail a thesis needs to be written to
 
 
 Done:

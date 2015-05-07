@@ -22,7 +22,7 @@ int main(int argc, char const *argv[])
    DAG dag(numLevels, objFile.getBoundingBox(), objFile.getTriangles(), filePath, objFile.materials);
    if (argc == 3)
    {
-      dag.writeImages();
+      //dag.writeImages();
    }
 
    Raytracer raytracer(500,500, &dag);

@@ -11,6 +11,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream> 
+#include "tbb/mutex.h"
+#include "tbb/atomic.h"
+#include "tbb/tbb.h"
 
 using namespace std;
 using namespace glm;

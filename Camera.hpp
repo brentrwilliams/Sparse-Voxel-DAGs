@@ -30,7 +30,7 @@ class Camera
       glm::vec3 w;
       
       Camera(glm::vec3 position, glm::vec3 up, glm::vec3 right, unsigned int width, unsigned int height);
-      Ray getRay(unsigned int x, unsigned int y);
+      Ray getRay(unsigned int x, unsigned int y, float xFraction, float yFraction);
 };
 
 #endif

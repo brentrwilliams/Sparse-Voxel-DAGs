@@ -29,14 +29,14 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, glm::vec3 right, unsigned int w
 }
 
 
-Ray Camera::getRay(unsigned int x, unsigned int y)
+Ray Camera::getRay(unsigned int x, unsigned int y, float xFraction, float yFraction)
 {
    float u_s;
    float v_s;
    float w_s;
 
-   u_s = l + (r-l) * ( (x + 0.5f) / width );
-   v_s = b + (t-b) * ( (y + 0.5f) / height );
+   u_s = l + (r-l) * ( (x + 0.5f + xFraction) / width );
+   v_s = b + (t-b) * ( (y + 0.5f + yFraction) / height );
    w_s = 1.0f;
 
    glm::vec3 s = position + (u_s * u) + (v_s * v) + (w_s * w);

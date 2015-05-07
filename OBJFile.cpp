@@ -135,7 +135,7 @@ void OBJFile::parse()
       aiColor4D ksAi;
       aiColor4D kaAi;
 
-      glm::vec3 ka(0.0f,0.0f,0.0f);
+      glm::vec3 ka(0.1f,0.1f,0.1f);
       glm::vec3 kd(0.5f,0.5f,0.5f);
       glm::vec3 ks(0.5f,0.5f,0.5f);
       float ns = 1.0f;
@@ -176,6 +176,8 @@ void OBJFile::parse()
       cout << "\tshininess: " << ns << endl;
       cout << endl;
    }
+
+   cout << "Num triangles: " << triangles.size() << endl << endl;
 
    updateBoundingBox();
 }
