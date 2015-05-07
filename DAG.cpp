@@ -49,14 +49,33 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
    svoRoot = svo.root;
    unsigned int* newLevelSizes = new unsigned int[numLevels-1]();
    unsigned int newLevelIndex = numLevels-2;
+   unsigned int* dagMemoryAlocated = new unsigned int[numLevels-1];
+   unsigned int* moxelDagOptimizedMemoryAlocated = new unsigned int[numLevels-1];
+   unsigned int* prevDagMemoryAlocated = new unsigned int[numLevels-1];
+
+   unsigned int emptyCountSize[13];
+   emptyCountSize[0] = 0;
+   emptyCountSize[1] = 0;
+   emptyCountSize[2] = 0;
+   emptyCountSize[3] = 0;
+   emptyCountSize[4] = 1;
+   emptyCountSize[5] = 1;
+   emptyCountSize[6] = 1;
+   emptyCountSize[7] = 2;
+   emptyCountSize[8] = 2;
+   emptyCountSize[9] = 2;
+   emptyCountSize[10] = 3;
+   emptyCountSize[11] = 3;
+   emptyCountSize[12] = 3;
 
    voxelTriangleIndexMap = svoPtr->voxelTriangleIndexMap;
 
-   cerr << "Levels: " << endl;
-   for (int i = 0; i < 2; ++i)
-   {
-      cerr << "\t" << i << ": " << svo.countAtLevel(i) << endl;
-   }
+   cerr << "Building DAG..." << endl;
+   // cerr << "Levels: " << endl;
+   // for (int i = 0; i < 2; ++i)
+   // {
+   //    cerr << "\t" << i << ": " << svo.countAtLevel(i) << endl;
+   // }
 
    unsigned int numLeafs = size / 64;
    unsigned int sizeOfLeafs = numLeafs * sizeof(uint64_t);
@@ -69,20 +88,20 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
    {
       cerr << "Unable to allocate copyLeafVoxels\n";
    }
-   cerr << endl;
+   //cerr << endl;
 
    int parentLevelNum = numLevels-3;
    SVONode* parentLevel = (SVONode*) svo.levels[parentLevelNum];
    unsigned int numParents = numLeafs / 8;
 
-   std::cerr << "Starting leaf level (parentLevelNum: " << parentLevelNum << ")" << endl;
-   std::cerr << "numParents: " << numParents << endl;
-   std::cerr << "numChildren: " << numChildren << endl << endl;
+   std::cerr << "\tStarting leaf level (parentLevelNum: " << parentLevelNum << ")" << endl;
+   // std::cerr << "numParents: " << numParents << endl;
+   // std::cerr << "numChildren: " << numChildren << endl << endl;
 
-   cerr << "\tSorting leaf nodes..." << endl;
+   // cerr << "\tSorting leaf nodes..." << endl;
    memcpy(copyLeafVoxels, leafVoxels, sizeOfLeafs);
    std::sort(copyLeafVoxels, copyLeafVoxels + numLeafs);
-   cerr << "\tFinished sorting leaf nodes." << endl << endl;
+   //cerr << "\tFinished sorting leaf nodes." << endl << endl;
 
    // Calculate the number of unique leafs
    cerr << "\tReducing leaf nodes..." << endl;
@@ -102,7 +121,7 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
    uniqueLeafs[0] = copyLeafVoxels[0];
    newLevels[newLevelIndex] = uniqueLeafs;
    newLevelSizes[newLevelIndex] = numUniqueLeafs;
-   cout << "newLevels at leafs (newLevelIndex = " << newLevelIndex << ")" << endl;
+   // cout << "newLevels at leafs (newLevelIndex = " << newLevelIndex << ")" << endl;
    newLevelIndex--;
 
    for (unsigned int i = 0; i < numLeafs-1; ++i)
@@ -114,12 +133,12 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
       }
    }
 
-   cout << "\nuniqueLeafs: " << endl;
-   for (unsigned int i = 0; i < numUniqueLeafs; ++i)
-   {
-      std::cout << uniqueLeafs[i] << " => " << &(uniqueLeafs[i]) << "\n";
-   }
-   std::cout << endl << endl; 
+   // cout << "\nuniqueLeafs: " << endl;
+   // for (unsigned int i = 0; i < numUniqueLeafs; ++i)
+   // {
+   //    std::cout << uniqueLeafs[i] << " => " << &(uniqueLeafs[i]) << "\n";
+   // }
+   // std::cout << endl << endl; 
 
    // Free the copy of the leafs
    delete [] copyLeafVoxels;
@@ -145,7 +164,7 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
                {
                   parentLevel[i].childPointers[j] = &(uniqueLeafs[k]);
                   updateCount++;
-                  cerr << "\t\tUpdate: " << updateCount << "\t=> "  << childValue << " &=> " << &(uniqueLeafs[k]) << endl;
+                  //cerr << "\t\tUpdate: " << updateCount << "\t=> "  << childValue << " &=> " << &(uniqueLeafs[k]) << endl;
                   foundUpdate = true;
                }
             }
@@ -158,7 +177,7 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
       }
    }
    cerr << "\tFinished adjusting parent node's pointer's to unique children." << endl << endl;
-   std::cerr << "Finished leaf level (parentLevelNum: " << parentLevelNum << ")" << endl << endl << endl;
+   //std::cerr << "Finished leaf level (parentLevelNum: " << parentLevelNum << ")" << endl << endl << endl;
 
    parentLevelNum--;
 
@@ -174,17 +193,17 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
       numParents /= 8;
       unsigned int sizeofChildren = sizeof(SVONode) * numChildren;
 
-      std::cerr << "Starting parentLevelNum: " << parentLevelNum << endl;
-      std::cerr << "numParents: " << numParents << endl;
-      std::cerr << "numChildren: " << numChildren << endl << endl;
+      std::cerr << "\tStarting parentLevelNum: " << parentLevelNum << endl;
+      // std::cerr << "numParents: " << numParents << endl;
+      // std::cerr << "numChildren: " << numChildren << endl << endl;
 
       // Sort the child level based on the pointers of each child node
-      cerr << "\tSorting child nodes..." << endl;
+      // cerr << "\tSorting child nodes..." << endl;
       SVONode* copyChildNodes = new SVONode[numChildren];
       memcpy(copyChildNodes, childLevel, sizeofChildren);
       std::sort(copyChildNodes, copyChildNodes + numChildren);
 
-      cout << "copyChildNodes (at parentLevel " << parentLevelNum << "): " << endl;
+      //cout << "copyChildNodes (at parentLevel " << parentLevelNum << "): " << endl;
       for (unsigned int i = 0; i < numChildren; i++)
       {
          cout << &copyChildNodes[i] << ": ";
@@ -192,10 +211,10 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
       }
       cout << endl;
 
-      cerr << "\tFinished sorting child nodes." << endl << endl;
+      // cerr << "\tFinished sorting child nodes." << endl << endl;
 
       //Reducing child nodes
-      cerr << "\tReducing child nodes..." << endl;
+      // cerr << "\tReducing child nodes..." << endl;
       unsigned int numUniqueChildren = 1;
       for (unsigned int i = 0; i < numChildren-1; ++i)
       {
@@ -212,7 +231,7 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
       uniqueChildIndex++;
       newLevels[newLevelIndex] = uniqueChildren;
       newLevelSizes[newLevelIndex] = numUniqueChildren;
-      cout << "newLevels at newLevelIndex = " << newLevelIndex << endl;
+      //cout << "newLevels at newLevelIndex = " << newLevelIndex << endl;
       newLevelIndex--;
       for (unsigned int i = 0; i < numChildren-1; ++i)
       {
@@ -224,10 +243,10 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
       }
       delete [] copyChildNodes;
 
-      cerr << "\tFinished reducing child nodes." << endl << endl;
+      //cerr << "\tFinished reducing child nodes." << endl << endl;
 
       // Reducing child nodes
-      cerr << "\tAdjusting parent node's pointer's to unique children..." << endl;
+      //cerr << "\tAdjusting parent node's pointer's to unique children..." << endl;
       updateCount = 0;
       bool foundUpdate = false;
       for (unsigned int i = 0; i < numParents; i++)
@@ -248,7 +267,7 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
                   {
                      parentLevel[i].childPointers[j] = &(uniqueChildren[k]);
                      updateCount++;
-                     cerr << "\t\tUpdate: " << updateCount << " &=> " << &(uniqueChildren[k]) << endl;
+                     //cerr << "\t\tUpdate: " << updateCount << " &=> " << &(uniqueChildren[k]) << endl;
                      foundUpdate = true;
                   }
                }
@@ -261,7 +280,7 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
          }
       }
 
-      cerr << "\tFinished adjusting parent node's pointer's to unique children." << endl << endl;
+      //cerr << "\tFinished adjusting parent node's pointer's to unique children." << endl << endl;
 
       std::cerr << "Finished parentLevelNum: " << parentLevelNum << endl << endl << endl;
       parentLevelNum--;
@@ -274,12 +293,12 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
    svoRoot = newRoot;
    newLevelSizes[0] = 1;
 
-   cerr << "After updated SVO root:" << endl; 
-   for (int i = 0; i < 8; ++i)
-   {
-      cerr << "\t" << newRoot->childPointers[i] << endl;
-   }
-   cerr << endl;
+   //cerr << "After updated SVO root:" << endl; 
+   // for (int i = 0; i < 8; ++i)
+   // {
+   //    cerr << "\t" << newRoot->childPointers[i] << endl;
+   // }
+   // cerr << endl;
 
    cout << "Num unique nodes at level:" << endl;
    for (unsigned int i = 0; i < numLevels-1; ++i)
@@ -305,11 +324,18 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
 
       // A level is made up of              the pointers in the nodes,     the masks of the nodes, and the space for the empty counts (the first 8 bits is for the mask and the next 56+64+64 bits is for the empty node counts)
       levels[levelIndex] = (void*)malloc( (pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * 3 * sizeof(uint64_t)) );
-      cerr << levelIndex << ": " << ( (pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * 3 * sizeof(uint64_t)) ) / 8 << " uint64_t's or void*'s" << endl;
+      //cerr << levelIndex << ": " << ( (pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * 3 * sizeof(uint64_t)) ) / 8 << " uint64_t's or void*'s" << endl;
+      dagMemoryAlocated[levelIndex] = (pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * 3 * sizeof(uint64_t));
+      prevDagMemoryAlocated[levelIndex] = (pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * 1 * sizeof(uint64_t));      
+      moxelDagOptimizedMemoryAlocated[levelIndex] = (pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * (1 + emptyCountSize[levelIndex+2]) * sizeof(uint64_t));
+
       sizeAtLevel[levelIndex] = newLevelSizes[levelIndex];
    }
-   cerr << levelIndex << " (leafs): " << numUniqueLeafs << " uint64_t's or void*'s" << endl << endl;
+   //cerr << levelIndex << " (leafs): " << numUniqueLeafs << " uint64_t's or void*'s" << endl << endl;
    sizeAtLevel[levelIndex] = numUniqueLeafs;
+   dagMemoryAlocated[levelIndex] = numUniqueLeafs * sizeof(uint64_t);
+   prevDagMemoryAlocated[levelIndex] = numUniqueLeafs * sizeof(uint64_t);
+   moxelDagOptimizedMemoryAlocated[levelIndex] = numUniqueLeafs * sizeof(uint64_t);
 
    // Just use the already allocated leafs of the compacted SVO instead of allocating a new one
    levels[numLevels-2] = newLevels[numLevels-2];
@@ -326,7 +352,7 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
       maskPtr = (uint64_t*) currPtr;
       // Make a mapping from the address of the node of the compacted SVO to what the address is of the new DAG node
       leafParentMapping->insert( std::make_pair<void*,void*>( (void*) &((SVONode*) newLevels[currentLevelIndex])[i], (void*)maskPtr ) );
-      cout << "Adding to Map: " << "( " <<  (void*) &((SVONode*) newLevels[currentLevelIndex])[i] << ", " << (void*)maskPtr << " )" << endl;
+      //cout << "Adding to Map: " << "( " <<  (void*) &((SVONode*) newLevels[currentLevelIndex])[i] << ", " << (void*)maskPtr << " )" << endl;
       
       // Move 3 x 64bit sections down to get to where the child pointers should be
       currPtr+=3;
@@ -342,10 +368,10 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
             uint64_t* pointerToChild = (uint64_t*) ((SVONode*) newLevels[currentLevelIndex])[i].childPointers[j];
             uint64_t* pointerToStartOfChildsLevel = (uint64_t*)levels[numLevels-2];
             // *currPtr = pointerToChild;
-            cout << "pointer to child = " << pointerToChild << endl;
-            cout << "pointer to start of child's level = " << pointerToStartOfChildsLevel << endl;
+            //cout << "pointer to child = " << pointerToChild << endl;
+            //cout << "pointer to start of child's level = " << pointerToStartOfChildsLevel << endl;
             uint64_t offset = (uint64_t)(pointerToChild - pointerToStartOfChildsLevel);
-            cout << "\toffset = " << offset << endl << endl;
+            //cout << "\toffset = " << offset << endl << endl;
             *currPtr = offset;
 
             mask |= toOr;
@@ -361,8 +387,8 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
    // For each levels nodes: set the mask 
    for (int levelIndex = numLevels-4; levelIndex >= 0; levelIndex--)
    {
-      cout << "Working at level: " << levelIndex << endl;
-      cerr << "Level " << levelIndex << endl;
+      //cout << "Working at level: " << levelIndex << endl;
+      cerr << "\tSetting Mask for Level " << levelIndex << endl;
       
       // Update the maps releasing previous, setting previous to current, and creating a new current
       delete prevLevelsMap;
@@ -376,18 +402,18 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
          uint64_t mask = 0;
          maskPtr = (uint64_t*) currPtr;
          currLevelsMap->insert( std::make_pair<void*,void*>( (void*) &((SVONode*) newLevels[levelIndex])[i], (void*)maskPtr ) );
-         cout << "\tAdding to the map: ( " << &((SVONode*) newLevels[levelIndex])[i] << ", " << (void*)maskPtr << " )" << endl;
+         //cout << "\tAdding to the map: ( " << &((SVONode*) newLevels[levelIndex])[i] << ", " << (void*)maskPtr << " )" << endl;
          
          // Move 3 x 64bit sections down to get to where the child pointers should be
          currPtr+=3;
          
-         cerr << "\t";
+         //cerr << "\t";
          for (int j = 0; j < 8; j++)
          {
             if ( ((SVONode*) newLevels[levelIndex])[i].childPointers[j] != NULL)
             {
                uint64_t toOr = 1 << j;
-               cout << "Searching for[" << j << "]: " << ((SVONode*) newLevels[levelIndex])[i].childPointers[j] << endl;
+               //cout << "Searching for[" << j << "]: " << ((SVONode*) newLevels[levelIndex])[i].childPointers[j] << endl;
 
                //***
                // Set the child pointer to the pointer of the new DAG/leaf node that is found from the mapping of the previous level
@@ -395,47 +421,48 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
                uint64_t* pointerToChild = (uint64_t*) prevLevelsMap->at( ((SVONode*) newLevels[levelIndex])[i].childPointers[j] );
                uint64_t* pointerToStartOfChildsLevel = (uint64_t*) levels[levelIndex+1];
                // *currPtr = pointerToChild;
-               cout << "\tReturned value: " << pointerToChild<< endl;
-               cout << "pointer to child = " << pointerToChild << endl;
-               cout << "pointer to start of child's level = " << pointerToStartOfChildsLevel << endl;
+               // cout << "\tReturned value: " << pointerToChild<< endl;
+               // cout << "pointer to child = " << pointerToChild << endl;
+               // cout << "pointer to start of child's level = " << pointerToStartOfChildsLevel << endl;
                uint64_t offset = (uint64_t)(pointerToChild - pointerToStartOfChildsLevel);
-               cout << "\toffset = " << offset << endl << endl;
+               // cout << "\toffset = " << offset << endl << endl;
                *currPtr = offset;
                
                mask |= toOr;
-               cerr << "1";
+               // cerr << "1";
                currPtr++;
             }
             else 
             {
-               cerr << "0";
+               // cerr << "0";
             }
          }
-         cerr << endl;
-         cerr << "\tmask(" << maskPtr << "): " << mask << endl << endl;
+         // cerr << endl;
+         // cerr << "\tmask(" << maskPtr << "): " << mask << endl << endl;
          *maskPtr = mask;
       }
-      cout << endl;
+      // cout << endl;
+      cerr << "\tFinished Setting Mask for Level " << levelIndex << endl;
    }
    root=levels[0];
 
-   cout << "\nsizeAtLevel: " << endl;
-   for (unsigned int i = 0; i < numLevels-1; ++i)
-   {
-      cout << i << " (" << levels[i] << ")" << ": " << sizeAtLevel[i] << endl;
-   }
-   cout << endl;
+   //cout << "\nsizeAtLevel: " << endl;
+   // for (unsigned int i = 0; i < numLevels-1; ++i)
+   // {
+   //    cout << i << " (" << levels[i] << ")" << ": " << sizeAtLevel[i] << endl;
+   // }
+   // cout << endl;
 
    
    //*** Calculate and set the empty counts ***\\
-   cout << "Calculating empty counts" << endl << endl;
+   //cout << "\tCalculating empty counts" << endl << endl;
 
    // For each unique leaf node calculate its empty counts and put it in a map with the key 
    // as its memory address and its value as the empty count
    uint64_t* leafNodes = (uint64_t*) levels[numLevels-2];
    unordered_map<void*, unsigned int>* leafEmptyCountMap = new unordered_map<void*, unsigned int>;
 
-   cout << "Level " << numLevels-2 << " (leafs)" << endl;
+   //cout << "Level " << numLevels-2 << " (leafs)" << endl;
    for (unsigned int i = 0; i < sizeAtLevel[numLevels-2]; i++)
    {
       unsigned int emptyCount = getNumEmptyLeafNodes(leafNodes[i]);
@@ -449,7 +476,7 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
    // for each level above the leafs
    for (int levelIndex = numLevels-3; levelIndex >= 0; levelIndex--)
    {
-      cout << "Level " << levelIndex << endl;
+      //cout << "Level " << levelIndex << endl;
       // Update the maps releasing previous, setting previous to current, and creating a new current
       delete prevLevelsEmptyMap;
       prevLevelsEmptyMap = currLevelsEmptyMap;
@@ -474,7 +501,7 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
                uint64_t offset = (uint64_t) *currPtr;;
                uint64_t* childPointer = pointerToStartOfChildsLevel + offset;
                emptyCounts[j] = prevLevelsEmptyMap->at((void*)childPointer);
-               cout << "\t[ " <<  (void*)childPointer << " ] = " << emptyCounts[j] << endl;
+               //cout << "\t[ " <<  (void*)childPointer << " ] = " << emptyCounts[j] << endl;
                currPtr++;
             }
             else
@@ -486,7 +513,7 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
                   emptyBranchCount *= 8;
                }
                emptyCounts[j] = emptyBranchCount;
-               cout << "\t[                ] = " << emptyCounts[j] << endl;
+               //cout << "\t[                ] = " << emptyCounts[j] << endl;
             }
             emptyCountsSum += emptyCounts[j];
          }
@@ -539,11 +566,49 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
          //END Setting the empty counts next to the mask
 
          getEmptyCount((void*)maskPtr,0);
-         cout << endl;
+         //cout << endl;
          currLevelsEmptyMap->insert( std::make_pair<void*,unsigned int>( (void*) (maskPtr), (unsigned int) emptyCountsSum ) );
       }
-      cout << endl;
+      //cout << endl;
    }
+   cerr << "Finished Building DAG..." << endl << endl; 
+
+   cerr << "\nUnique Nodes at Level: " << endl;
+   for (unsigned int i = 0; i < numLevels-1; ++i)
+   {
+      cerr << i << ": " << sizeAtLevel[i] << endl;
+   }
+
+   cerr << "\nMoxel DAG Memory Size (in bytes) at Level: " << endl;
+   unsigned int totalMoxelDagMemory = 0;
+   for (unsigned int i = 0; i < numLevels-1; ++i)
+   {
+      cerr << i << ": " << dagMemoryAlocated[i] << endl;
+      totalMoxelDagMemory += dagMemoryAlocated[i];
+   }
+   cerr << endl;
+
+   cerr << "\nOptimized Moxel DAG Memory Size (in bytes) at Level: " << endl;
+   unsigned int totalOptMoxelDagMemory = 0;
+   for (unsigned int i = 0; i < numLevels-1; ++i)
+   {
+      cerr << i << ": " << moxelDagOptimizedMemoryAlocated[i] << endl;
+      totalOptMoxelDagMemory += moxelDagOptimizedMemoryAlocated[i];
+   }
+   cerr << endl;
+
+   cerr << "\nRegular DAG Memory Size (in bytes) at Level: " << endl;
+   unsigned int totalDagMemory = 0;
+   for (unsigned int i = 0; i < numLevels-1; ++i)
+   {
+      cerr << i << ": " << prevDagMemoryAlocated[i] << endl;
+      totalDagMemory += prevDagMemoryAlocated[i];
+   }
+   cerr << endl;
+
+   cerr << "Moxel DAG Memory Size: " << totalMoxelDagMemory << endl;
+   cerr << "Optimized Moxel DAG Memory Size: " << totalOptMoxelDagMemory << endl;
+   cerr << "Regular DAG Memory Size: " << totalDagMemory << endl;
 
 }
 
@@ -683,7 +748,7 @@ void DAG::buildMoxelTable(const std::vector<Triangle> triangles)
    unsigned int moxelIndex = 0;
 
    boundingBox.print();
-   cout << "Creating moxel table for size " << size <<  "..." << endl;
+   cerr << "Creating moxel table for size " << size <<  "..." << endl;
 
    for (uint32_t i = 0; i < size; i++)
    {
@@ -711,6 +776,7 @@ void DAG::buildMoxelTable(const std::vector<Triangle> triangles)
          moxelIndex++;
       }
    }
+   cerr << "Finished Creating moxel table" << endl;
 }
 
 

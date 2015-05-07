@@ -37,6 +37,10 @@ void Raytracer::trace()
 
    float numPixels = imageWidth * imageHeight;
 
+   unsigned int stepSize = (imageWidth * imageHeight) / 10000;
+   unsigned int progress = 0;
+   
+
    for (unsigned int y = 0; y < imageHeight; y++)
    {
       for (unsigned int x = 0; x < imageWidth; x++)
@@ -91,11 +95,11 @@ void Raytracer::trace()
             colorSum += color;
          }
          colorSum /= 5.0f;
+
          image.addColor(y,x, colorSum);
-      }
-      
-      float percentageDone = ((y * imageWidth) / numPixels) * 100.0f;
-      cerr << percentageDone << "%" << endl;  
+      }  
+      float percentDone = ((float) y) / ((float)imageHeight);
+      cerr << (percentDone * 100.0f) << "%" << endl;
    }
    cerr << "100%" << endl;
 }
