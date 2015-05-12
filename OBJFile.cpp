@@ -195,7 +195,7 @@ const BoundingBox& OBJFile::getBoundingBox()
 /**
  * Returns a vector of all the triangles in the obj file.
  */
-const std::vector<Triangle>& OBJFile::getTriangles()
+std::vector<Triangle>& OBJFile::getTriangles()
 {
    return triangles;
 }

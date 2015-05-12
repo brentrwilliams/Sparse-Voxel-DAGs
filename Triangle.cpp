@@ -111,3 +111,99 @@ const Vec3 Triangle::getNormal() const
    return Vec3(crossX, crossY, crossZ);
 }
 
+glm::vec3 Triangle::getGLMNormal()
+{
+   // Calculate b0 and b1
+   float b0x = v1.x - v0.x;
+   float b0y = v1.y - v0.y;
+   float b0z = v1.z - v0.z;
+   
+   float b1x = v2.x - v1.x;
+   float b1y = v2.y - v1.y;
+   float b1z = v2.z - v1.z;
+   
+   // Cross 
+   //Vec3(b0.y*b1.z - b0.z*b1.y, b0.z*b1.x - b0.x*b1.z, b0.x*b1.y - b0.y*b1.x);
+   float crossX = b0y*b1z - b0z*b1y;
+   float crossY = b0z*b1x - b0x*b1z;
+   float crossZ = b0x*b1y - b0y*b1x;
+   
+   //Normalize
+   float len = sqrtf(crossX*crossX + crossY*crossY + crossZ*crossZ); 
+   crossX /= len;
+   crossY /= len;
+   crossZ /= len;
+   
+   
+   return glm::vec3(crossX, crossY, crossZ);
+}
+
+bool Triangle::intersect(Ray ray, float& t)
+{
+   float a, b, c, d, e, f, g, h, i, j, k, l, M, beta, gamma;
+   float ei_minus_hf, gf_minus_di, dh_minus_eg, ak_minus_jb, jc_minus_al, bl_minus_kc;
+   
+   a = v0.x - v1.x;
+   b = v0.y - v1.y;
+   c = v0.z - v1.z;
+   
+   d = v0.x - v2.x;
+   e = v0.y - v2.y;
+   f = v0.z - v2.z;
+   
+   g = ray.direction.x;
+   h = ray.direction.y;
+   i = ray.direction.z;
+   
+   j = v0.x - ray.position.x;
+   k = v0.y - ray.position.y;
+   l = v0.z - ray.position.z;
+   
+   ei_minus_hf = (e*i - h*f);
+   gf_minus_di = (g*f - d*i);
+   dh_minus_eg = (d*h - e*g);
+   
+   ak_minus_jb = (a*k - j*b);
+   jc_minus_al = (j*c - a*l);
+   bl_minus_kc = (b*l - k*c);
+   
+   M = a*ei_minus_hf + b*gf_minus_di + c*dh_minus_eg;
+   
+   t = - (f*ak_minus_jb + e*jc_minus_al + d*bl_minus_kc) / M;
+   if (t < 0)
+      return false;
+   
+   gamma = (i*ak_minus_jb + h*jc_minus_al + g*bl_minus_kc) / M;
+   if (gamma < 0 || gamma > 1)
+      return false;
+      
+   beta = (j*ei_minus_hf + k*gf_minus_di + l*dh_minus_eg) / M;
+   if (beta < 0 || beta > 1 - gamma)
+      return false;
+   
+   
+   return true;
+}
+
+BVHBoundingBox Triangle::getBVHBoundingBox()
+{
+   Vec3 mins = getMins();
+   Vec3 maxs = getMaxs();
+   BVHBoundingBox bb(glm::vec3(mins.x,mins.y,mins.z), glm::vec3(maxs.x,maxs.y,maxs.z));
+   return bb;
+}
+
+float Triangle::getCenterX()
+{
+   return (v0.x + v1.x +v2.x) * 0.333333333f; 
+}
+
+float Triangle::getCenterY()
+{
+   return (v0.y + v1.y +v2.y) * 0.333333333f; 
+}
+
+float Triangle::getCenterZ()
+{
+   return (v0.z + v1.z +v2.z) * 0.333333333f; 
+}

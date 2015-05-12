@@ -8,8 +8,11 @@
 #define TRIANGLE_HPP
 
 #include <stdio.h>
+#include <glm/glm.hpp>
 
 #include "Vec3.hpp"
+#include "Ray.hpp"
+#include "BVHBoundingBox.hpp"
 
 class Triangle 
 {
@@ -24,6 +27,12 @@ class Triangle
       const Vec3 getMins() const;
       const Vec3 getMaxs() const;
       const Vec3 getNormal() const;
+      glm::vec3 getGLMNormal();
+      bool intersect(Ray ray, float& t);
+      BVHBoundingBox getBVHBoundingBox();
+      float getCenterX();
+      float getCenterY();
+      float getCenterZ();
 };
 
 #endif

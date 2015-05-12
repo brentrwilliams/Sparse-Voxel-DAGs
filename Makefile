@@ -1,12 +1,30 @@
 CC=icpc
 OPTS= -Wall -Wextra -m64 -g -pg -O3 -openmp -ltbb -std=c++11 -lassimp
 
-all: Main
+all: Main TriMain
 
 test: Main
 
-Main: Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o DAG.o Node.o Voxels.o MortonCode.o SVONode.o DAGNode.o Image.o Raytracer.o Ray.o PhongMaterial.o AABB.o Camera.o Makefile
-	$(CC) -o main Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o DAG.o Node.o Voxels.o MortonCode.o SVONode.o DAGNode.o Image.o Raytracer.o Ray.o PhongMaterial.o AABB.o Camera.o $(OPTS)
+Main: Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o DAG.o Node.o Voxels.o MortonCode.o SVONode.o DAGNode.o Image.o Raytracer.o Ray.o PhongMaterial.o AABB.o Camera.o BVHBoundingBox.o Makefile
+	$(CC) -o main Main.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o DAG.o Node.o Voxels.o MortonCode.o SVONode.o DAGNode.o Image.o Raytracer.o Ray.o PhongMaterial.o AABB.o Camera.o BVHBoundingBox.o $(OPTS)
+
+TriMain: TriMain.o TriangleRaytracer.o BVHBoundingBox.o BoundingVolumeHierarchy.o Scene.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o DAG.o Node.o Voxels.o MortonCode.o SVONode.o DAGNode.o Image.o Raytracer.o Ray.o PhongMaterial.o AABB.o Camera.o BVHBoundingBox.o Makefile
+	$(CC) -o trimain TriMain.o TriangleRaytracer.o BVHBoundingBox.o BoundingVolumeHierarchy.o Scene.o Vec2.o Vec3.o Triangle.o Face.o OBJFile.o Intersect.o BoundingBox.o SparseVoxelOctree.o DAG.o Node.o Voxels.o MortonCode.o SVONode.o DAGNode.o Image.o Raytracer.o Ray.o PhongMaterial.o AABB.o Camera.o BVHBoundingBox.o $(OPTS)
+
+TriMain.o: TriMain.cpp TriMain.hpp
+	$(CC) -c TriMain.cpp $(OPTS)
+
+BVHBoundingBox.o: BVHBoundingBox.cpp BVHBoundingBox.hpp
+	$(CC) -c BVHBoundingBox.cpp $(OPTS)
+
+BoundingVolumeHierarchy.o: BoundingVolumeHierarchy.cpp BoundingVolumeHierarchy.hpp
+	$(CC) -c BoundingVolumeHierarchy.cpp $(OPTS)
+
+Scene.o: Scene.cpp Scene.hpp
+	$(CC) -c Scene.cpp $(OPTS)
+
+TriangleRaytracer.o: TriangleRaytracer.cpp TriangleRaytracer.hpp
+	$(CC) -c TriangleRaytracer.cpp $(OPTS)
 
 Camera.o: Camera.cpp Camera.hpp
 	$(CC) -c Camera.cpp $(OPTS) 

@@ -1,17 +1,10 @@
 To Do:
-- By Friday:
-   - Finish building scene like Bob's Toy Store
-      - Add more to the middle of the store
-      - Add materials to the meshes
-      - Change the camera to render a nicer image
-   - Remove all unneeded print outs
-   - Print the number of nodes at each level
-   - Calculate the ammount of memory it would take if implemented most efficiently
-   - Calculate what the DAG is without my thesis stuff added to it
-   - Calculate both of above for multiple different levels
 - By Monday:
+   - Implement BVH to speed up triangle-mesh scene intersection
    - Render triangulated version from same perspective for visual comparison
 - If Time:
+   - - Make toy store scene nicer
+      - Change the camera to render a nicer image
    - Add another 64bit chunk to the DAG nodes to allow for up to 12 levels of voxelization
    - Shadows
    - Smooth normals

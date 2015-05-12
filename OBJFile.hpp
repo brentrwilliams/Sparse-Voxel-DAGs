@@ -43,7 +43,7 @@ class OBJFile
       std::vector<PhongMaterial> materials;
       OBJFile(std::string fileNameVal);
       const BoundingBox& getBoundingBox();
-      const std::vector<Triangle>& getTriangles();
+      std::vector<Triangle>& getTriangles();
       unsigned int getNumTriangles();
       void centerMesh();
       void updateBoundingBox();

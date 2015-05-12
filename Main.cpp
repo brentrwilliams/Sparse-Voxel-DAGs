@@ -13,6 +13,9 @@ int main(int argc, char const *argv[])
       perror("Missing arguments.\n Exitting\n");
       exit(1);
    }
+
+   unsigned int imageWidth = 500;
+   unsigned int imageHeight = 500;
    
    std::string filePath(argv[1]);
    OBJFile objFile(filePath);
@@ -25,7 +28,7 @@ int main(int argc, char const *argv[])
       //dag.writeImages();
    }
 
-   Raytracer raytracer(500,500, &dag);
+   Raytracer raytracer(imageWidth, imageHeight, &dag);
    raytracer.trace();
    raytracer.writeImage("images/raytraced/image.tga");
 
