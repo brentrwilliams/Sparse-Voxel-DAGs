@@ -67,10 +67,10 @@ void TriangleRaytracer::trace()
 
             if (scene.intersect(ray, t, triangle))
             {
+               cout << "HIT!" << endl;
                glm::vec3 hitPosition = ray.position + (t * ray.direction);
                normal = triangle.getGLMNormal();
                color = scene.materials[triangle.materialIndex].calculateSurfaceColor(ray, hitPosition, normal);
-
             }
             else
             {

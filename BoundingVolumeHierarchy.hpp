@@ -22,7 +22,7 @@ class BVHNode {
    public:
       BVHNode();
       BVHNode(BVHBoundingBox boundingBox, Triangle *triangle, BVHNode *left, BVHNode *right);
-      bool intersect(Ray ray, float *t, Triangle **trianglePtr);
+      bool intersect(Ray ray, float *t, Triangle& returnTriangle);
       
       BVHBoundingBox boundingBox;
       Triangle *triangle;
@@ -37,7 +37,7 @@ class BoundingVolumeHierarchy
       
       BoundingVolumeHierarchy(vector<Triangle*> triangle);
       BVHNode* generateNode(vector<Triangle*> triangle, int axis);
-      bool intersect(Ray ray, float *t, Triangle **trianglePtr);
+      bool intersect(Ray ray, float *t, Triangle& returnTriangle);
       
 };
 

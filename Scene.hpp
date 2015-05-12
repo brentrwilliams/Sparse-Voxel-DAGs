@@ -15,6 +15,7 @@
 #include "omp.h"
 #include "Ray.hpp"
 #include "PhongMaterial.hpp"
+#include "BoundingVolumeHierarchy.hpp"
 
 using namespace std;
 
@@ -23,6 +24,7 @@ class Scene
    public:
       vector<Triangle> triangles;
       vector<PhongMaterial> materials;
+      BoundingVolumeHierarchy *bvh;
 
       Scene();
       Scene(vector<Triangle>& triangles, vector<PhongMaterial> materials);

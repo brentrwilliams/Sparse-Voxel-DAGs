@@ -55,11 +55,11 @@ BoundingVolumeHierarchy::BoundingVolumeHierarchy(vector<Triangle*> triangles)
    tree = generateNode(triangles, 0);
 }
 
-bool BVHNode::intersect(Ray ray, float *t, Triangle **trianglePtr)
+bool BVHNode::intersect(Ray ray, float *t, Triangle& returnTriangle)
 {
    bool leftBool, rightBool;
    float lt, rt;
-   Triangle *lGeo, *rGeo;
+   Triangle lGeo, rGeo;
 
    if (boundingBox.intersect(ray))
    {
@@ -69,36 +69,36 @@ bool BVHNode::intersect(Ray ray, float *t, Triangle **trianglePtr)
             printf("NULL LEFT!\n");
          if (left == NULL)
             printf("NULL RIGHT!\n");
-         leftBool = left->intersect(ray, &lt, &lGeo);
-         rightBool = right->intersect(ray, &rt, &rGeo);
+         leftBool = left->intersect(ray, &lt, lGeo);
+         rightBool = right->intersect(ray, &rt, rGeo);
          
          if (leftBool && rightBool)
          {
             if (lt < rt)
             {
                *t = lt;
-               *trianglePtr = lGeo;
+               returnTriangle = lGeo;
             }
             else
             {
                *t = rt;
-               *trianglePtr = rGeo;
+               returnTriangle = rGeo;
             }
-            //cout << "\t" << *trianglePtr << endl;
+            //cout << "\t" << *returnTriangle << endl;
             return true;
          }
          else if (leftBool)
          {
             *t = lt;
-            *trianglePtr = lGeo;
-            //cout << "\t" << *trianglePtr << endl;
+            returnTriangle = lGeo;
+            //cout << "\t" << *returnTriangle << endl;
             return true;
          }
          else if (rightBool)
          {
             *t = rt;
-            *trianglePtr = rGeo;
-            //cout << "\t" << *trianglePtr << endl;
+            returnTriangle = rGeo;
+            //cout << "\t" << *returnTriangle << endl;
             return true;
          }
          else
@@ -107,23 +107,27 @@ bool BVHNode::intersect(Ray ray, float *t, Triangle **trianglePtr)
       }
       else //It is a leaf node
       {
+         // cout << "At leaf!!!" << endl;
          Ray transformedRay = (ray);
          // transformedRay.toObjectSpace(triangle->invTrans);
 
-         *trianglePtr = triangle;
-         //cout << "End: " << *trianglePtr << endl;
+         returnTriangle = *triangle;
+         //cout << "End: " << *returnTriangle << endl;
          return triangle->intersect(transformedRay, *t);
       }
    }
    else
+   {
       return false;
+   }
    
    return false;
 }
 
-bool BoundingVolumeHierarchy::intersect(Ray ray, float *t, Triangle **trianglePtr)
+bool BoundingVolumeHierarchy::intersect(Ray ray, float *t, Triangle& returnTriangle)
 {
-   return tree->intersect(ray, t, trianglePtr);
+   // cerr << "tree: " << tree << endl;
+   return tree->intersect(ray, t, returnTriangle);
 }
 
 bool compareTrianglesX(Triangle *t1, Triangle *t2)
