@@ -23,17 +23,17 @@ void TriangleRaytracer::trace()
    float ns = 20.0;
    PhongMaterial phongMat(ka,kd,ks,ns);
 
-   // bigBunny Camera
-   glm::vec3 cameraPosition(10.25f,0.0f,10.25f);
-   glm::vec3 cameraRight = glm::normalize(glm::vec3(1.0f,0.0f,-1.0f));
-   glm::vec3 cameraUp = glm::normalize(glm::vec3(0.0f,1.0f,0.0f));
-   Camera camera(cameraPosition, cameraRight, cameraUp, imageWidth, imageHeight);
-
-   // // toyStore Camera
-   // glm::vec3 cameraPosition(25.25f,0.0f,25.25f);
+   // // bigBunny Camera
+   // glm::vec3 cameraPosition(10.25f,0.0f,10.25f);
    // glm::vec3 cameraRight = glm::normalize(glm::vec3(1.0f,0.0f,-1.0f));
    // glm::vec3 cameraUp = glm::normalize(glm::vec3(0.0f,1.0f,0.0f));
    // Camera camera(cameraPosition, cameraRight, cameraUp, imageWidth, imageHeight);
+
+   // toyStore Camera
+   glm::vec3 cameraPosition(25.25f,0.0f,25.25f);
+   glm::vec3 cameraRight = glm::normalize(glm::vec3(1.0f,0.0f,-1.0f));
+   glm::vec3 cameraUp = glm::normalize(glm::vec3(0.0f,1.0f,0.0f));
+   Camera camera(cameraPosition, cameraRight, cameraUp, imageWidth, imageHeight);
 
    float numPixels = imageWidth * imageHeight;
 
