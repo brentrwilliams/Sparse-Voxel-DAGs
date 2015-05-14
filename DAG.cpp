@@ -37,6 +37,22 @@ DAG::~DAG()
 {
 }
 
+void printBinaryVal(uint64_t val)
+{
+   for (int i = 0; i < 64; ++i)
+   {
+      uint64_t mask = 1L << (64 - 1 - i);
+      if (mask & val)
+      {
+         cout << "1";
+      }
+      else
+      {
+         cout << "0";
+      }
+   }
+}
+
 /**
  * Builds the DAG from a SVO
  * Tested: 
@@ -322,10 +338,10 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
          }
       }
 
-      // A level is made up of              the pointers in the nodes,     the masks of the nodes, and the space for the empty counts (the first 8 bits is for the mask and the next 56+64+64 bits is for the empty node counts)
-      levels[levelIndex] = (void*)malloc( (pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * 3 * sizeof(uint64_t)) );
+      // A level is made up of              the pointers in the nodes,     the masks of the nodes, and the space for the empty counts (the first 8 bits is for the mask and the next 56+64+64+64 bits is for the empty node counts)
+      levels[levelIndex] = (void*)malloc( (pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * 4 * sizeof(uint64_t)) );
       //cerr << levelIndex << ": " << ( (pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * 3 * sizeof(uint64_t)) ) / 8 << " uint64_t's or void*'s" << endl;
-      dagMemoryAlocated[levelIndex] = (pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * 3 * sizeof(uint64_t));
+      dagMemoryAlocated[levelIndex] = (pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * 4 * sizeof(uint64_t));
       prevDagMemoryAlocated[levelIndex] = (pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * 1 * sizeof(uint64_t));      
       moxelDagOptimizedMemoryAlocated[levelIndex] = (pointerCount * sizeof(void*)) + (newLevelSizes[levelIndex] * (1 + emptyCountSize[levelIndex+2]) * sizeof(uint64_t));
 
@@ -354,8 +370,8 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
       leafParentMapping->insert( std::make_pair<void*,void*>( (void*) &((SVONode*) newLevels[currentLevelIndex])[i], (void*)maskPtr ) );
       //cout << "Adding to Map: " << "( " <<  (void*) &((SVONode*) newLevels[currentLevelIndex])[i] << ", " << (void*)maskPtr << " )" << endl;
       
-      // Move 3 x 64bit sections down to get to where the child pointers should be
-      currPtr+=3;
+      // Move 4 x 64bit sections down to get to where the child pointers should be
+      currPtr+=4;
 
       for (int j = 0; j < 8; j++)
       {
@@ -404,8 +420,8 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
          currLevelsMap->insert( std::make_pair<void*,void*>( (void*) &((SVONode*) newLevels[levelIndex])[i], (void*)maskPtr ) );
          //cout << "\tAdding to the map: ( " << &((SVONode*) newLevels[levelIndex])[i] << ", " << (void*)maskPtr << " )" << endl;
          
-         // Move 3 x 64bit sections down to get to where the child pointers should be
-         currPtr+=3;
+         // Move 4 x 64bit sections down to get to where the child pointers should be
+         currPtr+=4;
          
          //cerr << "\t";
          for (int j = 0; j < 8; j++)
@@ -491,7 +507,7 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
          uint64_t* maskPtr = currPtr;
          uint64_t emptyCounts[8];
          uint64_t emptyCountsSum = 0;
-         currPtr += 3;
+         currPtr += 4;
 
          // for each child node
          for (int j = 0; j < 8; j++)
@@ -522,50 +538,78 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
          
          // Set child 0 empty count
          uint64_t* emptyCountPtr = maskPtr; 
-         uint64_t value = 0;
+         uint64_t value = 0L;
          uint64_t toOr = emptyCounts[0] << 8;
          value = value | toOr;
 
          // Set child 1 empty count
-         toOr = emptyCounts[1] << (8+24); // 8 for mask, 24 for last empty count
+         // This overlaps 2 uint64_t's so must do extra operations to handle that
+         toOr = emptyCounts[1] << (8+33); // 8 for mask, 33 for last empty count, leaving 23 written and 10 left over
+         value = value | toOr;
+         *emptyCountPtr = *emptyCountPtr | value;
+         cout << "\n\n0: ";
+         printBinaryVal(*emptyCountPtr);
+         cout << endl;
+         emptyCountPtr++;
+
+         value = 0L;
+         toOr = emptyCounts[1] >> (23); // 23 for how much was saved in last uint64_t
          value = value | toOr;
 
          // Set child 2 empty count
-         // This overlaps 2 uint64_t's so must do extra operations to handle that
-         toOr = emptyCounts[2] << (8+24+24); // 8 for mask, 24 + 24 for last two empty counts
-         value = value | toOr;
-         *emptyCountPtr = *emptyCountPtr | value;
-         emptyCountPtr++;
-
-         value = 0;
-         toOr = emptyCounts[2] >> (8); // 8 for how much was saved in last uint64_t
+         toOr = emptyCounts[2] << (10); // 10 for last empty count
          value = value | toOr;
 
          // Set child 3 empty count
-         toOr = emptyCounts[3] << (16); // 16 for the part of empty count 2
+         toOr = emptyCounts[3] << (10 + 33); // 10 for the part of empty count 2, 33 for last empty count, leaving 21 written and 12 left over
+         value = value | toOr;
+         *emptyCountPtr = value;
+         cout << "1: ";
+         printBinaryVal(*emptyCountPtr);
+         cout << endl;
+         emptyCountPtr++;
+
+         value = 0L;
+         toOr = emptyCounts[3] >> (21); // 21 for how much was saved in last uint64_t
          value = value | toOr;
 
          // Set child 4 empty count
          // This one exactly fill the uint64_t
-         toOr = emptyCounts[4] << (16 + 24); // 16 for the part of empty count 2, 24 for last empty count
+         toOr = emptyCounts[4] << (12); // 12 for the part of empty count 3
          value = value | toOr;
 
-         *emptyCountPtr = value;
-         emptyCountPtr++;
-         value = 0;
-
          // Set child 5 empty count
-         toOr = emptyCounts[5] << (0);
+         toOr = emptyCounts[5] << (12 + 33); // 12 for the part of empty count 2, 33 for last empty count, leaving 19 written and 14 left over
+         value = value | toOr;
+         *emptyCountPtr = value;
+         cout << "2: ";
+         printBinaryVal(*emptyCountPtr);
+         cout << endl;
+         emptyCountPtr++;
+
+         value = 0L;
+         toOr = emptyCounts[5] >> (19); // 21 for how much was saved in last uint64_t
          value = value | toOr;
 
          // Set child 6 empty count
-         toOr = emptyCounts[6] << (0 + 24); // 24 for last empty count
+         toOr = emptyCounts[6] << (14); // 24 for last empty count
          value = value | toOr;
          *emptyCountPtr = value;
+         cout << "3: ";
+         printBinaryVal(*emptyCountPtr);
+         cout << endl;
+
+         cout << "\nGiven: " << endl;
+         for (int i = 0; i < 7; ++i)
+         {
+            cout << "\t[" << i << "]: " << emptyCounts[i] << " => ";
+            printBinaryVal(emptyCounts[i]);
+            cout << endl;
+         }
 
          //END Setting the empty counts next to the mask
 
-         getEmptyCount((void*)maskPtr,0);
+         getEmptyCount((void*)maskPtr, emptyCounts);
          //cout << endl;
          currLevelsEmptyMap->insert( std::make_pair<void*,unsigned int>( (void*) (maskPtr), (unsigned int) emptyCountsSum ) );
       }
@@ -853,8 +897,8 @@ void* DAG::getChildPointer(void* node, unsigned int index, unsigned int level)
 {
    uint64_t** pointer = (uint64_t**)node;
 
-   // Move 3 x 64bit sections down to get to where the child pointers should be (mask + space for empty count = 3x64bits)
-   pointer+=3;
+   // Move 4 x 64bit sections down to get to where the child pointers should be (mask + space for empty count = 3x64bits)
+   pointer+=4;
    for (unsigned int i = 0; i < index; i++)
    {
       if (isChildSet(node, i))
@@ -1124,9 +1168,13 @@ uint64_t DAG::getEmptyCount(void* node, unsigned int index)
 {
    uint64_t *emptyCountPtr = (uint64_t*)node;
    uint64_t emptyCounts[7];
-   uint64_t mask24 = 16777215L;
-   uint64_t mask16 = 65535L;
-   uint64_t mask8 = 255L;
+   uint64_t mask33 = 8589934591L;
+   uint64_t mask23 = 8388607L;
+   uint64_t mask10 = 1023L;
+   uint64_t mask21 = 2097151L;
+   uint64_t mask12 = 4095L;
+   uint64_t mask19 = 524287L;
+   uint64_t mask14 = 16383L;
    uint64_t value;
    uint64_t sum = 0;
 
@@ -1137,36 +1185,43 @@ uint64_t DAG::getEmptyCount(void* node, unsigned int index)
 
    // Get empty count 0
    value = *emptyCountPtr;
-   emptyCounts[0] = mask24 & (value >> 8);
+   emptyCounts[0] = mask33 & (value >> 8);
 
    // Get empty count 1
-   emptyCounts[1] = mask24 & (value >> (8 + 24));
+   emptyCounts[1] = mask23 & (value >> (8 + 33));
+   emptyCountPtr++;
+   value = *emptyCountPtr;
+   emptyCounts[1] = emptyCounts[1] | ((value & mask10) << 23);
 
    // Get empty count 2
-   emptyCounts[2] = mask8 & (value >> (8 + 24 + 24));
-   emptyCountPtr++;
-   value = *emptyCountPtr;
-   emptyCounts[2] = emptyCounts[2] | ((value & mask16) << 8);
+   emptyCounts[2] = mask33 & (value >> (10));
 
    // Get empty count 3
-   emptyCounts[3] = mask24 & (value >> (16));
-
-   // Get empty count 4
-   emptyCounts[4] = mask24 & (value >> (16 + 24));
+   emptyCounts[3] = mask21 & (value >> (10 + 33));
    emptyCountPtr++;
    value = *emptyCountPtr;
+   emptyCounts[3] = emptyCounts[3] | ((value & mask12) << 21);
+
+   // Get empty count 4
+   emptyCounts[4] = mask33 & (value >> (12));
 
    // Get empty count 5
-   emptyCounts[5] = mask24 & (value >> (0));
+   emptyCounts[5] = mask19 & (value >> (12 + 33));
+   emptyCountPtr++;
+   value = *emptyCountPtr;
+   emptyCounts[5] = emptyCounts[5] | ((value & mask14) << 19);
 
    // Get empty count 6
-   emptyCounts[6] = mask24 & (value >> (24));
+   emptyCounts[6] = mask33 & (value >> (14));
 
-
+   // cout << "Found: " << endl;
    // for (int i = 0; i < 7; ++i)
    // {
-   //    cout << i << ": " << emptyCounts[i] << endl;
+   //    cout << "\t[" << i << "]: " << emptyCounts[i] << " => ";
+   //    printBinaryVal(emptyCounts[i]);
+   //    cout << endl;
    // }
+   // cout << endl;
 
    for (int i = 0; i < index; ++i)
    {
@@ -1174,6 +1229,71 @@ uint64_t DAG::getEmptyCount(void* node, unsigned int index)
    }
    
    return sum;
+}
+
+void DAG::getEmptyCount(void* node, uint64_t* expected)
+{
+   uint64_t *emptyCountPtr = (uint64_t*)node;
+   uint64_t emptyCounts[7];
+   uint64_t mask33 = 8589934591L;
+   uint64_t mask23 = 8388607L;
+   uint64_t mask10 = 1023L;
+   uint64_t mask21 = 2097151L;
+   uint64_t mask12 = 4095L;
+   uint64_t mask19 = 524287L;
+   uint64_t mask14 = 16383L;
+   uint64_t value;
+   uint64_t sum = 0;
+
+   for (int i = 0; i < 7; ++i)
+   {
+      emptyCounts[i] = 0L;
+   }
+
+   // Get empty count 0
+   value = *emptyCountPtr;
+   emptyCounts[0] = mask33 & (value >> 8);
+
+   // Get empty count 1
+   emptyCounts[1] = mask23 & (value >> (8 + 33));
+   emptyCountPtr++;
+   value = *emptyCountPtr;
+   emptyCounts[1] = emptyCounts[1] | ((value & mask10) << 23);
+
+   // Get empty count 2
+   emptyCounts[2] = mask33 & (value >> (10));
+
+   // Get empty count 3
+   emptyCounts[3] = mask21 & (value >> (10 + 33));
+   emptyCountPtr++;
+   value = *emptyCountPtr;
+   emptyCounts[3] = emptyCounts[3] | ((value & mask12) << 21);
+
+   // Get empty count 4
+   emptyCounts[4] = mask33 & (value >> (12));
+
+   // Get empty count 5
+   emptyCounts[5] = mask19 & (value >> (12 + 33));
+   emptyCountPtr++;
+   value = *emptyCountPtr;
+   emptyCounts[5] = emptyCounts[5] | ((value & mask14) << 19);
+
+   // Get empty count 6
+   emptyCounts[6] = mask33 & (value >> (14));
+
+   cout << "Found: " << endl;
+   for (int i = 0; i < 7; ++i)
+   {
+      cout << "\t[" << i << "]: " << emptyCounts[i] << " => ";
+      printBinaryVal(emptyCounts[i]);
+      
+      if (emptyCounts[i] != expected[i])
+      {
+         cout << " ERROR ";
+      }
+      cout << endl;
+   }
+   cout << endl;
 }
 
 
