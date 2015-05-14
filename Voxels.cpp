@@ -30,16 +30,16 @@ Voxels::Voxels(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, 
    }
    
    boundingBox.square();
-   std::cout << "Voxels constructor boundingBox: " << endl;
-   boundingBox.print();
-   std::cout << endl;
+   //std::cout << "Voxels constructor boundingBox: " << endl;
+   //boundingBox.print();
+   //std::cout << endl;
    voxelWidth = (boundingBox.maxs.x - boundingBox.mins.x) / dimension;
    
-   std::cout << "Number of 64bit ints allocated: " << dataSize << "\n";
-   std::cout << "sizeof(uint64_t) " << sizeof(uint64_t) << "\n";
+   //std::cout << "Number of 64bit ints allocated: " << dataSize << "\n";
+   //std::cout << "sizeof(uint64_t) " << sizeof(uint64_t) << "\n";
 
    string fileName = getFileNameFromPath(meshFilePath);
-   std::cout << "FILENAME: " << fileName << endl;
+   //std::cout << "FILENAME: " << fileName << endl;
 
    voxelTriangleIndexMap = new tbb::concurrent_unordered_map<unsigned int, unsigned int>();
 
@@ -195,7 +195,7 @@ void Voxels::build(const std::vector<Triangle> triangles)
 {
    //unsigned int i;
    unsigned int stepSize = triangles.size() / 100;
-   tbb::atomic<unsigned int> progress;
+   tbb::atomic<unsigned int> progress = 0;
    tbb::mutex sm;
 
    tbb::parallel_for((unsigned int)0, (unsigned int)triangles.size(), [&](unsigned int i) {
@@ -209,7 +209,8 @@ void Voxels::build(const std::vector<Triangle> triangles)
       {
          
          lock.acquire(sm);
-         fprintf(stderr, "%.2f\n", (((float)progress)/triangles.size()) * 100.0f);
+         float percentDone = (((float) progress) / ( (float)triangles.size() )) * 100.0f;
+         cerr << setprecision(3) << "Voxelization: " << percentDone << "%" << endl;
          lock.release();
       }
       

@@ -19,4 +19,6 @@
 #include "Raytracer.hpp"
 #include "MortonCode.hpp"
 
+using namespace std;
+
 #endif

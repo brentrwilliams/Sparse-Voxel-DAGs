@@ -85,6 +85,8 @@ void OBJFile::parse()
    // And have it read the given file with some example postprocessing
    // Usually - if speed is not the most important aspect for you - you'll 
    // propably to request more postprocessing than we do in this example.
+   
+   cerr << "Reading in file..." << endl;
    const aiScene* scene = importer.ReadFile( fileName, 
         aiProcess_CalcTangentSpace       | 
         aiProcess_Triangulate            |
@@ -101,7 +103,7 @@ void OBJFile::parse()
    {
       const struct aiMesh* mesh = scene->mMeshes[i];
       unsigned int materialIndex = mesh->mMaterialIndex;
-      cout << "materialIndex = " << materialIndex << endl;
+      //cout << "materialIndex = " << materialIndex << endl;
 
       for (int f = 0; f < mesh->mNumFaces; f++) 
       {
@@ -168,17 +170,17 @@ void OBJFile::parse()
       PhongMaterial material(ka,kd,ks,ns);
       materials.push_back(material);
 
-      cout << endl;
-      cout << "material " << i << ":" << endl;
-      cout << "\tambient: <" << ka.x << ", " << ka.y << ", " << ka.z << ">" << endl;
-      cout << "\tdiffuse: <" << kd.x << ", " << kd.y << ", " << kd.z << ">" << endl;
-      cout << "\tspecular: <" << ks.x << ", " << ks.y << ", " << ks.z << ">" << endl;
-      cout << "\tshininess: " << ns << endl;
-      cout << endl;
+      // cout << endl;
+      // cout << "material " << i << ":" << endl;
+      // cout << "\tambient: <" << ka.x << ", " << ka.y << ", " << ka.z << ">" << endl;
+      // cout << "\tdiffuse: <" << kd.x << ", " << kd.y << ", " << kd.z << ">" << endl;
+      // cout << "\tspecular: <" << ks.x << ", " << ks.y << ", " << ks.z << ">" << endl;
+      // cout << "\tshininess: " << ns << endl;
+      // cout << endl;
    }
 
-   cout << "Num triangles: " << triangles.size() << endl << endl;
-
+   // cout << "Num triangles: " << triangles.size() << endl << endl;
+   cerr << "Finished reading in file" << endl << endl;
    updateBoundingBox();
 }
 

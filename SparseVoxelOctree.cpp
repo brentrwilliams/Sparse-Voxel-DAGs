@@ -50,8 +50,8 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles, std::string
 
    voxelTriangleIndexMap = leafVoxels->voxelTriangleIndexMap;
    
-   std::cout << "levels: " << numLevels << "\n";
-   std::cout << "Number of leaf nodes: " << numLeafs << "\n";
+   // std::cout << "levels: " << numLevels << "\n";
+   // std::cout << "Number of leaf nodes: " << numLeafs << "\n";
 
    // Save the pointer to the leaf nodes
    unsigned int currentLevel = numLevels-2;

@@ -60,6 +60,7 @@ class DAG : public Traceable
       bool intersect(const Ray& ray, float& t, glm::vec3& normal, uint64_t& moxelIndex);
       bool intersect(const Ray& ray, float& t, void* node, unsigned int level, AABB aabb, glm::vec3& normal, uint64_t& moxelIndex);
       void getEmptyCount(void* node, uint64_t* expected);
+      string getMemorySize(unsigned int size);
 
       BoundingBox boundingBox;
       unsigned int numLevels;

@@ -83,9 +83,9 @@ void Raytracer::trace()
                }
                else 
                {
-                  cout << "(" << x << ", " << y << ") => moxelIndex = " << moxelIndex << endl;
-                  cout << "\tmoxelNormal Normal: <" << moxelNormal.x << ", " << moxelNormal.y << ", " << moxelNormal.z << ">" << endl; 
-                  cout << "\tTriangle Normal: <" << normal.x << ", " << normal.y << ", " << normal.z << ">" << endl; 
+                  // cout << "(" << x << ", " << y << ") => moxelIndex = " << moxelIndex << endl;
+                  // cout << "\tmoxelNormal Normal: <" << moxelNormal.x << ", " << moxelNormal.y << ", " << moxelNormal.z << ">" << endl; 
+                  // cout << "\tTriangle Normal: <" << normal.x << ", " << normal.y << ", " << normal.z << ">" << endl; 
                }
             }
             else

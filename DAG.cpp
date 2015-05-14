@@ -28,8 +28,10 @@ DAG::DAG(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const 
    materials = materialsVal;
    build(triangles, meshFilePath);
 
+   cerr << "Getting the number of filled leaf voxels..." << endl;
    numFilledVoxels = getNumFilledVoxels();
-   cout << "numFilledVoxels: " << numFilledVoxels << endl;
+   cerr << "Finished getting the number of filled leaf voxels" << endl << endl;
+   cout << endl << "Number of FilledVoxels: " << numFilledVoxels << endl << endl;
    buildMoxelTable(triangles);
 }
 
@@ -187,7 +189,7 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
 
             if (!foundUpdate)
             {
-               cout << "!!!!!!!!! Did not find update for " << childValue << endl;
+               cerr << "!!!!!!!!! Did not find update for " << childValue << endl;
             }
          }
       }
@@ -220,12 +222,12 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
       std::sort(copyChildNodes, copyChildNodes + numChildren);
 
       //cout << "copyChildNodes (at parentLevel " << parentLevelNum << "): " << endl;
-      for (unsigned int i = 0; i < numChildren; i++)
-      {
-         cout << &copyChildNodes[i] << ": ";
-         copyChildNodes[i].printOneLine();
-      }
-      cout << endl;
+      // for (unsigned int i = 0; i < numChildren; i++)
+      // {
+      //    cout << &copyChildNodes[i] << ": ";
+      //    copyChildNodes[i].printOneLine();
+      // }
+      // cout << endl;
 
       // cerr << "\tFinished sorting child nodes." << endl << endl;
 
@@ -289,8 +291,8 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
                }
                if (!foundUpdate)
                {
-                  cout << "!!!!!!!!! Did not find update for ";
-                  childValue.printOneLine();
+                  cerr << "!!!!!!!!! Did not find update for ";
+                  //childValue.printOneLine();
                }
             }
          }
@@ -316,11 +318,11 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
    // }
    // cerr << endl;
 
-   cout << "Num unique nodes at level:" << endl;
-   for (unsigned int i = 0; i < numLevels-1; ++i)
-   {
-      cout << "\t" << i << ": " << newLevelSizes[i] << endl;
-   }
+   // cout << "Num unique nodes at level:" << endl;
+   // for (unsigned int i = 0; i < numLevels-1; ++i)
+   // {
+   //    cout << "\t" << i << ": " << newLevelSizes[i] << endl;
+   // }
 
    // Go through each level and count the number of nonvoid pointers
    unsigned int levelIndex;
@@ -358,7 +360,7 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
 
    // Set the masks and pointers of the level above the leafs
    unsigned int currentLevelIndex = numLevels-3;
-   cout << "Working at level above the leafs: " << currentLevelIndex << endl;
+   // cout << "Working at level above the leafs: " << currentLevelIndex << endl;
    uint64_t* maskPtr;
    uint64_t* currPtr = (uint64_t*) levels[currentLevelIndex];
    unordered_map<void*, void*>* leafParentMapping = new unordered_map<void*, void*>;
@@ -483,9 +485,9 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
    {
       unsigned int emptyCount = getNumEmptyLeafNodes(leafNodes[i]);
       leafEmptyCountMap->insert( std::make_pair<void*,unsigned int>( (void*) &(leafNodes[i]), (unsigned int) emptyCount ) );
-      cout << "\t" << &(leafNodes[i]) << " => " << leafNodes[i] << " = " << emptyCount << endl;
+      //cout << "\t" << &(leafNodes[i]) << " => " << leafNodes[i] << " = " << emptyCount << endl;
    }
-   cout << endl;
+   //cout << endl;
 
    unordered_map<void*, unsigned int>* currLevelsEmptyMap = leafEmptyCountMap;
    unordered_map<void*, unsigned int>* prevLevelsEmptyMap = NULL;
@@ -547,9 +549,9 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
          toOr = emptyCounts[1] << (8+33); // 8 for mask, 33 for last empty count, leaving 23 written and 10 left over
          value = value | toOr;
          *emptyCountPtr = *emptyCountPtr | value;
-         cout << "\n\n0: ";
-         printBinaryVal(*emptyCountPtr);
-         cout << endl;
+         // cout << "\n\n0: ";
+         // printBinaryVal(*emptyCountPtr);
+         // cout << endl;
          emptyCountPtr++;
 
          value = 0L;
@@ -564,9 +566,9 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
          toOr = emptyCounts[3] << (10 + 33); // 10 for the part of empty count 2, 33 for last empty count, leaving 21 written and 12 left over
          value = value | toOr;
          *emptyCountPtr = value;
-         cout << "1: ";
-         printBinaryVal(*emptyCountPtr);
-         cout << endl;
+         // cout << "1: ";
+         // printBinaryVal(*emptyCountPtr);
+         // cout << endl;
          emptyCountPtr++;
 
          value = 0L;
@@ -582,9 +584,9 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
          toOr = emptyCounts[5] << (12 + 33); // 12 for the part of empty count 2, 33 for last empty count, leaving 19 written and 14 left over
          value = value | toOr;
          *emptyCountPtr = value;
-         cout << "2: ";
-         printBinaryVal(*emptyCountPtr);
-         cout << endl;
+         // cout << "2: ";
+         // printBinaryVal(*emptyCountPtr);
+         // cout << endl;
          emptyCountPtr++;
 
          value = 0L;
@@ -595,21 +597,21 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
          toOr = emptyCounts[6] << (14); // 24 for last empty count
          value = value | toOr;
          *emptyCountPtr = value;
-         cout << "3: ";
-         printBinaryVal(*emptyCountPtr);
-         cout << endl;
+         // cout << "3: ";
+         // printBinaryVal(*emptyCountPtr);
+         // cout << endl;
 
-         cout << "\nGiven: " << endl;
-         for (int i = 0; i < 7; ++i)
-         {
-            cout << "\t[" << i << "]: " << emptyCounts[i] << " => ";
-            printBinaryVal(emptyCounts[i]);
-            cout << endl;
-         }
+         // cout << "\nGiven: " << endl;
+         // for (int i = 0; i < 7; ++i)
+         // {
+         //    cout << "\t[" << i << "]: " << emptyCounts[i] << " => ";
+         //    printBinaryVal(emptyCounts[i]);
+         //    cout << endl;
+         // }
 
          //END Setting the empty counts next to the mask
 
-         getEmptyCount((void*)maskPtr, emptyCounts);
+         //getEmptyCount((void*)maskPtr, emptyCounts);
          //cout << endl;
          currLevelsEmptyMap->insert( std::make_pair<void*,unsigned int>( (void*) (maskPtr), (unsigned int) emptyCountsSum ) );
       }
@@ -617,42 +619,42 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
    }
    cerr << "Finished Building DAG..." << endl << endl; 
 
-   cerr << "\nUnique Nodes at Level: " << endl;
-   for (unsigned int i = 0; i < numLevels-1; ++i)
-   {
-      cerr << i << ": " << sizeAtLevel[i] << endl;
-   }
+   // cerr << "\nUnique Nodes at Level: " << endl;
+   // for (unsigned int i = 0; i < numLevels-1; ++i)
+   // {
+   //    cerr << i << ": " << sizeAtLevel[i] << endl;
+   // }
 
-   cerr << "\nMoxel DAG Memory Size (in bytes) at Level: " << endl;
+   // cerr << "\nMoxel DAG Memory Size (in bytes) at Level: " << endl;
    unsigned int totalMoxelDagMemory = 0;
    for (unsigned int i = 0; i < numLevels-1; ++i)
    {
-      cerr << i << ": " << dagMemoryAlocated[i] << endl;
+      // cerr << i << ": " << dagMemoryAlocated[i] << endl;
       totalMoxelDagMemory += dagMemoryAlocated[i];
    }
-   cerr << endl;
+   // cerr << endl;
 
-   cerr << "\nOptimized Moxel DAG Memory Size (in bytes) at Level: " << endl;
+   // cerr << "\nOptimized Moxel DAG Memory Size (in bytes) at Level: " << endl;
    unsigned int totalOptMoxelDagMemory = 0;
    for (unsigned int i = 0; i < numLevels-1; ++i)
    {
-      cerr << i << ": " << moxelDagOptimizedMemoryAlocated[i] << endl;
+      // cerr << i << ": " << moxelDagOptimizedMemoryAlocated[i] << endl;
       totalOptMoxelDagMemory += moxelDagOptimizedMemoryAlocated[i];
    }
-   cerr << endl;
+   // cerr << endl;
 
-   cerr << "\nRegular DAG Memory Size (in bytes) at Level: " << endl;
+   // cerr << "\nRegular DAG Memory Size (in bytes) at Level: " << endl;
    unsigned int totalDagMemory = 0;
    for (unsigned int i = 0; i < numLevels-1; ++i)
    {
-      cerr << i << ": " << prevDagMemoryAlocated[i] << endl;
+      // cerr << i << ": " << prevDagMemoryAlocated[i] << endl;
       totalDagMemory += prevDagMemoryAlocated[i];
    }
-   cerr << endl;
+   // cerr << endl;
 
-   cerr << "Moxel DAG Memory Size: " << totalMoxelDagMemory << endl;
-   cerr << "Optimized Moxel DAG Memory Size: " << totalOptMoxelDagMemory << endl;
-   cerr << "Regular DAG Memory Size: " << totalDagMemory << endl;
+   cout << "Moxel DAG Memory Size: " << totalMoxelDagMemory << " (" << getMemorySize(totalMoxelDagMemory) << ")" << endl;
+   cout << "Optimized Moxel DAG Memory Size: " << totalOptMoxelDagMemory << " (" << getMemorySize(totalOptMoxelDagMemory) << ")" << endl;
+   cout << "Regular DAG Memory Size: " << totalDagMemory << " (" << getMemorySize(totalDagMemory) << ")" << endl;
 
 }
 
@@ -663,16 +665,18 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
  */
 uint64_t DAG::getNumFilledVoxels()
 {
-   unsigned int x, y, z;
-   unsigned int count = 0;
-   for (uint32_t i = 0; i < size; i++)
-   {
+   // unsigned int count = 0;
+   tbb::atomic<unsigned int> count = 0;
+   tbb::parallel_for((unsigned int)0, (unsigned int)size, [&](unsigned int i) {
+   // for (uint32_t i = 0; i < size; i++)
+   // {
+      unsigned int x, y, z;
       mortonCodeToXYZ((uint32_t)i, &x, &y, &z, numLevels);
       if (isSet(x,y,z))
       {
          count++;
       }
-   }
+   });
    return count;
 }
 
@@ -791,7 +795,9 @@ void DAG::buildMoxelTable(const std::vector<Triangle> triangles)
    void* moxelTablePointer = moxelTable;
    unsigned int moxelIndex = 0;
 
-   boundingBox.print();
+   cout << "Moxel Table Size: " << moxelTableAllocSize << " (" << getMemorySize(moxelTableAllocSize) << ")" << endl;
+
+   //boundingBox.print();
    cerr << "Creating moxel table for size " << size <<  "..." << endl;
 
    for (uint32_t i = 0; i < size; i++)
@@ -1495,7 +1501,25 @@ void DAG::getNormalFromMoxelTable(uint32_t index, glm::vec3& normal, unsigned in
 
 }
 
+string DAG::getMemorySize(unsigned int size)
+{
+   string b = " B";
+   string kb = " KB";
+   string mb = " MB";
+   string gb = " GB";
+   string units[] = {b,kb,mb,gb};
+   float currentSize = (float)size;
+   float lastSize = (float)size;
+   int i;
 
+   for (i = 0; i < 4 && currentSize > 1.0f; ++i)
+   {
+      lastSize = currentSize;
+      currentSize /= 1024.0f;
+   }
+
+   return to_string(lastSize) + units[i-1];
+}
 
 
 
