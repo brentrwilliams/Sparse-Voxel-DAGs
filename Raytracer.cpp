@@ -23,25 +23,33 @@ void Raytracer::trace()
    float ns = 20.0;
    PhongMaterial phongMat(ka,kd,ks,ns);
 
-   // bigBunny Camera
-   glm::vec3 cameraPosition(10.25f,0.0f,10.25f);
-   glm::vec3 cameraRight = glm::normalize(glm::vec3(1.0f,0.0f,-1.0f));
-   glm::vec3 cameraUp = glm::normalize(glm::vec3(0.0f,1.0f,0.0f));
-   Camera camera(cameraPosition, cameraRight, cameraUp, imageWidth, imageHeight);
+   // // bigBunny Camera
+   // glm::vec3 cameraPosition(10.25f,0.0f,10.25f);
+   // glm::vec3 cameraRight = glm::normalize(glm::vec3(1.0f,0.0f,-1.0f));
+   // glm::vec3 cameraUp = glm::normalize(glm::vec3(0.0f,1.0f,0.0f));
+   // Camera camera(cameraPosition, cameraRight, cameraUp, imageWidth, imageHeight);
 
-   // // toyStore Camera
+   // // old toyStore Camera
    // glm::vec3 cameraPosition(25.25f,0.0f,25.25f);
    // glm::vec3 cameraRight = glm::normalize(glm::vec3(1.0f,0.0f,-1.0f));
    // glm::vec3 cameraUp = glm::normalize(glm::vec3(0.0f,1.0f,0.0f));
    // Camera camera(cameraPosition, cameraRight, cameraUp, imageWidth, imageHeight);
 
+   // old toyStore Camera
+   glm::vec3 cameraPosition(0.0f,0.0f,32.0f);
+   glm::vec3 cameraRight = glm::normalize(glm::vec3(1.0f,0.0f,0.0f));
+   glm::vec3 cameraUp = glm::normalize(glm::vec3(0.0f,1.0f,0.0f));
+   Camera camera(cameraPosition, cameraRight, cameraUp, imageWidth, imageHeight);
+
    float numPixels = imageWidth * imageHeight;
 
-   unsigned int stepSize = (imageWidth * imageHeight) / 10000;
-   unsigned int progress = 0;
-   
+   unsigned int stepSize = 1000;
 
-   for (unsigned int y = 0; y < imageHeight; y++)
+   tbb::atomic<unsigned int> progress = 0;
+   tbb::mutex sm;
+   
+   tbb::parallel_for((unsigned int)0, (unsigned int)imageHeight, [&](unsigned int y)
+   // for (unsigned int y = 0; y < imageHeight; y++)
    {
       for (unsigned int x = 0; x < imageWidth; x++)
       {
@@ -52,6 +60,9 @@ void Raytracer::trace()
          offsets[2] = glm::vec2(0.25f,-0.25f);
          offsets[3] = glm::vec2(-0.25f,0.25f);
          offsets[4] = glm::vec2(0.25f,0.25f);
+
+         tbb::mutex::scoped_lock lock;
+
 
 
          // Super Sampled Anti-Aliasing
@@ -96,11 +107,24 @@ void Raytracer::trace()
          }
          colorSum /= 5.0f;
 
+         progress.fetch_and_increment();
+
+         lock.acquire(sm);
          image.addColor(y,x, colorSum);
+         lock.release();
+
+         if (progress % (stepSize-1) == 0)
+         {
+         
+            lock.acquire(sm);
+            float percentDone = (((float) progress) / ( (float) imageWidth*imageHeight)) * 100.0f;
+            cerr << setprecision(3) << "Raytracing: " << percentDone << "%" << endl;
+            lock.release();
+         }
       }  
-      float percentDone = ((float) y) / ((float)imageHeight);
-      cerr << (percentDone * 100.0f) << "%" << endl;
-   }
+      // float percentDone = ((float) y) / ((float)imageHeight);
+      // cerr << (percentDone * 100.0f) << "%" << endl;
+   });
    cerr << "100%" << endl;
 }
 

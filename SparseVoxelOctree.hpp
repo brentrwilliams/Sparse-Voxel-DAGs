@@ -50,6 +50,7 @@ class SparseVoxelOctree
       void** levels; // Array of SVONode*'s that correspond to the levels of the SVO with 0 as root
       SVONode* root;
       tbb::concurrent_unordered_map<unsigned int, unsigned int>* voxelTriangleIndexMap;
+      unsigned int* levelSizes;
 };
 
 

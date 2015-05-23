@@ -26,6 +26,7 @@ SparseVoxelOctree::SparseVoxelOctree(const unsigned int levelsVal, const Boundin
    boundingBox.square();
    voxelWidth = (boundingBox.maxs.x - boundingBox.mins.x) / dimension;
    levels = new void*[numLevels-1]; // has the -1 because the last two levels are uint64's 
+   levelSizes = new unsigned int[numLevels-1]();
    build(triangles,meshFilePath);
 }
 
@@ -52,6 +53,8 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles, std::string
    
    // std::cout << "levels: " << numLevels << "\n";
    // std::cout << "Number of leaf nodes: " << numLeafs << "\n";
+
+   levelSizes[numLevels-1] = numLeafs * sizeof(uint64_t);
 
    // Save the pointer to the leaf nodes
    unsigned int currentLevel = numLevels-2;
@@ -81,6 +84,7 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles, std::string
    }
 
    levels[currentLevel] = (void*)currLevelNodes;
+   levelSizes[currentLevel] = numCurrLevelNodes * sizeof(SVONode);
    currentLevel--;
    
    // Set the rest of the non leaf nodes
@@ -90,6 +94,7 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles, std::string
       numCurrLevelNodes /= 8; // 8
       prevLevelNodes = currLevelNodes;
       currLevelNodes = new SVONode[numCurrLevelNodes];
+      levelSizes[currentLevel] = numCurrLevelNodes * sizeof(SVONode);
       
       // For each of the previous level's nodes we set the child pointers
       for (int i = 0; i < numPrevLevelNodes; i++)
@@ -118,6 +123,13 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles, std::string
 
    // Save the pointer for root node in the levels array
    levels[currentLevel] = root;
+   levelSizes[currentLevel] = sizeof(SVONode);
+
+   cout << "SVO Size: " << endl;
+   for (int i = 0; i < numLevels-1; ++i)
+   {
+      cout << "[" << i << "]: " << levelSizes[i] << endl;
+   }
 }
 
 

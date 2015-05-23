@@ -205,7 +205,7 @@ void Voxels::build(const std::vector<Triangle> triangles)
 
       progress.fetch_and_increment();
 
-      if (progress % (stepSize-1))
+      if (progress % (stepSize-1) == 0)
       {
          
          lock.acquire(sm);
