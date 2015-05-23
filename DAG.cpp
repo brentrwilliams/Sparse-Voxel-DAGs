@@ -28,10 +28,6 @@ DAG::DAG(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const 
    materials = materialsVal;
    boundingBox.print();
    build(triangles, meshFilePath);
-
-   cerr << "Getting the number of filled leaf voxels..." << endl;
-   numFilledVoxels = getNumFilledVoxels();
-   cerr << "Finished getting the number of filled leaf voxels" << endl << endl;
    cout << endl << "Number of FilledVoxels: " << numFilledVoxels << endl << endl;
    buildMoxelTable(triangles);
 }
@@ -653,6 +649,13 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
    }
    // cerr << endl;
 
+   cerr << "Getting the number of filled leaf voxels..." << endl;
+   numFilledVoxels = getNumFilledVoxels();
+   cerr << "Finished getting the number of filled leaf voxels" << endl << endl;
+
+   uint64_t materialSize = ( sizeof(float) * 3 ) + ( 1 * sizeof(unsigned int) );
+   uint64_t svoMemorySizeWithMaterials = svo.sizeWithoutMaterials + (numFilledVoxels * materialSize );
+   cout << "SVO (with materials) Memory Size: " << svoMemorySizeWithMaterials << " (" << getMemorySize(svoMemorySizeWithMaterials) << ")" << endl;
    cout << "Moxel DAG Memory Size: " << totalMoxelDagMemory << " (" << getMemorySize(totalMoxelDagMemory) << ")" << endl;
    cout << "Optimized Moxel DAG Memory Size: " << totalOptMoxelDagMemory << " (" << getMemorySize(totalOptMoxelDagMemory) << ")" << endl;
    cout << "Regular DAG Memory Size: " << totalDagMemory << " (" << getMemorySize(totalDagMemory) << ")" << endl;

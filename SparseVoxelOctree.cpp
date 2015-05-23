@@ -60,7 +60,7 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles, std::string
    unsigned int currentLevel = numLevels-2;
    levels[currentLevel] = (void*)leafVoxelData; 
    cerr << "Leaf Level = " << currentLevel << endl;
-   currentLevel--;
+   
    
    if (numLevels <= 3)
    {
@@ -73,6 +73,7 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles, std::string
    SVONode* prevLevelNodes;
    SVONode* currLevelNodes; 
    currLevelNodes = new SVONode[numCurrLevelNodes](); 
+   levelSizes[currentLevel] = 0;
    
    // Set the level above the leaf nodes
    for (int i = 0; i < numPrevLevelNodes; i++)
@@ -80,11 +81,12 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles, std::string
       if (leafVoxelData[i] > 0)
       {
          currLevelNodes[i/8].childPointers[i%8] = (void *)  &(leafVoxelData[i]);
+         levelSizes[currentLevel]++;
       }
    }
 
+   currentLevel--;
    levels[currentLevel] = (void*)currLevelNodes;
-   levelSizes[currentLevel] = numCurrLevelNodes * sizeof(SVONode);
    currentLevel--;
    
    // Set the rest of the non leaf nodes
@@ -94,7 +96,7 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles, std::string
       numCurrLevelNodes /= 8; // 8
       prevLevelNodes = currLevelNodes;
       currLevelNodes = new SVONode[numCurrLevelNodes];
-      levelSizes[currentLevel] = numCurrLevelNodes * sizeof(SVONode);
+      levelSizes[currentLevel] = 0;
       
       // For each of the previous level's nodes we set the child pointers
       for (int i = 0; i < numPrevLevelNodes; i++)
@@ -102,6 +104,7 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles, std::string
          if (isNodeNotEmpty(&prevLevelNodes[i]))
          {
             currLevelNodes[i/8].childPointers[i%8] = (void *)  &(prevLevelNodes[i]);
+            levelSizes[currentLevel+1]++;
          }
       }
 
@@ -113,23 +116,38 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles, std::string
    // Set the root node
    prevLevelNodes = currLevelNodes;
    root = new SVONode;
+   levelSizes[currentLevel] = 0;
    for (int i = 0; i < 8; i++)
    {
       if (isNodeNotEmpty(&prevLevelNodes[i]))
       {
          root->childPointers[i] = (void *)  &(prevLevelNodes[i]);
+         levelSizes[currentLevel+1]++;
       }
    }
 
    // Save the pointer for root node in the levels array
    levels[currentLevel] = root;
-   levelSizes[currentLevel] = sizeof(SVONode);
+   levelSizes[currentLevel] = 1;
 
-   cout << "SVO Size: " << endl;
-   for (int i = 0; i < numLevels-1; ++i)
+   unsigned int memorySizeWithoutLeafs = 0;
+   //cout << "SVO Size: " << endl;
+   for (int i = 0; i < numLevels-2; ++i)
    {
-      cout << "[" << i << "]: " << levelSizes[i] << endl;
+      // cout << "[" << i << "]: " << levelSizes[i] * sizeof(SVONode) << endl;
+      memorySizeWithoutLeafs += levelSizes[i] * sizeof(SVONode);
    }
+   // cout << "[" << numLevels-2 << "]: " << levelSizes[numLevels-2] * sizeof(uint64_t) << endl;
+   // cout << "Filled Voxels: (from SVO perspective): " << levelSizes[numLevels-2] << endl;
+
+   sizeWithoutMaterials = memorySizeWithoutLeafs + ( levelSizes[numLevels-2] * sizeof(uint64_t) );
+
+   //                                                normal          index into material table
+   unsigned int sizeOfSVOLeafWithMaterials = ( 3 * sizeof(float) ) + (1 * sizeof(unsigned int) );
+   uint64_t sizeWithMaterials = memorySizeWithoutLeafs + ( levelSizes[numLevels-2] * sizeOfSVOLeafWithMaterials );
+   
+   cout << "\nSVO (No Materials) Memory Size: " << sizeWithoutMaterials << " (" << getMemorySize(sizeWithoutMaterials) << ")" << endl;
+
 }
 
 
@@ -288,7 +306,25 @@ unsigned int SparseVoxelOctree::countAtLevel(unsigned int level)
    return count;
 }
 
+string SparseVoxelOctree::getMemorySize(unsigned int size)
+{
+   string b = " B";
+   string kb = " KB";
+   string mb = " MB";
+   string gb = " GB";
+   string units[] = {b,kb,mb,gb};
+   float currentSize = (float)size;
+   float lastSize = (float)size;
+   int i;
 
+   for (i = 0; i < 4 && currentSize > 1.0f; ++i)
+   {
+      lastSize = currentSize;
+      currentSize /= 1024.0f;
+   }
+
+   return to_string(lastSize) + units[i-1];
+}
 
 
 

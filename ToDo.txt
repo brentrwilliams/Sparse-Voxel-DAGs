@@ -6,16 +6,12 @@ Toy Store
 
 
 
-
-
-
 To Do:
-- By Friday EOD:
+- By Monday EOD:
    - Print to cout the SVO size
-   - Add more lights to the scene
-   - Render at 11 levels
-   - Render tri version with new camera angle and lights
    - Get data for levels 8, 9, 10, and 11
+   - Render tri version with new camera angle and lights
+   - Render Moxel DAG version with new camera angle and lights at 11 levels
 - If Time:
    - Shadows
    - Smooth normals
