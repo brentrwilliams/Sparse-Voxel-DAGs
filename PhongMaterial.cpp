@@ -21,36 +21,46 @@ PhongMaterial::~PhongMaterial()
 
 glm::vec3 PhongMaterial::calculateSurfaceColor(Ray ray, glm::vec3 hitPosition, glm::vec3 n)
 {  
-   glm::vec3 finalColor;
-   glm::vec3 lightPosition(-500, 500, 500);
+   glm::vec3 finalColor = glm::vec3(0.0f,0.0f,0.0f);
    glm::vec3 lc(1.0,1.0,1.0); // Light color
-   glm::vec3 l = glm::normalize(lightPosition - hitPosition);
-   glm::vec3 v = ray.direction;
+   float intensity = 0.18f;
+   lc = lc * intensity;
 
-   // Ambient
-   glm::vec3 ambientComponent = ka * lc;
+   glm::vec3 lightPositions[8];
+   // Top Floor
+   lightPositions[0] = glm::vec3( 12,  12,  12);
+   lightPositions[1] = glm::vec3( 12,  12, -12);
+   lightPositions[2] = glm::vec3(-12,  12,  12);
+   lightPositions[3] = glm::vec3(-12,  12, -12);
 
-   // Diffuse
-   float nDotL = max(glm::dot(n, l), 0.0f);
-   glm::vec3 diffuseComponent = kd * nDotL * lc;
+   // Bottom Floor
+   lightPositions[0] = glm::vec3( 12,  -0.5,  12);
+   lightPositions[1] = glm::vec3( 12,  -0.5, -12);
+   lightPositions[2] = glm::vec3(-12,  -0.5,  12);
+   lightPositions[3] = glm::vec3(-12,  -0.5, -12);
+   
 
-   // Specular
-   glm::vec3 r = glm::reflect(l, n);
-   float vDotR = max(glm::dot(v,r), 0.0f);
-   glm::vec3 specularComponent = ks * pow(vDotR, ns) * lc;
+   for (int i = 0; i < 8; ++i)
+   {
+      glm::vec3 lightPosition = lightPositions[i];
+      glm::vec3 l = glm::normalize(lightPosition - hitPosition);
+      glm::vec3 v = ray.direction;
 
-   finalColor = ambientComponent + diffuseComponent + specularComponent;
+      // Ambient
+      glm::vec3 ambientComponent = ka * lc;
 
-   // if (finalColor.x < 0.25 || finalColor.y < 0.25 || finalColor.z < 0.25)
-   // {
-   //    cout << "\n\tn = <" << n.x << ", " << n.y << ", " << n.z << ">" << endl;
-   //    cout << "\tl = <" << l.x << ", " << l.y << ", " << l.z << ">" << endl;
-   //    cout << "\tnDotL = " << nDotL << endl;
+      // Diffuse
+      float nDotL = max(glm::dot(n, l), 0.0f);
+      glm::vec3 diffuseComponent = kd * nDotL * lc;
 
-   //    cout << "\tv = <" << v.x << ", " << v.y << ", " << v.z << ">" << endl;
-   //    cout << "\tr = <" << r.x << ", " << r.y << ", " << r.z << ">" << endl;
-   //    cout << "\tvDotR = " << vDotR << endl;
-   // }
+      // Specular
+      glm::vec3 r = glm::reflect(l, n);
+      float vDotR = max(glm::dot(v,r), 0.0f);
+      glm::vec3 specularComponent = ks * pow(vDotR, ns) * lc;
+
+      finalColor += ambientComponent + diffuseComponent + specularComponent;
+   }
+
    return finalColor;
 }
 

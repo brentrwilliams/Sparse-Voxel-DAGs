@@ -26,6 +26,7 @@ DAG::DAG(const unsigned int levelsVal, const BoundingBox& boundingBoxVal, const 
    boundingBox.square();
    voxelWidth = (boundingBox.maxs.x - boundingBox.mins.x) / dimension;
    materials = materialsVal;
+   boundingBox.print();
    build(triangles, meshFilePath);
 
    cerr << "Getting the number of filled leaf voxels..." << endl;

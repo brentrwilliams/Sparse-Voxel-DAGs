@@ -1,11 +1,22 @@
+RUN TIMES:
+----------
+Toy Store
+- 10 Levels: 9m10.455s
+- 11 Levels 50% Voxelization 13m5s 
+
+
+
+
+
+
 To Do:
-- By Monday:
-   - Implement BVH to speed up triangle-mesh scene intersection
-   - Render triangulated version from same perspective for visual comparison
+- By Friday EOD:
+   - Print to cout the SVO size
+   - Add more lights to the scene
+   - Render at 11 levels
+   - Render tri version with new camera angle and lights
+   - Get data for levels 8, 9, 10, and 11
 - If Time:
-   - - Make toy store scene nicer
-      - Change the camera to render a nicer image
-   - Add another 64bit chunk to the DAG nodes to allow for up to 12 levels of voxelization
    - Shadows
    - Smooth normals
    - Textures
