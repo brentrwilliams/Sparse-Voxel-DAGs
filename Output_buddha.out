@@ -1,0 +1,78 @@
+buddha.obj
+
+Levels: 7
+SVO Size: 
+[0]: 1
+[1]: 8
+[2]: 56
+[3]: 318
+[4]: 1632
+[5]: 7012
+SVO (without materials) Memory Size: 185056 (180.718750 KB)
+Moxel DAG Memory Size: 40064 (39.125000 KB)
+Optimized Moxel DAG Memory Size: 32920 (32.148438 KB)
+Regular DAG Memory Size: 29456 (28.765625 KB)
+
+Number of FilledVoxels: 121846
+
+Moxel Table Size: 1949536 (1.859222 MB)
+buddha.obj
+
+Levels: 8
+SVO Size: 
+[0]: 1
+[1]: 8
+[2]: 56
+[3]: 318
+[4]: 1625
+[5]: 6976
+[6]: 29112
+SVO (without materials) Memory Size: 807872 (788.937500 KB)
+Moxel DAG Memory Size: 146600 (143.164062 KB)
+Optimized Moxel DAG Memory Size: 129808 (126.765625 KB)
+Regular DAG Memory Size: 107192 (104.679688 KB)
+
+Number of FilledVoxels: 486385
+
+Moxel Table Size: 7782160 (7.421646 MB)
+buddha.obj
+
+Levels: 9
+SVO Size: 
+[0]: 1
+[1]: 8
+[2]: 56
+[3]: 317
+[4]: 1623
+[5]: 6955
+[6]: 28986
+[7]: 119376
+SVO (without materials) Memory Size: 3383552 (3.226807 MB)
+Moxel DAG Memory Size: 554696 (541.695312 KB)
+Optimized Moxel DAG Memory Size: 499032 (487.335938 KB)
+Regular DAG Memory Size: 398600 (389.257812 KB)
+
+Number of FilledVoxels: 1939448
+
+Moxel Table Size: 31031168 (29.593628 MB)
+buddha.obj
+
+Levels: 10
+SVO Size: 
+[0]: 1
+[1]: 8
+[2]: 56
+[3]: 317
+[4]: 1623
+[5]: 6945
+[6]: 28923
+[7]: 119066
+[8]: 481198
+SVO (without materials) Memory Size: 13893680 (13.250046 MB)
+Moxel DAG Memory Size: 2060632 (1.965172 MB)
+Optimized Moxel DAG Memory Size: 1849136 (1.763474 MB)
+Regular DAG Memory Size: 1437040 (1.370468 MB)
+
+Number of FilledVoxels: 7751931
+
+Moxel Table Size: 124030896 (118.285080 MB)

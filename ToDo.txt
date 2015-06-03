@@ -1,14 +1,10 @@
 To Do:
-- By Monday:
-   - Implement BVH to speed up triangle-mesh scene intersection
-   - Render triangulated version from same perspective for visual comparison
-- If Time:
-   - - Make toy store scene nicer
-      - Change the camera to render a nicer image
-   - Add another 64bit chunk to the DAG nodes to allow for up to 12 levels of voxelization
-   - Shadows
-   - Smooth normals
-   - Textures
+- By ASAP:
+   - Write results section based on data
+   - Update abstract
+   - Change out diagram of voxel morton encoding
+   - Send in request for thesis defense
+   - Schedule room for thesis defense
 
 
 

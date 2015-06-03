@@ -24,6 +24,8 @@
 
 #define SET_8_BITS 255
 
+using namespace std;
+
 class SparseVoxelOctree
 {
    private:
@@ -41,6 +43,7 @@ class SparseVoxelOctree
       void printBinary();
       void writeImages();
       unsigned int countAtLevel(unsigned int level);
+      string getMemorySize(unsigned int size);
       
       BoundingBox boundingBox;
       unsigned int numLevels;

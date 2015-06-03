@@ -29,9 +29,15 @@ void TriangleRaytracer::trace()
    // glm::vec3 cameraUp = glm::normalize(glm::vec3(0.0f,1.0f,0.0f));
    // Camera camera(cameraPosition, cameraRight, cameraUp, imageWidth, imageHeight);
 
-   // toyStore Camera
-   glm::vec3 cameraPosition(25.25f,0.0f,25.25f);
-   glm::vec3 cameraRight = glm::normalize(glm::vec3(1.0f,0.0f,-1.0f));
+   // // old toyStore Camera
+   // glm::vec3 cameraPosition(25.25f,0.0f,25.25f);
+   // glm::vec3 cameraRight = glm::normalize(glm::vec3(1.0f,0.0f,-1.0f));
+   // glm::vec3 cameraUp = glm::normalize(glm::vec3(0.0f,1.0f,0.0f));
+   // Camera camera(cameraPosition, cameraRight, cameraUp, imageWidth, imageHeight);
+
+   // old toyStore Camera
+   glm::vec3 cameraPosition(0.0f,0.0f,32.0f);
+   glm::vec3 cameraRight = glm::normalize(glm::vec3(1.0f,0.0f,0.0f));
    glm::vec3 cameraUp = glm::normalize(glm::vec3(0.0f,1.0f,0.0f));
    Camera camera(cameraPosition, cameraRight, cameraUp, imageWidth, imageHeight);
 
@@ -67,7 +73,7 @@ void TriangleRaytracer::trace()
 
             if (scene.intersect(ray, t, triangle))
             {
-               cout << "HIT!" << endl;
+               //cout << "HIT!" << endl;
                glm::vec3 hitPosition = ray.position + (t * ray.direction);
                normal = triangle.getGLMNormal();
                color = scene.materials[triangle.materialIndex].calculateSurfaceColor(ray, hitPosition, normal);

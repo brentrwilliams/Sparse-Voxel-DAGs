@@ -1,0 +1,78 @@
+bunny.obj
+
+Levels: 7
+SVO Size: 
+[0]: 1
+[1]: 8
+[2]: 59
+[3]: 352
+[4]: 1760
+[5]: 7547
+SVO (without materials) Memory Size: 199896 (195.210938 KB)
+Moxel DAG Memory Size: 58720 (57.343750 KB)
+Optimized Moxel DAG Memory Size: 48056 (46.929688 KB)
+Regular DAG Memory Size: 42832 (41.828125 KB)
+
+Number of FilledVoxels: 127888
+
+Moxel Table Size: 2046208 (1.951416 MB)
+bunny.obj
+
+Levels: 8
+SVO Size: 
+[0]: 1
+[1]: 8
+[2]: 59
+[3]: 352
+[4]: 1759
+[5]: 7536
+[6]: 31295
+SVO (without materials) Memory Size: 872120 (851.679688 KB)
+Moxel DAG Memory Size: 206944 (202.093750 KB)
+Optimized Moxel DAG Memory Size: 181944 (177.679688 KB)
+Regular DAG Memory Size: 148264 (144.789062 KB)
+
+Number of FilledVoxels: 512257
+
+Moxel Table Size: 8196112 (7.816422 MB)
+bunny.obj
+
+Levels: 9
+SVO Size: 
+[0]: 1
+[1]: 8
+[2]: 59
+[3]: 352
+[4]: 1758
+[5]: 7532
+[6]: 31265
+[7]: 127325
+SVO (without materials) Memory Size: 3641000 (3.472328 MB)
+Moxel DAG Memory Size: 734576 (717.359375 KB)
+Optimized Moxel DAG Memory Size: 654568 (639.226562 KB)
+Regular DAG Memory Size: 510824 (498.851562 KB)
+
+Number of FilledVoxels: 2052473
+
+Moxel Table Size: 32839568 (31.318253 MB)
+bunny.obj
+
+Levels: 10
+SVO Size: 
+[0]: 1
+[1]: 8
+[2]: 59
+[3]: 352
+[4]: 1758
+[5]: 7531
+[6]: 31263
+[7]: 127296
+[8]: 511635
+SVO (without materials) Memory Size: 14862232 (14.173729 MB)
+Moxel DAG Memory Size: 2603632 (2.483017 MB)
+Optimized Moxel DAG Memory Size: 2315360 (2.208099 MB)
+Regular DAG Memory Size: 1755088 (1.673782 MB)
+
+Number of FilledVoxels: 8219159
+
+Moxel Table Size: 131506544 (125.414413 MB)

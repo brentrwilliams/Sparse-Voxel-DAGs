@@ -1,0 +1,78 @@
+cornellBox.obj
+
+Levels: 7
+SVO Size: 
+[0]: 1
+[1]: 8
+[2]: 57
+[3]: 322
+[4]: 1532
+[5]: 6741
+SVO (without materials) Memory Size: 176808 (172.664062 KB)
+Moxel DAG Memory Size: 60608 (59.187500 KB)
+Optimized Moxel DAG Memory Size: 50328 (49.148438 KB)
+Regular DAG Memory Size: 45296 (44.234375 KB)
+
+Number of FilledVoxels: 116543
+
+Moxel Table Size: 1864688 (1.778305 MB)
+cornellBox.obj
+
+Levels: 8
+SVO Size: 
+[0]: 1
+[1]: 8
+[2]: 57
+[3]: 322
+[4]: 1525
+[5]: 6688
+[6]: 28002
+SVO (without materials) Memory Size: 774480 (756.328125 KB)
+Moxel DAG Memory Size: 226264 (220.960938 KB)
+Optimized Moxel DAG Memory Size: 200640 (195.937500 KB)
+Regular DAG Memory Size: 164776 (160.914062 KB)
+
+Number of FilledVoxels: 462187
+
+Moxel Table Size: 7394992 (7.052414 MB)
+cornellBox.obj
+
+Levels: 9
+SVO Size: 
+[0]: 1
+[1]: 8
+[2]: 57
+[3]: 320
+[4]: 1518
+[5]: 6657
+[6]: 27858
+[7]: 114152
+SVO (without materials) Memory Size: 3244032 (3.093750 MB)
+Moxel DAG Memory Size: 829712 (810.265625 KB)
+Optimized Moxel DAG Memory Size: 744120 (726.679688 KB)
+Regular DAG Memory Size: 588008 (574.226562 KB)
+
+Number of FilledVoxels: 1845236
+
+Moxel Table Size: 29523776 (28.156067 MB)
+cornellBox.obj
+
+Levels: 10
+SVO Size: 
+[0]: 1
+[1]: 8
+[2]: 57
+[3]: 320
+[4]: 1517
+[5]: 6645
+[6]: 27819
+[7]: 113975
+[8]: 458704
+SVO (without materials) Memory Size: 13291520 (12.675781 MB)
+Moxel DAG Memory Size: 2992048 (2.853439 MB)
+Optimized Moxel DAG Memory Size: 2672296 (2.548500 MB)
+Regular DAG Memory Size: 2047840 (1.952972 MB)
+
+Number of FilledVoxels: 7380269
+
+Moxel Table Size: 118084304 (112.613968 MB)
