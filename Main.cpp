@@ -34,9 +34,13 @@ int main(int argc, char const *argv[])
       //dag.writeImages();
    }
 
-   // Raytracer raytracer(imageWidth, imageHeight, &dag);
-   // raytracer.trace();
-   // raytracer.writeImage("images/raytraced/image.tga");
+   auto start = chrono::steady_clock::now();
+   Raytracer raytracer(imageWidth, imageHeight, &dag);
+   raytracer.trace();
+   raytracer.writeImage("images/raytraced/image.tga");
+   auto end = chrono::steady_clock::now();
+   auto diff = end - start;
+   cout << "\t\tTime Raytracing: " << chrono::duration <double, milli> (diff).count() << " ms" << endl;
 
    cout << endl;
    cout << "************************************************************************" << endl;

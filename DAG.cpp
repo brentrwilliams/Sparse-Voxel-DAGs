@@ -60,6 +60,8 @@ void printBinaryVal(uint64_t val)
 void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
 {
    SparseVoxelOctree* svoPtr = new SparseVoxelOctree(numLevels, boundingBox, triangles, meshFilePath);
+   auto start = chrono::steady_clock::now();
+   
    SparseVoxelOctree svo = *svoPtr;
    svoRoot = svo.root;
    unsigned int* newLevelSizes = new unsigned int[numLevels-1]();
@@ -660,6 +662,9 @@ void DAG::build(const std::vector<Triangle> triangles, std::string meshFilePath)
    cout << "Optimized Moxel DAG Memory Size: " << totalOptMoxelDagMemory << " (" << getMemorySize(totalOptMoxelDagMemory) << ")" << endl;
    cout << "Regular DAG Memory Size: " << totalDagMemory << " (" << getMemorySize(totalDagMemory) << ")" << endl;
 
+   auto end = chrono::steady_clock::now();
+   auto diff = end - start;
+   cout << "\t\tTime Moxel DAG Building: " << chrono::duration <double, milli> (diff).count() << " ms" << endl;
 }
 
 /**
@@ -788,6 +793,7 @@ uint64_t DAG::getNumFilledVoxels()
 
 void DAG::buildMoxelTable(const std::vector<Triangle> triangles)
 {
+   auto start = chrono::steady_clock::now();
    unsigned int moxelTableAllocSize = ((sizeof(float) * 3) + (sizeof(unsigned int) * 1)) * numFilledVoxels; // Only space for normals and material index
    moxelTable = (void*) malloc(moxelTableAllocSize);
    unsigned int x, y, z;
@@ -831,6 +837,10 @@ void DAG::buildMoxelTable(const std::vector<Triangle> triangles)
       }
    }
    cerr << "Finished Creating moxel table" << endl;
+
+   auto end = chrono::steady_clock::now();
+   auto diff = end - start;
+   cout << "\t\tTime Moxel Table Building: " << chrono::duration <double, milli> (diff).count() << " ms" << endl;
 }
 
 

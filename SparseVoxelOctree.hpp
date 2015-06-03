@@ -22,6 +22,8 @@
 #include <unordered_map>
 #include "tbb/concurrent_unordered_map.h"
 
+#include <chrono>
+
 #define SET_8_BITS 255
 
 using namespace std;

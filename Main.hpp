@@ -18,6 +18,7 @@
 #include "DAG.hpp"
 #include "Raytracer.hpp"
 #include "MortonCode.hpp"
+#include <chrono>
 
 using namespace std;
 

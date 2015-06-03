@@ -1,0 +1,138 @@
+************************************************************************
+************************************************************************
+
+toyStore.obj
+
+Levels: 7
+		Time Voxelization: 7520.21 ms
+SVO Size: 
+[0]: 1
+[1]: 8
+[2]: 60
+[3]: 362
+[4]: 1735
+[5]: 7910
+SVO (without materials) Memory Size: 201904 (197.171875 KB)
+		Time SVO Building: 0.216575 ms
+SVO (with materials) Memory Size: 140658572106000 (2.503515 GB)
+Moxel DAG Memory Size: 93096 (90.914062 KB)
+Optimized Moxel DAG Memory Size: 76832 (75.031250 KB)
+Regular DAG Memory Size: 68808 (67.195312 KB)
+		Time Moxel DAG Building: 84.0436 ms
+
+Number of FilledVoxels: 159828
+
+Moxel Table Size: 2557248 (2.438782 MB)
+		Time Moxel Table Building: 354.1 ms
+		Time Raytracing: 21678.9 ms
+
+************************************************************************
+************************************************************************
+
+
+
+************************************************************************
+************************************************************************
+
+toyStore.obj
+
+Levels: 8
+		Time Voxelization: 17703.7 ms
+SVO Size: 
+[0]: 1
+[1]: 8
+[2]: 58
+[3]: 358
+[4]: 1724
+[5]: 7762
+[6]: 37287
+SVO (without materials) Memory Size: 932600 (910.742188 KB)
+		Time SVO Building: 1.99098 ms
+SVO (with materials) Memory Size: 14987979559899390993 (9.899430 MB)
+Moxel DAG Memory Size: 295024 (288.109375 KB)
+Optimized Moxel DAG Memory Size: 260640 (254.531250 KB)
+Regular DAG Memory Size: 215872 (210.812500 KB)
+		Time Moxel DAG Building: 965.761 ms
+
+Number of FilledVoxels: 648756
+
+Moxel Table Size: 10380096 (9.899231 MB)
+		Time Moxel Table Building: 2400.15 ms
+		Time Raytracing: 27771.2 ms
+
+************************************************************************
+************************************************************************
+
+
+
+************************************************************************
+************************************************************************
+
+toyStore.obj
+
+Levels: 9
+		Time Voxelization: 53492.9 ms
+SVO Size: 
+[0]: 1
+[1]: 8
+[2]: 58
+[3]: 357
+[4]: 1714
+[5]: 7653
+[6]: 36597
+[7]: 150845
+SVO (without materials) Memory Size: 4175592 (3.982155 MB)
+		Time SVO Building: 11.3888 ms
+SVO (with materials) Memory Size: 40612976 (38.731552 MB)
+Moxel DAG Memory Size: 954304 (931.937500 KB)
+Optimized Moxel DAG Memory Size: 857656 (837.554688 KB)
+Regular DAG Memory Size: 688360 (672.226562 KB)
+		Time Moxel DAG Building: 9515.78 ms
+
+Number of FilledVoxels: 2538311
+
+Moxel Table Size: 40612976 (38.731552 MB)
+		Time Moxel Table Building: 18838.2 ms
+		Time Raytracing: 27733.4 ms
+
+************************************************************************
+************************************************************************
+
+
+
+************************************************************************
+************************************************************************
+
+toyStore.obj
+
+Levels: 10
+		Time Voxelization: 262345 ms
+SVO Size: 
+[0]: 1
+[1]: 8
+[2]: 58
+[3]: 357
+[4]: 1708
+[5]: 7583
+[6]: 36188
+[7]: 148932
+[8]: 622763
+SVO (without materials) Memory Size: 17451544 (16.643089 MB)
+		Time SVO Building: 158.162 ms
+SVO (with materials) Memory Size: 140237793210272 (2.622631 GB)
+Moxel DAG Memory Size: 3299224 (3.146385 MB)
+Optimized Moxel DAG Memory Size: 2966048 (2.828644 MB)
+Regular DAG Memory Size: 2324248 (2.216576 MB)
+		Time Moxel DAG Building: 108038 ms
+
+Number of FilledVoxels: 10276873
+
+Moxel Table Size: 164429968 (156.812637 MB)
+		Time Moxel Table Building: 153774 ms
+		Time Raytracing: 28838.6 ms
+
+************************************************************************
+************************************************************************
+
+
+

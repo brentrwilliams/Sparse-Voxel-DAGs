@@ -1,0 +1,138 @@
+************************************************************************
+************************************************************************
+
+cornellBox.obj
+
+Levels: 7
+		Time Voxelization: 1723.22 ms
+SVO Size: 
+[0]: 1
+[1]: 8
+[2]: 57
+[3]: 322
+[4]: 1532
+[5]: 6741
+SVO (without materials) Memory Size: 176808 (172.664062 KB)
+		Time SVO Building: 0.297314 ms
+SVO (with materials) Memory Size: 566995814478865 (1.778337 MB)
+Moxel DAG Memory Size: 60608 (59.187500 KB)
+Optimized Moxel DAG Memory Size: 50328 (49.148438 KB)
+Regular DAG Memory Size: 45296 (44.234375 KB)
+		Time Moxel DAG Building: 89.4185 ms
+
+Number of FilledVoxels: 116543
+
+Moxel Table Size: 1864688 (1.778305 MB)
+		Time Moxel Table Building: 385.845 ms
+		Time Raytracing: 13624.3 ms
+
+************************************************************************
+************************************************************************
+
+
+
+************************************************************************
+************************************************************************
+
+cornellBox.obj
+
+Levels: 8
+		Time Voxelization: 3691.31 ms
+SVO Size: 
+[0]: 1
+[1]: 8
+[2]: 57
+[3]: 322
+[4]: 1525
+[5]: 6688
+[6]: 28002
+SVO (without materials) Memory Size: 774480 (756.328125 KB)
+		Time SVO Building: 1.08745 ms
+SVO (with materials) Memory Size: 7394992 (7.052414 MB)
+Moxel DAG Memory Size: 226264 (220.960938 KB)
+Optimized Moxel DAG Memory Size: 200640 (195.937500 KB)
+Regular DAG Memory Size: 164776 (160.914062 KB)
+		Time Moxel DAG Building: 799.518 ms
+
+Number of FilledVoxels: 462187
+
+Moxel Table Size: 7394992 (7.052414 MB)
+		Time Moxel Table Building: 3322.29 ms
+		Time Raytracing: 14385.4 ms
+
+************************************************************************
+************************************************************************
+
+
+
+************************************************************************
+************************************************************************
+
+cornellBox.obj
+
+Levels: 9
+		Time Voxelization: 12120.8 ms
+SVO Size: 
+[0]: 1
+[1]: 8
+[2]: 57
+[3]: 320
+[4]: 1518
+[5]: 6657
+[6]: 27858
+[7]: 114152
+SVO (without materials) Memory Size: 3244032 (3.093750 MB)
+		Time SVO Building: 14.6245 ms
+SVO (with materials) Memory Size: 140334495639360 (700.197083 MB)
+Moxel DAG Memory Size: 829712 (810.265625 KB)
+Optimized Moxel DAG Memory Size: 744120 (726.679688 KB)
+Regular DAG Memory Size: 588008 (574.226562 KB)
+		Time Moxel DAG Building: 8518.04 ms
+
+Number of FilledVoxels: 1845236
+
+Moxel Table Size: 29523776 (28.156067 MB)
+		Time Moxel Table Building: 24850.8 ms
+		Time Raytracing: 14534.3 ms
+
+************************************************************************
+************************************************************************
+
+
+
+************************************************************************
+************************************************************************
+
+cornellBox.obj
+
+Levels: 10
+		Time Voxelization: 58234.8 ms
+SVO Size: 
+[0]: 1
+[1]: 8
+[2]: 57
+[3]: 320
+[4]: 1517
+[5]: 6645
+[6]: 27819
+[7]: 113975
+[8]: 458704
+SVO (without materials) Memory Size: 13291520 (12.675781 MB)
+		Time SVO Building: 218.316 ms
+SVO (with materials) Memory Size: 118089826 (112.619232 MB)
+Moxel DAG Memory Size: 2992048 (2.853439 MB)
+Optimized Moxel DAG Memory Size: 2672296 (2.548500 MB)
+Regular DAG Memory Size: 2047840 (1.952972 MB)
+		Time Moxel DAG Building: 89337.9 ms
+
+Number of FilledVoxels: 7380269
+
+Moxel Table Size: 118084304 (112.613968 MB)
+		Time Moxel Table Building: 206096 ms
+		Time Raytracing: 16219.3 ms
+
+************************************************************************
+************************************************************************
+
+
+

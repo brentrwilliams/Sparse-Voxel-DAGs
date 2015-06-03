@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <cfloat>
 #include <string>
+#include <chrono>
 
 #define SET_8_BITS 255
 

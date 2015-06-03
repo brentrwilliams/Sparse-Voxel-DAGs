@@ -45,7 +45,13 @@ SparseVoxelOctree::~SparseVoxelOctree()
  */
 void SparseVoxelOctree::build(const std::vector<Triangle> triangles, std::string meshFilePath)
 {
+   auto start = chrono::steady_clock::now();
    Voxels* leafVoxels = new Voxels(numLevels, boundingBox, triangles, meshFilePath);
+   auto end = chrono::steady_clock::now();
+   auto diff = end - start;
+   cout << "\t\tTime Voxelization: " << chrono::duration <double, milli> (diff).count() << " ms" << endl;
+
+   auto svoStartTime = chrono::steady_clock::now();
    uint64_t* leafVoxelData = leafVoxels->data;
    unsigned int numLeafs = leafVoxels->dataSize;
 
@@ -141,6 +147,10 @@ void SparseVoxelOctree::build(const std::vector<Triangle> triangles, std::string
 
 
    cout << "SVO (without materials) Memory Size: " << totalSVOMemory << " (" << getMemorySize(totalSVOMemory) << ")" << endl;
+   
+   auto svoEndTime = chrono::steady_clock::now();
+   auto svoDiff = svoEndTime - svoStartTime;
+   cout << "\t\tTime SVO Building: " << chrono::duration <double, milli> (svoDiff).count() << " ms" << endl;
 }
 
 string SparseVoxelOctree::getMemorySize(unsigned int size)
