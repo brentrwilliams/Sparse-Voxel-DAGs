@@ -22,6 +22,9 @@ int main(int argc, char const *argv[])
    unsigned int numLevels = atoi(argv[2]);
    objFile.centerMesh();
 
+   cout << "************************************************************************" << endl;
+   cout << "************************************************************************" << endl;
+   cout << endl;
    cout << argv[1] << endl << endl;
    cout << "Levels: " << numLevels << endl;
 
@@ -31,9 +34,14 @@ int main(int argc, char const *argv[])
       //dag.writeImages();
    }
 
-   Raytracer raytracer(imageWidth, imageHeight, &dag);
-   raytracer.trace();
-   raytracer.writeImage("images/raytraced/image.tga");
+   // Raytracer raytracer(imageWidth, imageHeight, &dag);
+   // raytracer.trace();
+   // raytracer.writeImage("images/raytraced/image.tga");
+
+   cout << endl;
+   cout << "************************************************************************" << endl;
+   cout << "************************************************************************" << endl;
+   cout << endl << endl << endl;
 
    return 0;
 }

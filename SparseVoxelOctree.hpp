@@ -54,6 +54,7 @@ class SparseVoxelOctree
       SVONode* root;
       tbb::concurrent_unordered_map<unsigned int, unsigned int>* voxelTriangleIndexMap;
       unsigned int* levelSizes;
+      uint64_t sizeWithoutMaterials;
 };
 
 

@@ -35,7 +35,7 @@ void Raytracer::trace()
    // glm::vec3 cameraUp = glm::normalize(glm::vec3(0.0f,1.0f,0.0f));
    // Camera camera(cameraPosition, cameraRight, cameraUp, imageWidth, imageHeight);
 
-   // old toyStore Camera
+   // toyStore Camera
    glm::vec3 cameraPosition(0.0f,0.0f,32.0f);
    glm::vec3 cameraRight = glm::normalize(glm::vec3(1.0f,0.0f,0.0f));
    glm::vec3 cameraUp = glm::normalize(glm::vec3(0.0f,1.0f,0.0f));
@@ -51,6 +51,7 @@ void Raytracer::trace()
    tbb::parallel_for((unsigned int)0, (unsigned int)imageHeight, [&](unsigned int y)
    // for (unsigned int y = 0; y < imageHeight; y++)
    {
+      tbb::mutex::scoped_lock lock;
       for (unsigned int x = 0; x < imageWidth; x++)
       {
          glm::vec3 colorSum = glm::vec3(0.0f,0.0f,0.0f);
@@ -61,7 +62,6 @@ void Raytracer::trace()
          offsets[3] = glm::vec2(-0.25f,0.25f);
          offsets[4] = glm::vec2(0.25f,0.25f);
 
-         tbb::mutex::scoped_lock lock;
 
 
 

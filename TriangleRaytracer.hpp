@@ -10,6 +10,7 @@
 #include <iostream>
 #include <stdint.h>
 #include <vector>
+#include <iomanip>
 #include <glm/glm.hpp>
 #include "Image.hpp"
 #include "PhongMaterial.hpp"
