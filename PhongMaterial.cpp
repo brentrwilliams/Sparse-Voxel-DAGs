@@ -24,29 +24,29 @@ glm::vec3 PhongMaterial::calculateSurfaceColor(Ray ray, glm::vec3 hitPosition, g
    glm::vec3 finalColor = glm::vec3(0.0f,0.0f,0.0f);
    glm::vec3 lc(1.0,1.0,1.0); // Light color
    
-   // toyStore lights
-   float intensity = 0.18f;
-   glm::vec3 lightPositions[8];
-   // Top Floor
-   lightPositions[0] = glm::vec3( 12,  12,  12);
-   lightPositions[1] = glm::vec3( 12,  12, -12);
-   lightPositions[2] = glm::vec3(-12,  12,  12);
-   lightPositions[3] = glm::vec3(-12,  12, -12);
+   // // toyStore lights
+   // float intensity = 0.18f;
+   // glm::vec3 lightPositions[8];
+   // // Top Floor
+   // lightPositions[0] = glm::vec3( 12,  12,  12);
+   // lightPositions[1] = glm::vec3( 12,  12, -12);
+   // lightPositions[2] = glm::vec3(-12,  12,  12);
+   // lightPositions[3] = glm::vec3(-12,  12, -12);
 
-   // Bottom Floor
-   lightPositions[0] = glm::vec3( 12,  -0.5,  12);
-   lightPositions[1] = glm::vec3( 12,  -0.5, -12);
-   lightPositions[2] = glm::vec3(-12,  -0.5,  12);
-   lightPositions[3] = glm::vec3(-12,  -0.5, -12);
+   // // Bottom Floor
+   // lightPositions[0] = glm::vec3( 12,  -0.5,  12);
+   // lightPositions[1] = glm::vec3( 12,  -0.5, -12);
+   // lightPositions[2] = glm::vec3(-12,  -0.5,  12);
+   // lightPositions[3] = glm::vec3(-12,  -0.5, -12);
 
-   // // cornellBox, bunny and buddha lights
-   // float intensity = 0.35f;
-   // glm::vec3 lightPositions[5];
-   // lightPositions[0] = glm::vec3( 100,  1000,  100);
-   // lightPositions[1] = glm::vec3( 100,  1000, -100);
-   // lightPositions[2] = glm::vec3(-100,  1000,  100);
-   // lightPositions[3] = glm::vec3(-100,  1000, -100);
-   // lightPositions[4] = glm::vec3(0,  100, 0);
+   // cornellBox, bunny and buddha lights
+   float intensity = 0.35f;
+   glm::vec3 lightPositions[5];
+   lightPositions[0] = glm::vec3( 100,  1000,  100);
+   lightPositions[1] = glm::vec3( 100,  1000, -100);
+   lightPositions[2] = glm::vec3(-100,  1000,  100);
+   lightPositions[3] = glm::vec3(-100,  1000, -100);
+   lightPositions[4] = glm::vec3(0,  100, 0);
 
    
    lc = lc * intensity;

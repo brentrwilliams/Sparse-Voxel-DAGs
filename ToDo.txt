@@ -1,3 +1,23 @@
+Difference in Raytracing times between Moxel and Sparse Voxel DAG:
+
+I have found that the difference in time is due to inefficiency of the code within the intersection methods that comes from the introduction of the moxel index calculation code.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 To Do:
 - By ASAP:
    - Write results section based on data
